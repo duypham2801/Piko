@@ -93,4 +93,4 @@ Trong suốt quá trình này, **prod vẫn chạy version cũ và không bị �
 
 - `.env.example` được commit, chỉ chứa tên biến và giá trị giả.
 - `.env.dev` và `.env.prod` **không bao giờ commit**. Trên server, đặt quyền `chmod 600 .env.prod`.
-- Mật khẩu DB prod phải khác dev và đủ dài (tạo bằng `openssl rand -base64 32`).
+- Mật khẩu DB prod phải khác dev và đủ dài. Tạo bằng `openssl rand -hex 32`. Dùng dạng hex vì nó an toàn khi đặt trong `DATABASE_URL`; base64 có các ký tự `/ + =` làm hỏng URL.

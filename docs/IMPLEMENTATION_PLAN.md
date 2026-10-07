@@ -10,7 +10,7 @@
 |---|---|---|---|
 | 0 | Discovery | ✅ done | Greenfield; architecture in DECISIONS.md, ops in ENVIRONMENTS.md |
 | 1a-1 | Monorepo + API skeleton + Docker dev | ✅ done | `1a-1-monorepo-dev-foundation.md` + `1a-1-fix-1.md` |
-| 1a-2 | Docker prod (Caddy, migrate, hardening, backup/rollback) | ⏳ next | |
+| 1a-2 | Docker prod (Caddy, migrate, hardening, backup/rollback) | 📤 handed off | `docs/handoffs/1a-2-docker-prod.md` |
 | 1b | Design system + `/design` | ⬜ | Tokens, fonts (VN subset, self-hosted), primitives, playground |
 | 2 | Core decision domain | ⬜ | `packages/domain`: types, seeded PRNG, selection, validation, animation plan, zod schemas + tests |
 | 2.5 | Case-opening spike | ⬜ | Rough carousel in `/design` to validate motion feel early |
