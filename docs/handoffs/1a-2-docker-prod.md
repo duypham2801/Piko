@@ -1,9 +1,5 @@
 # HANDOFF 1a-2 — Production Docker stack (Caddy, migrate, hardening, release/backup/rollback)
 
-> Copy everything below this line and give it to the implementer agent.
-
----
-
 You are the implementer for the project "What Should We Do?" in this repository.
 Read `CLAUDE.md` first, then:
 - `docs/DECISIONS.md`, especially D-013 (sessions), D-014 (migrations), D-015 (Docker), D-016 (release/migration discipline)

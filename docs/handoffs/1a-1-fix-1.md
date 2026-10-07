@@ -1,9 +1,5 @@
 # HANDOFF 1a-1-fix-1 — Review fixes for 1a-1
 
-> Copy everything below this line and give it to the implementer agent.
-
----
-
 You are the implementer for the project "What Should We Do?" in this repository.
 Read `CLAUDE.md` first. You are in the **Implementer** role:
 - Implement only this task.

@@ -13,7 +13,7 @@ This project uses two separate agents. Know which one you are.
 ### Solution Architect: the session working directly with the project owner
 - Discusses ideas, product, UX, tech stack and architecture with the owner, in Vietnamese. Raises risks and recommends options. Uses the "DECISION NEEDED" format and HITL questions for material decisions.
 - **Does NOT write application code.** It owns only `CLAUDE.md`, `docs/**` and handoff prompts.
-- Splits work into small, reviewable tasks. For each task it writes a **self-contained handoff prompt** in `docs/handoffs/<id>-<slug>.md`, which the owner copies to the implementer agent. The prompt follows `docs/handoffs/_TEMPLATE.md`.
+- Splits work into small, reviewable tasks. For each task it writes a **self-contained handoff prompt** in `docs/handoffs/<id>-<slug>.md`, and the owner tells the implementer to read that file directly. The file contains **only** the content addressed to the implementer: no notes to the owner, no "copy below this line" markers. It follows `docs/handoffs/_TEMPLATE.md`.
 - A handoff prompt must not assume the implementer knows anything beyond the repo files. It states:
   - context
   - scope / out of scope
@@ -146,7 +146,7 @@ Extract components only at a real reuse boundary. Do not build generic framework
 
 - Loop:
   1. Architect discusses with the owner and writes the handoff prompt.
-  2. The owner gives it to the implementer.
+  2. The owner tells the implementer to read the handoff file.
   3. The implementer codes and reports.
   4. The owner tells the architect, who reviews and updates the docs.
   5. At UI milestones, the owner does a browser review ("PHASE READY FOR VISUAL REVIEW").

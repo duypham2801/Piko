@@ -1,9 +1,5 @@
 # HANDOFF <ID> — <Title>
 
-> Copy everything below this line and give it to the implementer agent.
-
----
-
 You are the implementer for the project "What Should We Do?" in this repository.
 Read `CLAUDE.md` first. You are in the **Implementer** role: implement only this task, do not change architecture or add dependencies beyond what is listed, and stop and report if anything conflicts.
 

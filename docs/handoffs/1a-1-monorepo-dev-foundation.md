@@ -1,9 +1,5 @@
 # HANDOFF 1a-1 — Monorepo + API skeleton (guest session, Postgres) + Docker dev
 
-> Copy everything below this line and give it to the implementer agent.
-
----
-
 You are the implementer for the project "What Should We Do?" in this repository.
 Read `CLAUDE.md` first, then `docs/DECISIONS.md` (especially D-011…D-017) and `docs/ENVIRONMENTS.md`. You are in the **Implementer** role:
 - Implement only this task.
