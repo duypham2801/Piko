@@ -1,0 +1,87 @@
+.screen {
+  min-height: 100dvh;
+  padding: var(--space-6) var(--space-4) var(--space-8);
+  background: var(--color-bg);
+}
+
+.content {
+  display: grid;
+  width: min(100%, var(--content-max-width));
+  gap: var(--space-6);
+  margin: 0 auto;
+}
+
+.header {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  text-align: center;
+}
+
+.headerEmoji {
+  font-size: var(--text-3xl);
+  line-height: var(--leading-tight);
+}
+
+.header h1 {
+  font-size: var(--text-display);
+}
+
+.header p {
+  color: var(--color-text-muted);
+  font-size: var(--text-lg);
+}
+
+.optionList {
+  display: grid;
+  min-width: 0;
+  gap: var(--space-3);
+}
+
+.optionRow {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.optionEmoji {
+  font-size: var(--text-xl);
+  line-height: var(--leading-tight);
+}
+
+.optionLabel {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-weight: var(--font-weight-bold);
+}
+
+.optionRow[data-off] .optionEmoji,
+.optionRow[data-off] .optionLabel {
+  opacity: var(--opacity-dimmed);
+}
+
+.hint {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+
+.openButton {
+  justify-self: center;
+}
+
+@media (min-width: 48rem) {
+  .screen {
+    padding: var(--space-6);
+  }
+
+  .content {
+    width: min(100%, var(--content-wide-max-width));
+  }
+
+  .optionList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

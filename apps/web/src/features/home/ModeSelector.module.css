@@ -1,0 +1,66 @@
+.selector {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+}
+
+.selector legend {
+  margin-bottom: var(--space-3);
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--font-weight-display);
+  line-height: var(--leading-tight);
+}
+
+.options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.option {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  min-height: var(--tap-target-min);
+  align-content: center;
+  justify-items: center;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-2);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+  text-align: center;
+}
+
+.option:has(input:checked) {
+  background: var(--color-primary);
+  box-shadow: var(--shadow-chunky-sm);
+  color: var(--color-on-primary-strong);
+}
+
+.option:has(input:disabled) {
+  background: var(--color-disabled-bg);
+  color: var(--color-disabled-text);
+  cursor: not-allowed;
+}
+
+.option:has(input:focus-visible) {
+  outline: var(--border-width) solid var(--color-focus-ring);
+  outline-offset: var(--border-width);
+}
+
+.emoji {
+  font-size: var(--text-xl);
+  line-height: var(--leading-tight);
+}
+
+.label {
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--leading-tight);
+  overflow-wrap: anywhere;
+}

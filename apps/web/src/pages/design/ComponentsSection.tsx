@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { MemoryRouter } from 'react-router';
 
+import BackLink from '../../components/ui/BackLink';
 import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
@@ -54,6 +56,16 @@ export default function ComponentsSection() {
             <span className={styles.demoLabel}>disabled</span>
             <Button disabled>Thêm lựa chọn</Button>
           </div>
+        </div>
+      </div>
+
+      <div className={styles.group}>
+        <h3>BackLink</h3>
+        <div className={styles.demoCell}>
+          <span className={styles.demoLabel}>router link</span>
+          <MemoryRouter>
+            <BackLink to="/">Trở về</BackLink>
+          </MemoryRouter>
         </div>
       </div>
 

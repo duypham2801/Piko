@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import type { DecisionOptionData } from '@piko/domain';
 
+import BackLink from '../../components/ui/BackLink';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import { t } from '../../i18n';
@@ -10,10 +11,12 @@ import Confetti from './Confetti';
 import { useCaseOpening } from './useCaseOpening';
 
 type CaseOpeningProps = {
+  title: string;
   options: readonly DecisionOptionData[];
+  backTo: string;
 };
 
-export default function CaseOpening({ options }: CaseOpeningProps) {
+export default function CaseOpening({ title, options, backTo }: CaseOpeningProps) {
   const { state, plan, open, viewportRef, stripRef } = useCaseOpening(options);
   const optionsById = useMemo(
     () => new Map(options.map((option) => [option.id, option] as const)),
@@ -25,9 +28,10 @@ export default function CaseOpening({ options }: CaseOpeningProps) {
   return (
     <main className={styles.screen}>
       <div className={styles.content}>
+        <BackLink to={backTo}>{t('back')}</BackLink>
+
         <header className={styles.header}>
-          <h1>{t('title')}</h1>
-          <p>{t('tagline')}</p>
+          <h1>{title}</h1>
         </header>
 
         <div className={styles.stage}>
