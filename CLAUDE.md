@@ -164,6 +164,7 @@ Extract components only at a real reuse boundary. Do not build generic framework
 - Git:
   - `main` is always releasable.
   - Work happens on `feat/*` / `fix/*` branches.
+  - Each feature/phase has an integration branch (e.g. `feat/phase-2-core-domain`), which is pushed to GitHub. Task branches start from it and are merged back into it after review. It is merged into `main` only when the whole feature is done and reviewed.
   - Releases are tagged `vX.Y.Z` and only tags get deployed to prod.
 - Keep `docs/IMPLEMENTATION_PLAN.md` and `docs/DECISIONS.md` in sync with the code.
 - Never claim visual correctness because the code compiles.

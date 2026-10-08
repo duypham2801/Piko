@@ -2,6 +2,7 @@
 
 ## Status
 - **Current phase:** Phase 2 — Core decision domain (2-1 done; 2-2 animation plan next)
+- **Integration branch:** `feat/phase-2-core-domain` (pushed). Task branches merge into it, and it merges into `main` when Phase 2 is complete.
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate
 
 ## Phases
@@ -133,7 +134,7 @@
     - the unused `weightDefault`, which the Phase 5 builder will use
     - the three separate `superRefine` checks, one per issue code
   - Note for Phase 5: zod skips the object-level refinements while any field is invalid. The builder therefore shows the cross-field errors (duplicates, too few enabled) only after the field errors are fixed. This is acceptable UX, but keep it in mind.
-  - **2-1 accepted.** Fast-forward merged into `main`.
+  - **2-1 accepted.** Merged into the integration branch `feat/phase-2-core-domain`, not `main` (owner workflow: `main` only receives finished features).
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
