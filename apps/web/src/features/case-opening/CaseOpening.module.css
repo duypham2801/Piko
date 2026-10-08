@@ -1,7 +1,6 @@
 .screen {
   display: grid;
   min-height: 100dvh;
-  overflow-x: clip;
   place-items: center;
   padding: var(--space-4);
   background: var(--color-bg);
@@ -16,6 +15,7 @@
 
 .stage {
   position: relative;
+  min-width: 0; /* grid item: do not grow to the strip's max-content */
   width: 100%;
 }
 
@@ -60,7 +60,7 @@
 .winnerDetails {
   display: grid;
   min-width: 0;
-  text-align: left;
+  text-align: start;
 }
 
 .winnerLabel {

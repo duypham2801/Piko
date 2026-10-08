@@ -6,11 +6,10 @@ type CaseItemProps = {
   option: DecisionOptionData;
   isWinner: boolean;
   revealed: boolean;
-  dimmed: boolean;
 };
 
-export default function CaseItem({ option, isWinner, revealed, dimmed }: CaseItemProps) {
-  const classes = [styles.item, revealed && isWinner && styles.winner, dimmed && styles.dimmed]
+export default function CaseItem({ option, isWinner, revealed }: CaseItemProps) {
+  const classes = [styles.item, revealed && (isWinner ? styles.winner : styles.dimmed)]
     .filter(Boolean)
     .join(' ');
 

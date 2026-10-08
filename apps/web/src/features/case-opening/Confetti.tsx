@@ -3,14 +3,13 @@ import type { CSSProperties } from 'react';
 import styles from './Confetti.module.css';
 
 type ConfettiColor = 'primary' | 'secondary' | 'accent';
-type ConfettiShape = 'dot' | 'strip';
 
 type ConfettiPiece = {
   x: number;
   y: number;
   rotate: number;
   color: ConfettiColor;
-  shape: ConfettiShape;
+  dot: boolean;
 };
 
 const CONFETTI_COLORS: readonly ConfettiColor[] = ['primary', 'secondary', 'accent'];
@@ -28,7 +27,7 @@ const CONFETTI_PIECES: readonly ConfettiPiece[] = Array.from(
       y: Math.sin(angle) * reach,
       rotate: index % 2 === 0 ? rotation : -rotation,
       color: CONFETTI_COLORS[colorIndex] ?? 'primary',
-      shape: index % 4 === 0 ? 'dot' : 'strip',
+      dot: index % 4 === 0,
     };
   },
 );
@@ -45,7 +44,9 @@ export default function Confetti() {
 
         return (
           <span
-            className={[styles.piece, styles[piece.color], styles[piece.shape]].join(' ')}
+            className={[styles.piece, styles[piece.color], piece.dot && styles.dot]
+              .filter(Boolean)
+              .join(' ')}
             key={index}
             style={style}
           />
