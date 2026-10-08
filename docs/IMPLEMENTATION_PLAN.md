@@ -1,7 +1,7 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 2.5 — case-opening spike (handoff 2-5 ready). Phase 2 merged into `main`.
+- **Current phase:** Phase 2.5 — case-opening spike (2-5 reviewed; fix `2-5-fix-1` ready, then owner tuning). Phase 2 merged into `main`.
 - **Integration branch:** `feat/phase-2-5-case-spike` (pushed). Phase 2 was merged into `main` via `feat/phase-2-core-domain`, which is now deleted.
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2)
 
@@ -18,7 +18,7 @@
 | 1c-2 | Prettier in `make check` + drop unused `@` alias | ✅ done | `1c-2-format-gate.md` (`2a38aaa`) |
 | 2-1 | Domain model + zod/mini + seeded selection engine | ✅ done | `2-1-domain-model-selection.md` (D-024, D-025, `6a61954`) |
 | 2-2 | Animation plan math (strip, stop offset, timeline params) | ✅ done | `2-2-animation-plan.md` (D-006, D-026, `af1004f`) |
-| 2.5 | Case-opening spike | 🔧 handoff ready | `2-5-case-spike.md`: throwaway tuning playground in `/design#case-spike`; the owner tunes `ANIMATION_PLAN_DEFAULTS`; folds in the 2-2 `pickWeighted` nit |
+| 2.5 | Case-opening spike | 🔧 fix ready (`2-5-fix-1.md`) | `2-5-case-spike.md`: throwaway tuning playground in `/design#case-spike`; the owner tunes `ANIMATION_PLAN_DEFAULTS`; folds in the 2-2 `pickWeighted` nit |
 | 3 | Case opening (full) | ⬜ | Controller, state machine, timeline, marker, reveal, reduced-motion |
 | 4 | Home | ⬜ | Hero, mode selector (Solo + locked Soon), presets, recent decisions |
 | 5 | Decision builder | ⬜ | CRUD decisions/options via API, validation, open case |
@@ -154,6 +154,25 @@
     - the `ids`/`makeOption` fixtures duplicated in `select.test.ts` and `plan.test.ts`; two copies do not justify a shared fixtures module
   - Open for Phase 2.5: the tail looks long on paper (about 0.6 cells in the last 2 s). Tune `decelPower`, `durationMs` and the spin length in the browser.
   - **2-2 accepted. Phase 2 complete** on `feat/phase-2-core-domain`.
+- **2-5 (2026-10-08):** reviewed `feat/2-5-case-spike` (5 files, +824/−5).
+  - `make check` passes. Tests: domain 40 (6 files), api 7.
+  - The literal greps are clean. The report gives no `/design` leak and main JS at 76.98 kB gz, both unchanged.
+  - R0 (`pickWeighted` validates before drawing, plus 2 tests) is accepted.
+  - The spike is built as specified:
+    - the domain plan drives it
+    - frames are written through refs
+    - a `ResizeObserver` keeps the item-unit position
+    - the primitives and tokens are reused
+  - MUST: the winner cell is outlined in the idle state and during the whole spin, so the result is visible before the stop. This defeats the feel review.
+  - SHOULD:
+    - the readout `<pre>` has React children and is also written through `textContent`
+    - `aria-label` sits on role-less `div`s (the same rule as 1b-2 C2)
+  - NICE:
+    - a redundant `initialPlan` memo
+    - a per-cell `.find`
+    - `: ''` class merging
+    - the 20 rem viewport height (tall, narrow cells)
+  - Fixes in `2-5-fix-1.md`, as one extra commit on `feat/2-5-case-spike`. The task branch is rebased onto the integration branch so that it contains the fix handoff.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
