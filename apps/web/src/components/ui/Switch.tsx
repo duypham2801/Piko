@@ -18,11 +18,10 @@ export default function Switch({
   label,
   hideLabel = false,
   className,
-  disabled,
   type = 'button',
   ...props
 }: SwitchProps) {
-  const classes = [styles.switch, checked ? styles.checked : '', disabled ? styles.disabled : '', className ?? '']
+  const classes = [styles.switch, checked && styles.checked, className]
     .filter(Boolean)
     .join(' ');
   const generatedId = useId();
@@ -34,7 +33,6 @@ export default function Switch({
       aria-checked={checked}
       aria-labelledby={labelId}
       className={classes}
-      disabled={disabled}
       onClick={() => onCheckedChange(!checked)}
       role="switch"
       type={type}

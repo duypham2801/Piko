@@ -24,10 +24,10 @@ export default function TextField({
   const inputId = id ?? generatedId;
   const hintId = `${inputId}-hint`;
   const errorId = `${inputId}-error`;
-  const describedBy = [ariaDescribedBy, hint ? hintId : '', error ? errorId : '']
+  const describedBy = [ariaDescribedBy, hint && hintId, error && errorId]
     .filter(Boolean)
     .join(' ');
-  const inputClasses = [styles.input, error ? styles.error : '', className ?? '']
+  const inputClasses = [styles.input, error && styles.error, className]
     .filter(Boolean)
     .join(' ');
 

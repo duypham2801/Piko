@@ -20,8 +20,8 @@ export default function Button({
     styles.button,
     styles[variant],
     styles[size],
-    fullWidth ? styles.fullWidth : '',
-    className ?? '',
+    fullWidth && styles.fullWidth,
+    className,
   ]
     .filter(Boolean)
     .join(' ');

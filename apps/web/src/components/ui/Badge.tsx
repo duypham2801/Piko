@@ -7,7 +7,7 @@ type BadgeProps = ComponentPropsWithoutRef<'span'> & {
 };
 
 export default function Badge({ tone = 'accent', className, ...props }: BadgeProps) {
-  const classes = [styles.badge, styles[tone], className ?? ''].filter(Boolean).join(' ');
+  const classes = [styles.badge, styles[tone], className].filter(Boolean).join(' ');
 
   return <span {...props} className={classes} />;
 }

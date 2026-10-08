@@ -7,7 +7,7 @@ type CardProps = ComponentPropsWithoutRef<'div'> & {
 };
 
 export default function Card({ tone = 'surface', className, ...props }: CardProps) {
-  const classes = [styles.card, styles[tone], className ?? ''].filter(Boolean).join(' ');
+  const classes = [styles.card, styles[tone], className].filter(Boolean).join(' ');
 
   return <div {...props} className={classes} />;
 }

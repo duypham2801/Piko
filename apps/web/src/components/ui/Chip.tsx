@@ -12,11 +12,9 @@ export default function Chip({
   onSelectedChange,
   className,
   type = 'button',
-  disabled,
-  children,
   ...props
 }: ChipProps) {
-  const classes = [styles.chip, selected ? styles.selected : styles.unselected, className ?? '']
+  const classes = [styles.chip, selected ? styles.selected : styles.unselected, className]
     .filter(Boolean)
     .join(' ');
 
@@ -25,11 +23,8 @@ export default function Chip({
       {...props}
       aria-pressed={selected}
       className={classes}
-      disabled={disabled}
       onClick={() => onSelectedChange?.(!selected)}
       type={type}
-    >
-      {children}
-    </button>
+    />
   );
 }

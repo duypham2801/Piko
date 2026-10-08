@@ -51,11 +51,11 @@
   cursor: not-allowed;
 }
 
-.disabled .track {
+.switch:disabled .track {
   border-color: var(--color-disabled-text);
   background: var(--color-disabled-bg);
 }
 
-.disabled .thumb {
+.switch:disabled .thumb {
   border-color: var(--color-disabled-text);
 }

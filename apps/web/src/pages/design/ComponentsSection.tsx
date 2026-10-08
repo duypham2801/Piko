@@ -7,6 +7,7 @@ import Chip from '../../components/ui/Chip';
 import Switch from '../../components/ui/Switch';
 import TextField from '../../components/ui/TextField';
 
+import pageStyles from './DesignPage.module.css';
 import styles from './ComponentsSection.module.css';
 
 const buttonVariants = ['primary', 'secondary', 'outline'] as const;
@@ -21,9 +22,9 @@ export default function ComponentsSection() {
   const [switchHidden, setSwitchHidden] = useState(false);
 
   return (
-    <section className={styles.section} id="components">
-      <div className={styles.sectionHeading}>
-        <p className={styles.sectionIndex}>06</p>
+    <section className={pageStyles.section} id="components">
+      <div className={pageStyles.sectionHeading}>
+        <p className={pageStyles.sectionIndex}>06</p>
         <div>
           <h2>Components</h2>
           <p>Every primitive variant and state, ready for feature screens.</p>
@@ -72,7 +73,7 @@ export default function ComponentsSection() {
       <div className={styles.group}>
         <h3>Chip</h3>
         <div className={styles.chipExamples}>
-          <div className={styles.chipGroup} aria-label="Modes">
+          <div className={styles.chipGroup} role="group" aria-label="Modes">
             <span className={styles.demoLabel}>Exactly one selected</span>
             <div className={styles.inlineItems}>
               {modes.map((mode) => (
@@ -109,7 +110,7 @@ export default function ComponentsSection() {
       <div className={styles.group}>
         <h3>Badge</h3>
         <div className={styles.inlineItems}>
-          <Badge> Sắp có </Badge>
+          <Badge>Sắp có</Badge>
           <Badge tone="neutral">Neutral</Badge>
         </div>
       </div>
@@ -124,7 +125,7 @@ export default function ComponentsSection() {
             placeholder="Ví dụ: bánh mì"
           />
           <TextField error="Không được để trống" label="Lựa chọn có lỗi" />
-          <TextField disabled label="Lựa chọn bị khóa" value="Không thể chỉnh sửa" readOnly />
+          <TextField defaultValue="Không thể chỉnh sửa" disabled label="Lựa chọn bị khóa" />
           <TextField hideLabel label="Nhãn ẩn" placeholder="Nhãn vẫn được đọc bởi screen reader" />
         </div>
       </div>
