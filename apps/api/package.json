@@ -20,6 +20,7 @@
     "zod": "4.6.5"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "0.5.8",
     "@piko/domain": "workspace:*",
     "@types/node": "22.20.5",
     "drizzle-kit": "0.31.11",
