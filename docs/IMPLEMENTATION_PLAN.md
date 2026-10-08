@@ -1,8 +1,8 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 2.5 — case-opening spike (next). Phase 2 merged into `main`.
-- **Integration branch:** none open. `feat/phase-2-core-domain` was merged into `main` (Phase 2 complete). Phase 2.5 gets a new one.
+- **Current phase:** Phase 2.5 — case-opening spike (handoff 2-5 ready). Phase 2 merged into `main`.
+- **Integration branch:** `feat/phase-2-5-case-spike` (pushed). Phase 2 was merged into `main` via `feat/phase-2-core-domain`, which is now deleted.
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2)
 
 ## Phases
@@ -18,7 +18,7 @@
 | 1c-2 | Prettier in `make check` + drop unused `@` alias | ✅ done | `1c-2-format-gate.md` (`2a38aaa`) |
 | 2-1 | Domain model + zod/mini + seeded selection engine | ✅ done | `2-1-domain-model-selection.md` (D-024, D-025, `6a61954`) |
 | 2-2 | Animation plan math (strip, stop offset, timeline params) | ✅ done | `2-2-animation-plan.md` (D-006, D-026, `af1004f`) |
-| 2.5 | Case-opening spike | ⬜ | Rough carousel in `/design` to validate motion feel early |
+| 2.5 | Case-opening spike | 🔧 handoff ready | `2-5-case-spike.md`: throwaway tuning playground in `/design#case-spike`; the owner tunes `ANIMATION_PLAN_DEFAULTS`; folds in the 2-2 `pickWeighted` nit |
 | 3 | Case opening (full) | ⬜ | Controller, state machine, timeline, marker, reveal, reduced-motion |
 | 4 | Home | ⬜ | Hero, mode selector (Solo + locked Soon), presets, recent decisions |
 | 5 | Decision builder | ⬜ | CRUD decisions/options via API, validation, open case |
