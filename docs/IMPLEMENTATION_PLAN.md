@@ -10,7 +10,7 @@
 |---|---|---|---|
 | 0 | Discovery | ✅ done | Greenfield; architecture in DECISIONS.md, ops in ENVIRONMENTS.md |
 | 1a-1 | Monorepo + API skeleton + Docker dev | ✅ done | `1a-1-monorepo-dev-foundation.md` + `1a-1-fix-1.md` |
-| 1a-2 | Docker prod (Caddy, migrate, hardening, backup/rollback) | 🔧 fixing | `1a-2-docker-prod.md` → review → `1a-2-fix-1.md` |
+| 1a-2 | Docker prod (Caddy, migrate, hardening, backup/rollback) | ✅ done | `1a-2-docker-prod.md` + `1a-2-fix-1.md` (merged `1d98559`) |
 | 1b | Design system + `/design` | ⬜ | Tokens, fonts (VN subset, self-hosted), primitives, playground |
 | 2 | Core decision domain | ⬜ | `packages/domain`: types, seeded PRNG, selection, validation, animation plan, zod schemas + tests |
 | 2.5 | Case-opening spike | ⬜ | Rough carousel in `/design` to validate motion feel early |
@@ -58,6 +58,11 @@
   - SHOULD: caddy gets the DB password through `env_file`; a missing `/assets/*` file returns `index.html` with an immutable cache header; a same-tag redeploy overwrites the rollback target.
   - NICE: `DOCKER_BUILDKIT=1` is on the wrong command.
   - Fixes in `docs/handoffs/1a-2-fix-1.md`. Implementer commits are allowed on `feat/1a-2-prod-docker` only.
+- **1a-2-fix-1 (2026-10-08):** F1–F7 verified per report and architect re-check (`make check` 7/7, `make prod-config` OK, no secrets in the commit, rc tags/`.deploy/`/images cleaned up).
+  - Tag acceptance: build from `v0.0.1-rc.1`, rc.2 deploy with automatic backup, same-tag redeploy keeps `previous`, rollback rc.2 → rc.1.
+  - Accepted deviations: `@types/node@22.20.5` also in `apps/web` (removes every Node 26 peer resolution); explicit `respond 404` for missing assets so security headers stay.
+  - New SHOULD, deferred to tech debt: `prod-deploy` only backs up when the `db` container is **running**.
+  - **Phase 1a-2 accepted.** Fast-forward merged into `main`.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
@@ -81,6 +86,7 @@
 - Docker bind mounts + pnpm workspace `node_modules` can be fiddly (handled with container-owned volumes).
 
 ## Technical debt
+- `prod-deploy` skips the backup when the prod stack is stopped (e.g. after `make prod-down`) but `wswd-prod_pgdata` holds data, so migrations would run without a backup. Fix before Phase 9: if the volume exists, start `db` (`up -d --wait db`) and back up before `up`.
 - `prod-restore` does not take a safety backup of the current data before `--clean`. Add one before Phase 9.
 - Restoring an old dump into a newer schema is not guarded. The runbook must say: restore only with the image version that created the dump.
 

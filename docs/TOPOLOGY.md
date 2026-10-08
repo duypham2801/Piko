@@ -4,7 +4,7 @@ Tài liệu cho chủ dự án. Nó cho biết hệ thống **đang** gồm nh�
 - Architect cập nhật file này mỗi khi topology thay đổi, và hỏi chủ dự án (HITL) trước khi cập nhật.
 - Chi tiết vận hành nằm trong `ENVIRONMENTS.md`; lý do của từng lựa chọn nằm trong `DECISIONS.md`.
 
-**Cập nhật lần cuối:** 2026-10-08, trong lúc làm 1a-2 / 1a-2-fix-1.
+**Cập nhật lần cuối:** 2026-10-08, sau khi merge 1a-2.
 
 Ký hiệu:
 - ✅ đã có trên `main`
@@ -41,7 +41,7 @@ Ký hiệu:
 
 - Mọi port chỉ mở trên `127.0.0.1`, nên máy khác trong mạng LAN không truy cập được.
 
-### 1.2 Prod — 🔧 đã chạy thử trên máy local, chưa merge, **chưa có VPS**
+### 1.2 Prod — ✅ trên `main`, đã chạy thử trên máy local (build từ tag, deploy, backup, rollback), **chưa có VPS**
 
 ```
  Internet / trình duyệt
@@ -143,7 +143,7 @@ apps/web  ──HTTP /api──►  apps/api  ──►  PostgreSQL
 | Hạng mục | Hiện tại | Mục tiêu | Phase |
 |---|---|---|---|
 | Dev stack | ✅ | ✅ | 1a-1 |
-| Prod stack (Docker, Caddy, migrate, backup/rollback) | 🔧 | ✅ | 1a-2 + fix-1 |
+| Prod stack (Docker, Caddy, migrate, backup/rollback) | ✅ (chỉ local) | ✅ trên VPS | 1a-2 ✅, VPS ở 9 |
 | Design system + font tiếng Việt tự host | ⬜ | ✅ | 1b |
 | Domain engine (selection, animation plan) | ⬜ | ✅ | 2 |
 | UI case opening, home, builder, result, history | ⬜ | ✅ | 2.5 → 8 |
@@ -166,3 +166,4 @@ apps/web  ──HTTP /api──►  apps/api  ──►  PostgreSQL
 | Ngày | Thay đổi |
 |---|---|
 | 2026-10-08 | Tạo file. Hiện tại: dev ✅, prod 🔧 (1a-2 đang sửa). Mục tiêu: 1 VPS, release thủ công từ tag. |
+| 2026-10-08 | Merge 1a-2: prod 🔧 → ✅ (chỉ local, chưa có VPS). Lỗ hổng backup khi DB đang tắt ghi vào tech debt, sửa trước Phase 9. |
