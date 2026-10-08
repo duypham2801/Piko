@@ -1,8 +1,8 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 4 — Home (not started)
-- **Integration branch:** none yet
+- **Current phase:** Phase 4 — Home (4-1 handed off)
+- **Integration branch:** `feat/phase-4-home`
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`)
 
 ## Phases
@@ -21,9 +21,10 @@
 | 2.5 | Case-opening spike | ✅ done (`2-5-fix-1.md`; duration tuned to 8 s) | `2-5-case-spike.md`: throwaway tuning playground in `/design#case-spike`; the owner tunes `ANIMATION_PLAN_DEFAULTS`; folds in the 2-2 `pickWeighted` nit |
 | 3-1 | Case-opening core | ✅ done (`3-1-fix-1.md`) | `3-1-case-carousel.md`: state machine, carousel, `revealAtMs`, reduced motion, mounted in `App.tsx`, spike removed (D-027) |
 | 3-2 | Reveal celebration | ✅ done (`3-2-fix-1.md`, `3-2-fix-2.md`) | Winner pop + dim, in-house confetti, winner panel (D-027) |
-| 4 | Home | ⬜ | Hero, mode selector (Solo + locked Soon), presets, recent decisions |
-| 5 | Decision builder | ⬜ | CRUD decisions/options via API, validation, open case |
-| 6 | Result + history | ⬜ | Winner reveal, Let's Go / Spin Again / Not Tonight / Share, history |
+| 4-1 | Router + Home + preset case route | 🟡 handed off | `4-1-router-home.md`: React Router 8, Home (brand, question, mode selector, 4 preset cards), `/presets/:slug` case, not found (D-028) |
+| 4-2 | Preset preview | ⬜ | Preview screen with option switches, `?off=` in the URL, case moves to `/presets/:slug/open` (D-028) |
+| 5 | Decision builder | ⬜ | CRUD decisions/options via API, validation, open case; adds the Home "Create decision" CTA (D-028) |
+| 6 | Result + history | ⬜ | Winner reveal, Let's Go / Spin Again / Not Tonight / Share, history; adds Home "Recent decisions" (D-028) |
 | 7 | Responsive pass | ⬜ | Desktop is not in the mockup and must be designed |
 | 8 | Polish | ⬜ | States, micro-interactions, consistency |
 | 9 | First prod release | ⬜ | Deploy `v0.1.0` to VPS, verify backup/rollback |
@@ -258,6 +259,10 @@
   - With owner approval, the architect restored it directly as `toBe(6_865)` (commit `test(domain): pin the seed-42 reveal time at 6865 ms`).
   - `make check` passes (42 domain tests, 7 api tests).
   - The owner is satisfied with the visuals. **3-2 accepted.** Fast-forwarded into `feat/phase-3-case-opening`.
+- **Phase 4 kickoff (2026-10-08):** the owner decided the router (React Router), the preset flow (preview before the case), the scope (no Recent or Create on Home until Phases 6 and 5) and the four presets. Recorded as D-028.
+  - Architect note: v8 (8.4.0) has been current since 2026-06, so it is pinned instead of v7. The declarative exports were verified in the published package.
+  - Phase 4 is split in two. 4-1 covers the router, Home and the preset case route. 4-2 covers the preview.
+  - Integration branch: `feat/phase-4-home` from `main`.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
@@ -267,7 +272,6 @@
 
 ## Pending decisions
 - Emoji strategy: native vs SVG set (license check).
-- Sound/haptics for case opening (Phase 3).
 - Share format (Phase 6).
 - Inactive guest cleanup policy (e.g. delete after N months of inactivity).
 - Hosting target: VPS provider + domain (needed before Phase 9).

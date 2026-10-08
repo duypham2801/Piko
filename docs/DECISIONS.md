@@ -258,3 +258,38 @@ Format: Decision · Reason · Alternatives · Tradeoffs · Phase/Date
   - The app still warms the guest session in the background (`ensureSession()`, D-019), and never blocks on it (rule 5).
 - **Reduced motion (default, rule 11):** no long spin. The strip starts a few cells before the winner and slides to `stopPosition` with a token-based CSS transition (`--duration-slow`, `--ease-out`). The reveal starts when that transition ends.
 - **Phase:** 3 · 2026-10-08 · approved by user (reduced motion: default)
+
+## D-028 — Phase 4 Home: router, presets, scope
+- **Router (owner): React Router, declarative mode.**
+  - Package `react-router`, pinned to `8.4.0`. The owner asked for "React Router v7"; v8 has been the current major since 2026-06 and keeps the same declarative API (`BrowserRouter`, `Routes`, `Route`, `Link`, `useParams`, `useSearchParams`). Its peer deps are React ≥ 19.2.7 and Node ≥ 22.22, which matches the repo.
+  - Only declarative mode is used: no data router, loaders or framework mode.
+  - Reason: Phase 4 introduces real screens, deep links and browser Back. A well-known router is preferred over a hand-rolled one.
+  - The prod Caddy config already serves deep links (`try_files {path} /index.html`).
+  - **Supersedes the "Router" line of D-022.** `/design` keeps its dev-only pathname check in `main.tsx`, outside the router.
+- **Routes:**
+
+  | Path | Screen | Since |
+  |---|---|---|
+  | `/` | Home | 4-1 |
+  | `/presets/:slug` | Case opening | 4-1 |
+  | `/presets/:slug` | Preset preview | 4-2 |
+  | `/presets/:slug/open` | Case opening | 4-2 |
+  | `*` | Not found | 4-1 |
+
+  - Unknown preset slugs render the not-found screen.
+- **Presets (owner):** four presets: "Ăn gì?", "Uống gì?", "Đi đâu chơi?", "Làm gì cuối tuần?".
+  - They are static data in `apps/web/src/features/presets/`, shaped as domain `DecisionData`, with category as data (`food`, `drinks`, `outing`, `weekend`). All weights are 1.
+  - Option labels are locale-specific **content**, not UI strings, so they live in the preset data rather than in `i18n/vi.ts`. An English locale would ship its own preset set.
+  - In dev, the presets are validated against the domain `Decision` schema at module load.
+- **Preset flow (owner):** tapping a preset card opens a **preview** first. The user can switch individual options off (at least 2 must stay on), then open the case.
+  - The set of switched-off options is kept in the URL (`?off=` with option indexes). Back, reload and links all keep it.
+  - Built in 4-2. In 4-1 the card opens the case directly.
+- **Scope (owner):** Phase 4 = hero + mode selector + preset cards + preview.
+  - "Recent decisions" moves to Phase 6, where history exists.
+  - "Create decision" moves to Phase 5, where the builder exists.
+  - No placeholder or locked UI is shown for either.
+- **Mode selector (default):** a native radio group (`fieldset`/`legend` with `input type="radio"`), not toggle chips. This follows the 1b-2 review note.
+  - Solo is checked.
+  - Couple/Squad are disabled radios with a "Sắp có" badge (D-004). There is no mode state, because only Solo exists.
+- **Copy:** `spinAgain` changes from "Quay lại" to "Mở lại". "Quay lại" also means "go back", which would be ambiguous next to the new back link.
+- **Phase:** 4 · 2026-10-08 · approved by user (router, preset flow, scope, preset list); default (mode selector, URL `off`, copy)
