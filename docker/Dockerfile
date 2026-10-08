@@ -45,25 +45,14 @@ RUN NODE_ENV=production pnpm --filter @piko/api build
 # PGlite is test-only, but Drizzle's optional peer makes pnpm deploy --prod include it.
 RUN --mount=type=cache,id=piko-pnpm,target=/pnpm/store \
   pnpm --filter @piko/api deploy --prod --legacy /out/api \
-  && mkdir -p /out/api/node_modules/.pnpm/drizzle-orm@0.45.3_postgres@3.4.9/node_modules \
-  && cp -aL /out/api/node_modules/drizzle-orm \
-    /out/api/node_modules/.pnpm/drizzle-orm@0.45.3_postgres@3.4.9/node_modules/drizzle-orm \
-  && rm -f \
-    /out/api/node_modules/drizzle-orm \
-    /out/api/node_modules/.pnpm/node_modules/drizzle-orm \
-  && ln -s \
-    .pnpm/drizzle-orm@0.45.3_postgres@3.4.9/node_modules/drizzle-orm \
-    /out/api/node_modules/drizzle-orm \
-  && ln -s \
-    ../drizzle-orm@0.45.3_postgres@3.4.9/node_modules/drizzle-orm \
-    /out/api/node_modules/.pnpm/node_modules/drizzle-orm \
-  && find /out/api/node_modules -depth -name '*electric-sql*' -exec rm -rf {} + \
-  && remaining_paths="$(find /out/api/node_modules -name '*electric-sql*' -print)" \
+  && find /out/api/node_modules -depth \( -name '@electric-sql' -o -name '@electric-sql+*' \) -exec rm -rf {} + \
+  && remaining_paths="$(find /out/api/node_modules \( -name '@electric-sql' -o -name '@electric-sql+*' -o -name 'pglite.wasm' \) -print)" \
   && if [ -n "$remaining_paths" ]; then \
-    echo 'Unexpected electric-sql path in the production API dependencies:' >&2; \
+    echo 'Unexpected PGlite path in the production API dependencies:' >&2; \
     echo "$remaining_paths" >&2; \
     exit 1; \
   fi
+
 FROM node:22-alpine AS api-prod
 
 ENV NODE_ENV=production
