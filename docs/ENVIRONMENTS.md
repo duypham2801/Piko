@@ -62,6 +62,16 @@ Bạn sửa file trên máy, container thấy thay đổi ngay. Có thể mở D
 
 Trong suốt quá trình này, **prod vẫn chạy version cũ và không bị ảnh hưởng gì.**
 
+**Lưu ý khi đổi nhánh:** sau `git switch`, `git rebase` hoặc `git pull` trong lúc `make dev` đang chạy, Vite có thể vẫn phục vụ bản code cũ đã cache. Nhất là code trong `packages/domain`. Triệu chứng: giao diện chạy theo logic cũ, ví dụ quay xong không công bố kết quả. Cách sửa:
+
+```
+docker compose -f compose.dev.yaml restart web
+```
+
+Sau đó tải lại trang.
+
+---
+
 ## 5. Phát hành lên prod (release)
 
 ```

@@ -1,7 +1,7 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 3 — Case opening (3-1 reviewed; `3-1-fix-1` ready)
+- **Current phase:** Phase 3 — Case opening (3-1 done; owner visual check, then 3-2 celebration)
 - **Integration branch:** `feat/phase-3-case-opening` (pushed)
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s)
 
@@ -19,7 +19,7 @@
 | 2-1 | Domain model + zod/mini + seeded selection engine | ✅ done | `2-1-domain-model-selection.md` (D-024, D-025, `6a61954`) |
 | 2-2 | Animation plan math (strip, stop offset, timeline params) | ✅ done | `2-2-animation-plan.md` (D-006, D-026, `af1004f`) |
 | 2.5 | Case-opening spike | ✅ done (`2-5-fix-1.md`; duration tuned to 8 s) | `2-5-case-spike.md`: throwaway tuning playground in `/design#case-spike`; the owner tunes `ANIMATION_PLAN_DEFAULTS`; folds in the 2-2 `pickWeighted` nit |
-| 3-1 | Case-opening core | 🔧 fix ready (`3-1-fix-1.md`) | `3-1-case-carousel.md`: state machine, carousel, `revealAtMs`, reduced motion, mounted in `App.tsx`, spike removed (D-027) |
+| 3-1 | Case-opening core | ✅ done (`3-1-fix-1.md`) | `3-1-case-carousel.md`: state machine, carousel, `revealAtMs`, reduced motion, mounted in `App.tsx`, spike removed (D-027) |
 | 3-2 | Reveal celebration | ⬜ | Winner pop + dim, in-house confetti, winner panel (D-027) |
 | 4 | Home | ⬜ | Hero, mode selector (Solo + locked Soon), presets, recent decisions |
 | 5 | Decision builder | ⬜ | CRUD decisions/options via API, validation, open case |
@@ -210,6 +210,21 @@
     - a duplicate `min-height`
     - a nested `aria-hidden`
   - Fixes in `3-1-fix-1.md`, which adds one layout token `--content-wide-max-width: 60rem`. The task branch is rebased onto the integration branch.
+- **3-1-fix-1 (2026-10-08):** F1–F7 verified against the diff (8 files, +16/−35). `make check` passes. The report gives main JS 79.61 kB gz.
+  - The owner reported that after the spin no result appeared and the button stayed disabled.
+  - The architect reproduced it in headless Chrome over CDP. The dev server was serving a **stale `packages/domain` module**: its exports still included `createRng`/`spinProgress`, and `ANIMATION_PLAN_DEFAULTS` had no `revealThresholdItems`. So `plan.revealAtMs` was `undefined` and the reveal never fired.
+  - The files inside the container were current. Vite's module cache had missed the changes after the architect rebased the task branch under the running dev server.
+  - `docker compose -f compose.dev.yaml restart web` fixed it.
+  - Re-verified in headless Chrome:
+    - normal motion reveals at about 6.9 s
+    - the button re-enables and shows "Quay lại"
+    - a second spin works
+    - the cell under the marker is the winner and carries the winner class
+    - reduced motion reveals almost immediately after the short slide
+  - **Code is correct, so no code fix is needed.** `ENVIRONMENTS.md` now has a note to restart `web` after switching branches.
+  - Lesson (architect): avoid rebasing the task branch while the owner's dev server runs, or tell the owner to restart `web` afterwards.
+  - The "no end effect" part of the report is expected: the celebration is 3-2.
+  - **3-1 accepted.** Merged into `feat/phase-3-case-opening`.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
