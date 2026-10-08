@@ -1,7 +1,7 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 3 — Case opening (3-1 handoff ready)
+- **Current phase:** Phase 3 — Case opening (3-1 reviewed; `3-1-fix-1` ready)
 - **Integration branch:** `feat/phase-3-case-opening` (pushed)
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s)
 
@@ -19,7 +19,7 @@
 | 2-1 | Domain model + zod/mini + seeded selection engine | ✅ done | `2-1-domain-model-selection.md` (D-024, D-025, `6a61954`) |
 | 2-2 | Animation plan math (strip, stop offset, timeline params) | ✅ done | `2-2-animation-plan.md` (D-006, D-026, `af1004f`) |
 | 2.5 | Case-opening spike | ✅ done (`2-5-fix-1.md`; duration tuned to 8 s) | `2-5-case-spike.md`: throwaway tuning playground in `/design#case-spike`; the owner tunes `ANIMATION_PLAN_DEFAULTS`; folds in the 2-2 `pickWeighted` nit |
-| 3-1 | Case-opening core | 🔧 handoff ready | `3-1-case-carousel.md`: state machine, carousel, `revealAtMs`, reduced motion, mounted in `App.tsx`, spike removed (D-027) |
+| 3-1 | Case-opening core | 🔧 fix ready (`3-1-fix-1.md`) | `3-1-case-carousel.md`: state machine, carousel, `revealAtMs`, reduced motion, mounted in `App.tsx`, spike removed (D-027) |
 | 3-2 | Reveal celebration | ⬜ | Winner pop + dim, in-house confetti, winner panel (D-027) |
 | 4 | Home | ⬜ | Hero, mode selector (Solo + locked Soon), presets, recent decisions |
 | 5 | Decision builder | ⬜ | CRUD decisions/options via API, validation, open case |
@@ -186,6 +186,30 @@
   - DO NOT TOUCH: the other domain exports with no consumer yet (`Decision`, `DecisionOption`, `DECISION_LIMITS`, `SelectionResult`, `Seed`, `SELECTION_ALGORITHM`). They are the public API for the builder (Phase 5) and for history (Phase 6).
   - Phase 3 will delete the spike section (`CaseSpikeSection.*` and its `/design` nav link). It is about 800 lines of throwaway dev code.
   - Phase 3 must decide when the reveal starts, because the 8 s tail looks stopped about 1.5 s early (see D-026).
+- **3-1 (2026-10-08):** reviewed `feat/3-1-case-carousel` (17 files, +685/−912).
+  - Architect re-check: `make check` passes. Tests: domain 42, api 7.
+  - The web-scoped greps are clean.
+  - The report gives seed-42 `revealAtMs` = 6864 ms, main JS 79.62 kB gz (+2.6 kB for the feature) and no `/design` leak.
+  - Accepted:
+    - the domain `revealAtMs` bisection (no extra PRNG draw, so the pins are unchanged)
+    - the pure reducer
+    - refs-only frames, with the reveal dispatched once and the loop running on to `durationMs` (no snap)
+    - the reduced-motion slide driven by the token transition
+    - `ResizeObserver` re-application
+    - the background `ensureSession()`
+    - the spike and the debug strings removed; `createRng`/`spinProgress` unexported
+  - Deviation accepted: `/api/healthz` remains in `apps/api` (used by the prod healthcheck). The handoff grep should have been scoped to `apps/web` (architect mistake).
+  - SHOULD:
+    - F1: the viewport clips the card shadows and the winner lift, because the strip is exactly one cell tall.
+    - F2: desktop is capped at 30 rem, and the media `max-width: 48rem` has no effect.
+    - F3: the preview plan is built twice (hook and screen).
+    - F4: `--case-cell-width` is defined twice.
+  - NICE:
+    - the unused `reset` event (specified too early by the architect)
+    - the hook imports the carousel CSS module for a class name; switch to a `data-motion` attribute
+    - a duplicate `min-height`
+    - a nested `aria-hidden`
+  - Fixes in `3-1-fix-1.md`, which adds one layout token `--content-wide-max-width: 60rem`. The task branch is rebased onto the integration branch.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
