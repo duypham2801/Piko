@@ -247,6 +247,7 @@ Format: Decision · Reason · Alternatives · Tradeoffs · Phase/Date
   - One short confetti burst, implemented in-house with WAAPI/CSS (no library, D-006).
   - Then a winner panel with a large name.
   - Built in Phase 3-2. No flashes, shaking or rarity colors (D-010).
+  - 3-2 adds four tokens for this: `--duration-celebrate` (1200 ms burst), `--scale-pop` (1.08), `--opacity-dimmed` (0.4) and `--z-raised` (1). Confetti is 20 deterministic CSS-keyframe pieces (transform/opacity only), hidden under reduced motion.
 - **Sound and haptics (owner): deferred to Phase 8.** Sound needs licensed or synthesized assets, a mute control and autoplay handling.
 - **Mount point (owner):** the case-opening screen with a fixed demo pool temporarily replaces the dev health/guest debug screen in `App.tsx`. This allows a full-screen review on phone and desktop. Home (Phase 4) and the builder (Phase 5) replace the demo pool with real data.
   - The app still warms the guest session in the background (`ensureSession()`, D-019), and never blocks on it (rule 5).
