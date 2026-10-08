@@ -26,8 +26,7 @@ export type DecisionOptionData = z.infer<typeof DecisionOption>;
 
 const categoryPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
-const DecisionBase = z.object({
-  id: z.uuid(),
+const decisionFields = {
   title: normalizedText(DECISION_LIMITS.titleMaxLength),
   category: z.optional(
     z.string().check(z.regex(categoryPattern), z.maxLength(DECISION_LIMITS.categoryMaxLength)),
@@ -35,25 +34,32 @@ const DecisionBase = z.object({
   options: z
     .array(DecisionOption)
     .check(z.minLength(DECISION_LIMITS.minOptions), z.maxLength(DECISION_LIMITS.maxOptions)),
+};
+
+const DecisionBase = z.object({
+  id: z.uuid(),
+  ...decisionFields,
 });
 
-type DecisionBaseData = z.infer<typeof DecisionBase>;
+const DecisionDraftBase = z.object(decisionFields);
 
-const uniqueOptionIds = z.superRefine<DecisionBaseData>((decision, context) => {
+type DecisionFieldsData = z.infer<typeof DecisionDraftBase>;
+
+const uniqueOptionIds = z.superRefine<DecisionFieldsData>((decision, context) => {
   const ids = decision.options.map((option) => option.id);
   if (new Set(ids).size !== ids.length) {
     context.addIssue({ code: 'custom', message: 'duplicate_option_id' });
   }
 });
 
-const uniqueOptionLabels = z.superRefine<DecisionBaseData>((decision, context) => {
+const uniqueOptionLabels = z.superRefine<DecisionFieldsData>((decision, context) => {
   const labels = decision.options.map((option) => option.label.toLocaleLowerCase('vi'));
   if (new Set(labels).size !== labels.length) {
     context.addIssue({ code: 'custom', message: 'duplicate_option_label' });
   }
 });
 
-const enoughEnabledOptions = z.superRefine<DecisionBaseData>((decision, context) => {
+const enoughEnabledOptions = z.superRefine<DecisionFieldsData>((decision, context) => {
   const enabledCount = decision.options.filter((option) => option.enabled).length;
   if (enabledCount < DECISION_LIMITS.minEnabledOptions) {
     context.addIssue({ code: 'custom', message: 'not_enough_enabled_options' });
@@ -67,3 +73,11 @@ export const Decision = DecisionBase.check(
 );
 
 export type DecisionData = z.infer<typeof Decision>;
+
+export const DecisionDraft = DecisionDraftBase.check(
+  uniqueOptionIds,
+  uniqueOptionLabels,
+  enoughEnabledOptions,
+);
+
+export type DecisionDraftData = z.infer<typeof DecisionDraft>;

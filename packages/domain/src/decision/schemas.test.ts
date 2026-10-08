@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { DECISION_LIMITS } from './limits.js';
-import { Decision, DecisionOption, type DecisionOptionData } from './schemas.js';
+import { Decision, DecisionDraft, DecisionOption, type DecisionOptionData } from './schemas.js';
 
 const decisionId = '00000000-0000-4000-8000-000000000001';
 const optionIds = [
@@ -48,6 +48,31 @@ describe('Decision schemas', () => {
       expect(result.data.options[0]?.label).toBe('Phở');
       expect(result.data.options[1]?.label).toBe('Bánh');
     }
+  });
+
+  it('parses drafts and strips an accidental id field', () => {
+    const result = DecisionDraft.safeParse({
+      ...makeDecision(),
+    });
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data).not.toHaveProperty('id');
+    }
+  });
+
+  it('applies duplicate-label and enabled-option checks to drafts', () => {
+    const duplicateLabels = DecisionDraft.safeParse({
+      title: 'Dinner',
+      options: [makeOption(0, { label: 'Phở' }), makeOption(1, { label: 'phở' })],
+    });
+    const notEnoughEnabled = DecisionDraft.safeParse({
+      title: 'Dinner',
+      options: [makeOption(0), makeOption(1, { enabled: false })],
+    });
+
+    expect(duplicateLabels.success).toBe(false);
+    expect(notEnoughEnabled.success).toBe(false);
   });
 
   it('rejects option count outside the limits', () => {
