@@ -198,3 +198,30 @@ Format: Decision · Reason · Alternatives · Tradeoffs · Phase/Date
   - Past handoffs in `docs/handoffs/` keep the old names as historical records.
 - **Not renamed:** the local checkout folder name, and the colors, fonts and visual direction (unchanged).
 - **Phase:** 1c · 2026-10-08 · approved by user
+
+## D-024 — Decision model for the MVP: label + emoji, weights, limits
+- **Choice (owner, Phase 2 kickoff):**
+  - `DecisionOption` = `id`, `label`, `emoji?`, `weight`, `enabled`. Image, location, price and notes are added later only when a feature needs them.
+  - **Weights are in the MVP, including the UI.** A weight is an integer **1–5**. The default is 1. The chance of an option is `weight / sum(weights of enabled options)`.
+  - Limits: **2–20 options** per decision, at least **2 enabled**. Label **1–40** characters after NFC normalization and trimming. Title **1–60**. Labels are unique, ignoring case.
+  - `Decision` = `id`, `title`, `category?` (a slug, as data, never hard-coded), `options`. Persistence fields (`createdAt`, owner) are added with the API in Phase 5.
+- **Guardrail (D-010):** the UI shows weights as levels (wording decided in Phase 5). It never shows percentages, odds or rarity colors. The case strip draws its filler items with the same weights, so what the user sees honestly matches the chances.
+- **Alternatives:** uniform only (architect recommendation, rejected by the owner); weights in the engine but hidden in the UI.
+- **Tradeoffs:** the builder needs a weight control, and the "not casino" line needs care in the Phase 5 copy.
+- **Phase:** 2 · 2026-10-08 · approved by user
+
+## D-025 — Selection engine: mulberry32, uint32 seed, versioned algorithm
+- **Choice:**
+  - PRNG: **mulberry32**, seeded with an unsigned 32-bit integer. It is tiny, fast, pure and well known. 2³² streams are plenty for picking among ≤ 20 options.
+  - The caller generates the seed (`crypto.getRandomValues` in the web, later the server for group mode). The domain never reads a global random source.
+  - The weighted pick uses integer arithmetic: `r = floor(rng() * totalWeight)`, then a walk over the enabled options **in input order**. It consumes exactly the first PRNG value.
+  - `SelectionResult` = `{ algorithm: 'weighted-v1', seed, winnerId, candidateIds }`. The `algorithm` tag lets history and replay keep working if the algorithm changes later.
+- **Reason:** D-005/D-017 need a reproducible result shared by web and api. Golden-value tests pin the exact output.
+- **Alternatives:** sfc32/xoshiro128** with string seeds, which adds more state and hashing for no MVP benefit; `Math.random`, which is not reproducible.
+- **Phase:** 2 · 2026-10-08 · default
+
+## D-026 — The case stops at a seeded offset inside the winner cell
+- **Choice (owner):** the stop position is offset randomly but deterministically (from the seed) within a safe central band of the winner cell, never near its edges. It is not always dead center.
+- **Reason:** it feels natural and suspenseful, and it is still reproducible from the seed.
+- **Details** (band width, strip length, duration) are specified in handoff 2-2 (animation plan) and tuned in Phase 2.5 in the browser.
+- **Phase:** 2 · 2026-10-08 · approved by user

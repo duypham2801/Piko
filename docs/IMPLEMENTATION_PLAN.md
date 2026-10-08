@@ -1,8 +1,8 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** 1c-2 — format gate (small), then Phase 2 — Core decision domain
-- **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO
+- **Current phase:** Phase 2 — Core decision domain (2-1 handoff ready)
+- **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate
 
 ## Phases
 
@@ -14,8 +14,9 @@
 | 1b-1 | Tokens + fonts + dev-only `/design` | ✅ done | `1b-1-tokens-fonts-design-page.md` (merged `3513f2c`) |
 | 1b-2 | UI primitives in `/design` | ✅ done | `1b-2-ui-primitives.md` (`5ec3629`) + `1b-2-fix-1.md` (`9503c43`) |
 | 1c-1 | Rebrand to PIKO: full `wswd` → `piko` rename | ✅ done | `1c-1-rebrand-piko.md` (D-023, `d44cca4`) |
-| 1c-2 | Prettier in `make check` + drop unused `@` alias | 🔧 handoff ready | `1c-2-format-gate.md` |
-| 2 | Core decision domain | ⬜ | `packages/domain`: types, seeded PRNG, selection, validation, animation plan, zod schemas + tests |
+| 1c-2 | Prettier in `make check` + drop unused `@` alias | ✅ done | `1c-2-format-gate.md` (`2a38aaa`) |
+| 2-1 | Domain model + zod/mini + seeded selection engine | 🔧 handoff ready | `2-1-domain-model-selection.md` (D-024, D-025) |
+| 2-2 | Animation plan math (strip, stop offset, timeline params) | ⬜ | After 2-1 review; D-026 seeded stop offset |
 | 2.5 | Case-opening spike | ⬜ | Rough carousel in `/design` to validate motion feel early |
 | 3 | Case opening (full) | ⬜ | Controller, state machine, timeline, marker, reveal, reduced-motion |
 | 4 | Home | ⬜ | Hero, mode selector (Solo + locked Soon), presets, recent decisions |
@@ -104,6 +105,19 @@
     - zod classic in `packages/domain`, converted at the start of Phase 2 (D-020)
   - Known tech debt (unchanged): `prod-deploy` skips the backup when the `db` container is stopped. Fix before Phase 9.
   - CSP note for Phase 3: `style-src 'self'` blocks inline `style` attributes in HTML, but not CSSOM/WAAPI writes from JS (React `style`, `element.animate`). The carousel approach is unaffected.
+- **1c-2 (2026-10-08):** verified against the diff (`2a38aaa`, 10 files, +54/−75).
+  - `.prettierignore` ignores `*.md`. `check` now runs `format:check`, and `make check` passes with it.
+  - The six code files have formatting-only changes. The `@` alias is gone from Vite and tsconfig. The `alias` grep hit only `-webkit-font-smoothing: antialiased`, a false positive.
+  - NICE, not worth a fix: Prettier wraps the `--color-on-primary` line in `tokens.css` awkwardly because of its trailing comment. Move the comment above the line the next time `tokens.css` is touched.
+  - **1c-2 accepted.** Fast-forward merged into `main`.
+- **Phase 2 kickoff (2026-10-08):** the owner decided D-024 and D-026, and the architect recorded D-025 as a default.
+  - D-024: options have label + emoji; weights 1–5 with a UI; 2–20 options, label ≤ 40.
+  - D-025: mulberry32 PRNG, uint32 seed, `weighted-v1` algorithm tag.
+  - D-026: seeded stop offset.
+  - Phase 2 is split in two:
+    - 2-1: model, zod/mini and selection
+    - 2-2: animation-plan math
+  - No topology change: no service, route or table is involved.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
