@@ -1,7 +1,7 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 5 — Decision builder (5-1 done; 5-2 next)
+- **Current phase:** Phase 5 — Decision builder (5-1 done; 5-2 handed off)
 - **Integration branch:** `feat/phase-5-builder`
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`); Phase 4 (4-1, 4-2: router, Home, presets, preview, merged into `main`)
 
@@ -24,8 +24,8 @@
 | 4-1 | Router + Home + preset case route | ✅ done (`39e7baa`) | `4-1-router-home.md`: React Router 8, Home (brand, question, mode selector, 4 preset cards), `/presets/:slug` case, not found (D-028) |
 | 4-2 | Preset preview | ✅ done (`4-2-fix-1.md`, `89fe5cc`) | `4-2-preset-preview.md`: includes the 4-1 clean-up (C0) and a `BackLink` primitive. Preview screen with option switches, `?off=` in the URL, case moves to `/presets/:slug/open` (D-028) |
 | 5-1 | Decisions API | ✅ done (`5-1-fix-1.md`, `5-1-fix-2.md`, `60387fc`) | `5-1-decisions-api.md`: `decisions` table (options as JSONB), CRUD routes requiring a session, ownership, 100 per user, PGlite service tests (D-029) |
-| 5-2 | Builder screen | ⬜ | `/decisions/new` and `/decisions/:id/edit`: title, options (add/edit/remove), emoji picker, priority dots, shared schema validation, explicit Save, non-blocking save error (D-029) |
-| 5-3 | Saved decisions | ⬜ | `/decisions/:id` preview + `/open` case, Home "Của bạn" section + "Tạo quyết định", delete with confirm, preset "Tùy chỉnh" (D-028, D-029) |
+| 5-2 | Builder screen | 🔧 handed off (`5-2-decision-builder.md`) | `/decisions/new` and `/decisions/:id/edit`: title, options (add/edit/remove), emoji picker, priority dots, shared schema validation, explicit Save, non-blocking save error (D-029) |
+| 5-3 | Saved decisions | ⬜ | `/decisions/:id` preview + `/open` case, Home "Của bạn" section + "Tạo quyết định", delete with confirm, preset "Tùy chỉnh"; the post-create target moves from `/edit` to the preview; `DELETE` client (D-028, D-029) |
 | 6 | Result + history | ⬜ | Winner reveal, Let's Go / Spin Again / Not Tonight / Share, history; adds Home "Recent decisions" (D-028) |
 | 7 | Responsive pass | ⬜ | Desktop is not in the mockup and must be designed |
 | 8 | Polish | ⬜ | States, micro-interactions, consistency |
@@ -344,6 +344,10 @@
     - the `api-prod` image built from `HEAD` has no `@electric-sql`, `@electric-sql+*` or `pglite.wasm` path, imports `drizzle-orm/postgres-js`, and is 185.8 MB
     - the dev DB has the `decisions` table
   - **5-1 accepted.** Fast-forwarded into `feat/phase-5-builder`.
+
+- **5-2 handoff (2026-10-08):** the owner approved two empty options as the builder start. Architect defaults, recorded in D-029:
+  - "Mở case" is always available in the builder. It opens the current draft in place (`?view=case`), so a save failure never blocks a decision.
+  - Until 5-3, a create lands on `/decisions/:id/edit`, with the record passed in the router state.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.

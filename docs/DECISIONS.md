@@ -299,6 +299,11 @@ Format: Decision · Reason · Alternatives · Tradeoffs · Phase/Date
   - The builder saves the whole decision with one request (POST to create, PUT to update), then goes to the decision page, where the user opens the case.
   - If saving fails, the builder shows a non-blocking error and still lets the user open the case with the current draft (rule 5: a network failure never blocks a decision).
   - No autosave. Last write wins; there is no optimistic-concurrency check in the MVP (one user, one device at a time).
+- **Builder details (5-2):**
+  - It starts with an empty title and **two empty options** (owner).
+  - "Mở case" is always available next to "Lưu". It validates, then opens the case with the current draft in place, under the search param `?view=case` (push), so Back returns to the form with unsaved edits intact. Saving is never required to open the case (default).
+  - Validation errors show after the first attempt, per field, in Vietnamese. Duplicate labels are computed in the web with the same normalization as the schema, because zod skips refinements while a field is invalid (default).
+  - After a create, the builder replaces the URL with the saved decision. It goes to `/decisions/:id/edit` until 5-3, then to the preview (default).
 - **Weights UI (owner): five tappable dots per option**, under one label "Độ ưu tiên".
   - A filled dot means the level is reached; tapping dot N sets weight N. The default is 1.
   - It is a radio group per option, so it stays keyboard and screen-reader friendly.
