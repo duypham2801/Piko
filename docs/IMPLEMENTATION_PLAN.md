@@ -1,7 +1,7 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 2.5 — case-opening spike (2-5 reviewed; fix `2-5-fix-1` ready, then owner tuning). Phase 2 merged into `main`.
+- **Current phase:** Phase 2.5 ✅ complete on `feat/phase-2-5-case-spike` (pending owner approval to merge into `main`); next: Phase 3 — Case opening
 - **Integration branch:** `feat/phase-2-5-case-spike` (pushed). Phase 2 was merged into `main` via `feat/phase-2-core-domain`, which is now deleted.
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2)
 
@@ -18,7 +18,7 @@
 | 1c-2 | Prettier in `make check` + drop unused `@` alias | ✅ done | `1c-2-format-gate.md` (`2a38aaa`) |
 | 2-1 | Domain model + zod/mini + seeded selection engine | ✅ done | `2-1-domain-model-selection.md` (D-024, D-025, `6a61954`) |
 | 2-2 | Animation plan math (strip, stop offset, timeline params) | ✅ done | `2-2-animation-plan.md` (D-006, D-026, `af1004f`) |
-| 2.5 | Case-opening spike | 🔧 fix ready (`2-5-fix-1.md`) | `2-5-case-spike.md`: throwaway tuning playground in `/design#case-spike`; the owner tunes `ANIMATION_PLAN_DEFAULTS`; folds in the 2-2 `pickWeighted` nit |
+| 2.5 | Case-opening spike | ✅ done (`2-5-fix-1.md`; duration tuned to 8 s) | `2-5-case-spike.md`: throwaway tuning playground in `/design#case-spike`; the owner tunes `ANIMATION_PLAN_DEFAULTS`; folds in the 2-2 `pickWeighted` nit |
 | 3 | Case opening (full) | ⬜ | Controller, state machine, timeline, marker, reveal, reduced-motion |
 | 4 | Home | ⬜ | Hero, mode selector (Solo + locked Soon), presets, recent decisions |
 | 5 | Decision builder | ⬜ | CRUD decisions/options via API, validation, open case |
@@ -173,6 +173,18 @@
     - `: ''` class merging
     - the 20 rem viewport height (tall, narrow cells)
   - Fixes in `2-5-fix-1.md`, as one extra commit on `feat/2-5-case-spike`. The task branch is rebased onto the integration branch so that it contains the fix handoff.
+- **2-5-fix-1 (2026-10-08):** F1–F6 verified against the diff (2 files, +23/−17). `make check` passes.
+  - The winner outline appears only after the stop. The readout `<pre>` has no JSX children. The cells no longer carry `aria-label`. `initialPlan`, `.find` and `: ''` are gone, and cells are close to square (10 rem).
+  - Unrequested deviation, accepted: the implementer also removed `role="group"` + `aria-label` from the Pool/Speed chip groups. Those labels were valid, but the section is throwaway (deleted in Phase 3), so it is not worth a fix.
+  - **2-5 accepted.** Merged into `feat/phase-2-5-case-spike`.
+- **Owner tuning (2026-10-08):** the owner played the spike and changed only `durationMs` from 6000 to 8000. With the owner's explicit permission, the architect applied this one-line change directly in `ANIMATION_PLAN_DEFAULTS`. D-026 is updated.
+- **End-of-Phase-2.5 cleanup review (architect, whole repo on the integration branch):**
+  - `make check` passes. Tests: domain 40, api 7.
+  - The literal greps are clean, apart from the allowed prose line. No unused files or dependencies. Every i18n key is used, some through dynamic `t(status)`. Layering is respected.
+  - NICE, for the first Phase 3 handoff: the domain `index.ts` exports `createRng` and `spinProgress`, but nothing outside the domain needs them. Seeds come from `crypto` in the web, and `positionAt` wraps the curve. Unexport both and keep them internal.
+  - DO NOT TOUCH: the other domain exports with no consumer yet (`Decision`, `DecisionOption`, `DECISION_LIMITS`, `SelectionResult`, `Seed`, `SELECTION_ALGORITHM`). They are the public API for the builder (Phase 5) and for history (Phase 6).
+  - Phase 3 will delete the spike section (`CaseSpikeSection.*` and its `/design` nav link). It is about 800 lines of throwaway dev code.
+  - Phase 3 must decide when the reveal starts, because the 8 s tail looks stopped about 1.5 s early (see D-026).
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.

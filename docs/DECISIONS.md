@@ -228,6 +228,12 @@ Format: Decision · Reason · Alternatives · Tradeoffs · Phase/Date
   - The plan uses its own PRNG stream, `seed ^ 0x9e3779b9`.
   - Filler cells are pure weighted draws (D-024 honesty). The only rule is that the two neighbours of the winner are never the winner.
   - One curve: a linear ramp over the first 6 % of the time, then a velocity decay `((1−t)/(1−a))^3`. Velocity is continuous and the stop is smooth.
-  - Defaults: 40–47 cells, 6 s, peak about 28 cells/s.
-  - Everything is tuned in Phase 2.5 through `ANIMATION_PLAN_DEFAULTS`. On paper, the default tail is long: about 0.6 cells move in the last 2 s. Check it in the browser.
+  - All values live in `ANIMATION_PLAN_DEFAULTS`.
+- **Tuned by the owner in the Phase 2.5 spike (2026-10-08):** only the duration changed, **6 s → 8 s**. The other defaults are kept:
+  - 40–47 cells
+  - `stopBand` 0.6
+  - `accelFraction` 0.06
+  - `decelPower` 3
+  - 8 leading and 8 trailing cells
+- With these values the peak speed is about 21 cells/s. Only about 0.2 cells move in the last 2 s, and about 0.01 in the last 1 s. The strip therefore *looks* stopped well before `durationMs`. Phase 3 must decide when the reveal starts, for example once the remaining distance falls below a small threshold, so the user does not wait on a frozen strip.
 - **Phase:** 2 · 2026-10-08 · approved by user
