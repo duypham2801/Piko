@@ -83,8 +83,9 @@ apps/web  ──HTTP /api──►  apps/api  ──►  PostgreSQL
 |---|---|
 | API routes | `GET /api/healthz`, `GET /api/me` (tạo guest nếu chưa có) |
 | Bảng DB | `users`, `sessions` (chỉ lưu sha256 của token) |
-| Web | Trang kiểm tra kết nối (health + guest id). Chưa có UI thật |
-| Domain | Chỉ có schema API (`ApiError`, `HealthResponse`, `MeResponse`) |
+| Web | Màn mở case + hiệu ứng ăn mừng (Phase 3). Chọn ngẫu nhiên chạy ở trình duyệt, chưa lưu gì lên API |
+| Web routes | `/` Home, `/presets/:slug` mở case (4-1); 4-2 thêm `/presets/:slug` xem trước + `/presets/:slug/open` mở case. Caddy trả `index.html` cho mọi đường dẫn không phải `/api` |
+| Domain | Schema API, model `Decision`, engine chọn có seed (mulberry32), toán animation plan |
 
 ---
 
@@ -168,3 +169,4 @@ apps/web  ──HTTP /api──►  apps/api  ──►  PostgreSQL
 | 2026-10-08 | Tạo file. Hiện tại: dev ✅, prod 🔧 (1a-2 đang sửa). Mục tiêu: 1 VPS, release thủ công từ tag. |
 | 2026-10-08 | Merge 1a-2: prod 🔧 → ✅ (chỉ local, chưa có VPS). Lỗ hổng backup khi DB đang tắt ghi vào tech debt, sửa trước Phase 9. |
 | 2026-10-08 | Phase 1b xong (design system). Đổi tên `wswd` → `piko` (D-023): compose project `piko-dev`/`piko-prod`, volume `piko-*`, image `piko-api`/`piko-web`, cookie `piko_sid`, DB user/name `piko`. Áp dụng qua 1c-1; volume/image `wswd-*` cũ xoá thủ công sau. Repo: `github.com/duypham2801/Piko`. |
+| 2026-10-08 | Phase 3 merge vào `main`. Phase 4: web có router (React Router 8, D-028), thêm dòng "Web routes"; sửa dòng Web/Domain cho đúng hiện trạng. Hạ tầng không đổi. |
