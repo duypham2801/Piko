@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import * as z from 'zod/mini';
 
 export const HealthResponse = z.object({
   status: z.enum(['ok', 'degraded']),

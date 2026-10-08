@@ -1,5 +1,5 @@
 import { ApiError } from '@piko/domain';
-import type { ZodType } from 'zod';
+import type { ZodMiniType } from 'zod/mini';
 
 export class ApiClientError extends Error {
   public readonly status: number;
@@ -13,7 +13,7 @@ export class ApiClientError extends Error {
   }
 }
 
-export async function apiGet<T>(path: string, schema: ZodType<T>): Promise<T> {
+export async function apiGet<T>(path: string, schema: ZodMiniType<T>): Promise<T> {
   const response = await fetch(path, { credentials: 'same-origin' });
 
   if (!response.ok) {
