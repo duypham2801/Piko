@@ -1,9 +1,9 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 2 — Core decision domain ✅ complete on the integration branch (pending merge into `main`); next: Phase 2.5 case-opening spike
-- **Integration branch:** `feat/phase-2-core-domain` (pushed). Task branches merge into it, and it merges into `main` when Phase 2 is complete.
-- **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate
+- **Current phase:** Phase 2.5 — case-opening spike (next). Phase 2 merged into `main`.
+- **Integration branch:** none open. `feat/phase-2-core-domain` was merged into `main` (Phase 2 complete). Phase 2.5 gets a new one.
+- **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2)
 
 ## Phases
 
