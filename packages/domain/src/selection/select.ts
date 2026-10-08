@@ -3,6 +3,7 @@ import type { DecisionOptionData } from '../decision/schemas.js';
 import { Seed, SELECTION_ALGORITHM } from './result.js';
 import type { SelectionResultData } from './result.js';
 import { createRng } from './prng.js';
+import { pickWeighted } from './weighted.js';
 
 export function select(options: readonly DecisionOptionData[], seed: number): SelectionResultData {
   const candidates = options.filter((option) => option.enabled);
@@ -15,21 +16,7 @@ export function select(options: readonly DecisionOptionData[], seed: number): Se
     throw new RangeError('Seed must be an unsigned 32-bit integer.');
   }
 
-  const total = candidates.reduce((sum, option) => sum + option.weight, 0);
-  let remaining = Math.floor(createRng(parsedSeed.data)() * total);
-  const firstCandidate = candidates[0];
-  if (!firstCandidate) {
-    throw new RangeError('At least two enabled options are required.');
-  }
-  let winnerId = firstCandidate.id;
-
-  for (const candidate of candidates) {
-    if (remaining < candidate.weight) {
-      winnerId = candidate.id;
-      break;
-    }
-    remaining -= candidate.weight;
-  }
+  const winnerId = pickWeighted(candidates, createRng(parsedSeed.data)).id;
 
   return {
     algorithm: SELECTION_ALGORITHM,

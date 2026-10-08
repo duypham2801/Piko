@@ -11,3 +11,6 @@ export { createRng } from './selection/prng.js';
 export { select } from './selection/select.js';
 export { Seed, SelectionResult, SELECTION_ALGORITHM } from './selection/result.js';
 export type { SeedData, SelectionResultData } from './selection/result.js';
+export { spinProgress } from './animation-plan/curve.js';
+export { ANIMATION_PLAN_DEFAULTS, buildAnimationPlan, positionAt } from './animation-plan/plan.js';
+export type { AnimationPlan, AnimationPlanParams } from './animation-plan/plan.js';

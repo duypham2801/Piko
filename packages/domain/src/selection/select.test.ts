@@ -33,6 +33,7 @@ describe('select', () => {
     [5, ids[1]],
     [6, ids[1]],
     [7, ids[0]],
+    [42, ids[1]],
   ])('selects the golden winner for seed %d', (seed, winnerId) => {
     expect(select(weightedOptions, seed).winnerId).toBe(winnerId);
   });
@@ -64,12 +65,15 @@ describe('select', () => {
       counts.set(winnerId, (counts.get(winnerId) ?? 0) + 1);
     }
 
-    expect((counts.get(ids[0]) ?? 0) / 10_000).toBeGreaterThanOrEqual(0.17);
-    expect((counts.get(ids[0]) ?? 0) / 10_000).toBeLessThanOrEqual(0.23);
-    expect((counts.get(ids[1]) ?? 0) / 10_000).toBeGreaterThanOrEqual(0.57);
-    expect((counts.get(ids[1]) ?? 0) / 10_000).toBeLessThanOrEqual(0.63);
-    expect((counts.get(ids[2]) ?? 0) / 10_000).toBeGreaterThanOrEqual(0.17);
-    expect((counts.get(ids[2]) ?? 0) / 10_000).toBeLessThanOrEqual(0.23);
+    for (const [id, expectedShare] of [
+      [ids[0], 0.2],
+      [ids[1], 0.6],
+      [ids[2], 0.2],
+    ] as const) {
+      const ratio = (counts.get(id) ?? 0) / 10_000;
+      expect(ratio).toBeGreaterThanOrEqual(expectedShare - 0.03);
+      expect(ratio).toBeLessThanOrEqual(expectedShare + 0.03);
+    }
   });
 
   it('distributes equal weights evenly', () => {
