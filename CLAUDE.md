@@ -5,6 +5,7 @@ A playful decision-making web app: the user gives a pool of options, opens a "ca
 - Full product brief: `docs/prompts/WHAT_SHOULD_WE_DO_MASTER_PROMPT.md`. It is the source of truth for vision, phases and the review format.
 - Visual mood board: `images/figma_unisex_screens_design.png`. It is AI-generated, so use it for style only. Its hex values, font names and some screens (slot machine, group room) are **not** spec. The spec lives in `docs/DECISIONS.md` and `apps/web/src/styles/tokens.css`.
 - Environments and operations: `docs/ENVIRONMENTS.md`.
+- Current vs target topology: `docs/TOPOLOGY.md` (for the owner, in Vietnamese).
 
 ## Roles (IMPORTANT)
 
@@ -26,6 +27,12 @@ This project uses two separate agents. Know which one you are.
   - classifies findings as MUST FIX / SHOULD FIX / NICE TO HAVE / DO NOT TOUCH
   - writes a follow-up fix prompt if needed
   - updates `docs/IMPLEMENTATION_PLAN.md` and `docs/DECISIONS.md`
+- **Topology upkeep:** when a review, decision or handoff changes the topology, the architect must first ask the owner with a HITL question whether to update `docs/TOPOLOGY.md`. Topology changes include:
+  - services, ports, networks or volumes
+  - routes or DB tables
+  - environments or hosting
+
+  On approval, it updates the file and adds a line to its change log.
 - The architect does not silently fix code during review. Any change goes through a fix prompt, unless the owner explicitly asks the architect to edit directly.
 
 ### Implementer: the coding agent receiving a handoff prompt
