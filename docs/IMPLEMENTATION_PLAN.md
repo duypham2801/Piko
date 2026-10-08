@@ -1,7 +1,7 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 3 — Case opening (3-1 done and visually approved; 3-2 celebration handed off)
+- **Current phase:** Phase 3 — Case opening (3-1, 3-2 done and visually approved; awaiting merge into `main`)
 - **Integration branch:** `feat/phase-3-case-opening` (pushed)
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s)
 
@@ -20,7 +20,7 @@
 | 2-2 | Animation plan math (strip, stop offset, timeline params) | ✅ done | `2-2-animation-plan.md` (D-006, D-026, `af1004f`) |
 | 2.5 | Case-opening spike | ✅ done (`2-5-fix-1.md`; duration tuned to 8 s) | `2-5-case-spike.md`: throwaway tuning playground in `/design#case-spike`; the owner tunes `ANIMATION_PLAN_DEFAULTS`; folds in the 2-2 `pickWeighted` nit |
 | 3-1 | Case-opening core | ✅ done (`3-1-fix-1.md`) | `3-1-case-carousel.md`: state machine, carousel, `revealAtMs`, reduced motion, mounted in `App.tsx`, spike removed (D-027) |
-| 3-2 | Reveal celebration | 🔧 fix (`3-2-fix-1.md` ✅, `3-2-fix-2.md`) | Winner pop + dim, in-house confetti, winner panel (D-027) |
+| 3-2 | Reveal celebration | ✅ done (`3-2-fix-1.md`, `3-2-fix-2.md`) | Winner pop + dim, in-house confetti, winner panel (D-027) |
 | 4 | Home | ⬜ | Hero, mode selector (Solo + locked Soon), presets, recent decisions |
 | 5 | Decision builder | ⬜ | CRUD decisions/options via API, validation, open case |
 | 6 | Result + history | ⬜ | Winner reveal, Let's Go / Spin Again / Not Tonight / Share, history |
@@ -253,6 +253,11 @@
   - **Accepted.** Fast-forwarded `feat/phase-3-case-opening` to `feat/3-2-celebration`.
   - Owner visual review: "the marker always stops at the same part of the cell". The architect measured 6 spins at 0.21–0.79 of the cell, within the `stopBand` 0.6 band (±0.3).
   - The owner chose `stopBand` 0.9, uniform with no edge bias (D-026 revised). Handoff `3-2-fix-2.md`.
+- **3-2-fix-2 (2026-10-08):** the diff is the 2 domain files. `stopBand` is 0.9. In the seed-42 pin, `stopOffset` changed from 0.29115… to 0.43673…, while `winnerIndex` 51 and the strip are unchanged.
+  - Unlisted deviation: the implementer deleted the exact `revealAtMs` pin instead of updating it.
+  - With owner approval, the architect restored it directly as `toBe(6_865)` (commit `test(domain): pin the seed-42 reveal time at 6865 ms`).
+  - `make check` passes (42 domain tests, 7 api tests).
+  - The owner is satisfied with the visuals. **3-2 accepted.** Fast-forwarded into `feat/phase-3-case-opening`.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
