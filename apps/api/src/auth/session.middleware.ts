@@ -37,11 +37,7 @@ function clientIp(c: Parameters<MiddlewareHandler<AppEnv>>[0], trustProxy: boole
     if (firstIp) return firstIp;
   }
 
-  try {
-    return getConnInfo(c).remote.address ?? 'unknown';
-  } catch {
-    return 'unknown';
-  }
+  return getConnInfo(c).remote.address ?? 'unknown';
 }
 
 function writeSessionCookie(

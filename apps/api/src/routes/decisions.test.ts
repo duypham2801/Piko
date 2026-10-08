@@ -4,6 +4,7 @@ import { DecisionRecord, ApiError } from '@piko/domain';
 
 import { FixedWindowRateLimiter } from '../auth/rate-limit.js';
 import { createApp } from '../app.js';
+import { createGuestSession, SESSION_COOKIE_NAME } from '../auth/session.service.js';
 import { users } from '../db/schema.js';
 import { makeDraft } from '../test/decisions.fixtures.js';
 import { createTestDatabase } from '../test/pglite.js';
@@ -46,14 +47,8 @@ describe('decision routes', () => {
   }
 
   async function createSessionCookie(): Promise<string> {
-    const response = await request('/api/me');
-    expect(response.status).toBe(200);
-    const setCookie = response.headers.get('set-cookie');
-    const cookie = setCookie?.split(';')[0];
-    if (!cookie) {
-      throw new Error('Expected a session cookie');
-    }
-    return cookie;
+    const session = await createGuestSession(testDatabase.db);
+    return `${SESSION_COOKIE_NAME}=${session.token}`;
   }
 
   function mutationHeaders(cookie: string): HeadersInit {
