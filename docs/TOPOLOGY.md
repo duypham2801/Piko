@@ -4,7 +4,7 @@ Tài liệu cho chủ dự án. Nó cho biết hệ thống **đang** gồm nh�
 - Architect cập nhật file này mỗi khi topology thay đổi, và hỏi chủ dự án (HITL) trước khi cập nhật.
 - Chi tiết vận hành nằm trong `ENVIRONMENTS.md`; lý do của từng lựa chọn nằm trong `DECISIONS.md`.
 
-**Cập nhật lần cuối:** 2026-10-08, đổi tên sang PIKO (D-023). Tên `piko-*` có hiệu lực khi handoff 1c-1 được merge; trước đó máy bạn vẫn chạy `wswd-*`.
+**Cập nhật lần cuối:** 2026-10-08, đổi tên sang PIKO (D-023, đã merge qua 1c-1).
 
 Ký hiệu:
 - ✅ đã có trên `main`

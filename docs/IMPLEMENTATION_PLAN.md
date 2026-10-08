@@ -1,8 +1,8 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** 1c-1 — Rebrand to PIKO (D-023), then Phase 2
-- **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2)
+- **Current phase:** Phase 2 — Core decision domain (next)
+- **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO
 
 ## Phases
 
@@ -13,7 +13,7 @@
 | 1a-2 | Docker prod (Caddy, migrate, hardening, backup/rollback) | ✅ done | `1a-2-docker-prod.md` + `1a-2-fix-1.md` (merged `1d98559`) |
 | 1b-1 | Tokens + fonts + dev-only `/design` | ✅ done | `1b-1-tokens-fonts-design-page.md` (merged `3513f2c`) |
 | 1b-2 | UI primitives in `/design` | ✅ done | `1b-2-ui-primitives.md` (`5ec3629`) + `1b-2-fix-1.md` (`9503c43`) |
-| 1c-1 | Rebrand to PIKO: full `wswd` → `piko` rename | 🔧 handoff ready | `1c-1-rebrand-piko.md` (D-023) |
+| 1c-1 | Rebrand to PIKO: full `wswd` → `piko` rename | ✅ done | `1c-1-rebrand-piko.md` (D-023, `d44cca4`) |
 | 2 | Core decision domain | ⬜ | `packages/domain`: types, seeded PRNG, selection, validation, animation plan, zod schemas + tests |
 | 2.5 | Case-opening spike | ⬜ | Rough carousel in `/design` to validate motion feel early |
 | 3 | Case opening (full) | ⬜ | Controller, state machine, timeline, marker, reveal, reduced-motion |
@@ -79,6 +79,15 @@
   - Note for Phase 4: a mutually exclusive choice (mode selector) is a radio-group pattern, not `aria-pressed` toggle chips. Decide the primitive when building the mode selector.
 - **1b-2-fix-1 (2026-10-08):** C1–C6 verified against the diff (`9503c43`, 11 files, +18/−79). `make check` passes, both literal greps and both cleanup greps clean, `/design` absent from prod. The prod bundle is byte-identical (same hashes: JS 91.70 kB gz, CSS 2.08 kB gz), which confirms the primitives are tree-shaken and the cleanup changed no shipped code.
   - **1b-2 accepted.** Fast-forward merged into `main`. **Phase 1 complete.**
+- **1c-1 (2026-10-08):** full `wswd` → `piko` rename (21 files, +57/−53) verified against the diff.
+  - `git grep` for old names outside `docs/` is clean. The lockfile diff only renames `@wswd/domain`, with no version changes.
+  - Architect re-check: `make check` passes, `make prod-config` passes. The live dev stack `piko-dev` returns health ok, the cookie is `piko_sid` (HttpOnly, SameSite=Lax, 1 year), and the title is "PIKO — Pick. Open. Go.". No `.env.dev`/`.env.prod` in the commit.
+  - Implementer report: prod images `piko-api` 186 MB / `piko-web` 119 MB (unchanged), main JS 91.72 kB gz (+0.02 for the tagline), no `/design` leak.
+  - Handoff mistake (architect): the leftover grep scanned the gitignored `.env.prod`, which the handoff also forbade editing. The implementer correctly stopped. It was resolved by switching to `git grep` (tracked files only). Lesson: acceptance greps for tracked content use `git grep`.
+  - Owner follow-ups:
+    - update `.env.prod` (user/db `piko`), `chmod 600`, delete `.deploy/`
+    - remove the old `wswd-dev-*` images and `wswd-dev_*` / `wswd-prod_*` volumes
+  - **1c-1 accepted.**
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
