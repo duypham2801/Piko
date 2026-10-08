@@ -193,6 +193,7 @@ describe('buildAnimationPlan', () => {
     const result = select(options, 42);
     const plan = buildAnimationPlan(result, options);
 
+    expect(plan.revealAtMs).toBe(6_865);
     expect(plan.revealAtMs).toBeGreaterThanOrEqual(6_000);
     expect(plan.revealAtMs).toBeLessThanOrEqual(7_500);
   });
