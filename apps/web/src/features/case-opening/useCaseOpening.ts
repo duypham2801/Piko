@@ -7,14 +7,11 @@ import {
   type DecisionOptionData,
 } from '@piko/domain';
 
-import carouselStyles from './CaseCarousel.module.css';
 import { caseOpeningReducer } from './caseOpeningState';
 
 const MILLISECONDS_PER_SECOND = 1_000;
 const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
-const REDUCED_MOTION_CLASS = carouselStyles.reducedMotion!;
-
-export const CASE_PREVIEW_SEED = 0x2468ace0;
+const CASE_PREVIEW_SEED = 0x2468ace0;
 
 type Layout = {
   cellWidth: number;
@@ -73,7 +70,10 @@ export function useCaseOpening(options: readonly DecisionOptionData[]) {
     }
     transitionCleanupRef.current?.();
     transitionCleanupRef.current = null;
-    stripRef.current?.classList.remove(REDUCED_MOTION_CLASS);
+    const strip = stripRef.current;
+    if (strip) {
+      delete strip.dataset.motion;
+    }
     reducedMotionActiveRef.current = false;
   }, []);
 
@@ -100,7 +100,7 @@ export function useCaseOpening(options: readonly DecisionOptionData[]) {
 
       frameRef.current = requestAnimationFrame(() => {
         frameRef.current = null;
-        strip.classList.add(REDUCED_MOTION_CLASS);
+        strip.dataset.motion = 'reduced';
 
         const finish = () => {
           if (revealedRef.current) {
@@ -232,5 +232,5 @@ export function useCaseOpening(options: readonly DecisionOptionData[]) {
     dispatch({ type: 'open', plan, result });
   }, [cancelAnimation, options, state.status]);
 
-  return { state, open, viewportRef, stripRef };
+  return { state, plan: displayedPlan, open, viewportRef, stripRef };
 }

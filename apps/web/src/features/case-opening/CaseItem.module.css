@@ -35,9 +35,3 @@
   border-color: var(--color-primary);
   transform: translateY(calc(var(--space-1) * -1));
 }
-
-@media (min-width: 48rem) {
-  .item {
-    --case-cell-width: calc(var(--space-8) * 2.5);
-  }
-}

@@ -2,6 +2,7 @@
   position: relative;
   width: 100%;
   overflow: hidden;
+  padding-block: var(--space-3);
   --case-cell-width: calc(var(--space-8) * 2);
 }
 
@@ -35,7 +36,7 @@
   will-change: transform;
 }
 
-.reducedMotion {
+.strip[data-motion='reduced'] {
   transition: transform var(--duration-slow) var(--ease-out);
 }
 

@@ -38,7 +38,7 @@ export default function CaseCarousel({
           );
         })}
       </div>
-      <span aria-hidden="true" className={styles.marker} />
+      <span className={styles.marker} />
     </div>
   );
 }

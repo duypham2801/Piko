@@ -6,18 +6,12 @@ export type CaseOpeningState =
   | { status: 'revealed'; plan: AnimationPlan; result: SelectionResultData };
 
 export type CaseOpeningEvent =
-  | { type: 'open'; plan: AnimationPlan; result: SelectionResultData }
-  | { type: 'reveal' }
-  | { type: 'reset' };
+  { type: 'open'; plan: AnimationPlan; result: SelectionResultData } | { type: 'reveal' };
 
 export function caseOpeningReducer(
   state: CaseOpeningState,
   event: CaseOpeningEvent,
 ): CaseOpeningState {
-  if (event.type === 'reset') {
-    return { status: 'ready' };
-  }
-
   if (event.type === 'open') {
     return state.status === 'spinning'
       ? state

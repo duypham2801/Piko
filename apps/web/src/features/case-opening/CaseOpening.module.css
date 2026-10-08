@@ -39,16 +39,12 @@
   text-align: center;
 }
 
-.result p {
-  min-height: var(--text-xl);
-}
-
 @media (min-width: 48rem) {
   .screen {
     padding: var(--space-6);
   }
 
   .content {
-    max-width: 48rem;
+    width: min(100%, var(--content-wide-max-width));
   }
 }

@@ -1,27 +1,22 @@
 import { useMemo } from 'react';
-import { buildAnimationPlan, select, type DecisionOptionData } from '@piko/domain';
+import type { DecisionOptionData } from '@piko/domain';
 
 import Button from '../../components/ui/Button';
 import { t } from '../../i18n';
 import CaseCarousel from './CaseCarousel';
 import styles from './CaseOpening.module.css';
-import { CASE_PREVIEW_SEED, useCaseOpening } from './useCaseOpening';
+import { useCaseOpening } from './useCaseOpening';
 
 type CaseOpeningProps = {
   options: readonly DecisionOptionData[];
 };
 
 export default function CaseOpening({ options }: CaseOpeningProps) {
-  const { state, open, viewportRef, stripRef } = useCaseOpening(options);
-  const previewPlan = useMemo(
-    () => buildAnimationPlan(select(options, CASE_PREVIEW_SEED), options),
-    [options],
-  );
+  const { state, plan, open, viewportRef, stripRef } = useCaseOpening(options);
   const optionsById = useMemo(
     () => new Map(options.map((option) => [option.id, option] as const)),
     [options],
   );
-  const plan = state.status === 'ready' ? previewPlan : state.plan;
   const revealed = state.status === 'revealed';
   const winner = revealed ? optionsById.get(state.result.winnerId) : undefined;
 
