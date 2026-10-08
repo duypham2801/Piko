@@ -1,7 +1,7 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 2 — Core decision domain (2-1 done; 2-2 animation plan next)
+- **Current phase:** Phase 2 — Core decision domain ✅ complete on the integration branch (pending merge into `main`); next: Phase 2.5 case-opening spike
 - **Integration branch:** `feat/phase-2-core-domain` (pushed). Task branches merge into it, and it merges into `main` when Phase 2 is complete.
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate
 
@@ -17,7 +17,7 @@
 | 1c-1 | Rebrand to PIKO: full `wswd` → `piko` rename | ✅ done | `1c-1-rebrand-piko.md` (D-023, `d44cca4`) |
 | 1c-2 | Prettier in `make check` + drop unused `@` alias | ✅ done | `1c-2-format-gate.md` (`2a38aaa`) |
 | 2-1 | Domain model + zod/mini + seeded selection engine | ✅ done | `2-1-domain-model-selection.md` (D-024, D-025, `6a61954`) |
-| 2-2 | Animation plan math (strip, stop offset, timeline params) | 🔧 handoff ready | `2-2-animation-plan.md` (D-006, D-026; folds in the 2-1 nits N1–N3) |
+| 2-2 | Animation plan math (strip, stop offset, timeline params) | ✅ done | `2-2-animation-plan.md` (D-006, D-026, `af1004f`) |
 | 2.5 | Case-opening spike | ⬜ | Rough carousel in `/design` to validate motion feel early |
 | 3 | Case opening (full) | ⬜ | Controller, state machine, timeline, marker, reveal, reduced-motion |
 | 4 | Home | ⬜ | Hero, mode selector (Solo + locked Soon), presets, recent decisions |
@@ -135,6 +135,25 @@
     - the three separate `superRefine` checks, one per issue code
   - Note for Phase 5: zod skips the object-level refinements while any field is invalid. The builder therefore shows the cross-field errors (duplicates, too few enabled) only after the field errors are fixed. This is acceptable UX, but keep it in mind.
   - **2-1 accepted.** Merged into the integration branch `feat/phase-2-core-domain`, not `main` (owner workflow: `main` only receives finished features).
+- **2-2 (2026-10-08):** verified against the diff (`af1004f`, 8 files, +374/−21, all inside `packages/domain`).
+  - Architect re-check: `make check` passes. Tests: domain 38 (5 files), api 7.
+  - The global-random/time/classic-zod grep is clean. No lockfile change.
+  - The math matches the handoff:
+    - the plan PRNG stream is salted and draws in the specified order
+    - filler cells are pure weighted draws, and the winner's neighbours exclude the winner
+    - `floor(stopPosition) === winnerIndex` holds for every tested seed
+    - `positionAt` returns exactly `stopPosition` at the end
+    - the curve has a continuous velocity and a smooth stop
+  - N1–N3 from 2-1 are done: `pickWeighted` is the only weighted walk, seed 42 is in the golden table, and the distribution test uses a loop. The `select` golden values are unchanged.
+  - Seed-42 pin: `winnerIndex` 51, `stopOffset` 0.2911521795205772.
+  - NICE, to fold into the next handoff that touches the domain:
+    - `pickWeighted` validates the weights after it has already drawn a PRNG value. Validate first.
+    - Its final `throw` is now only reachable for an empty list, but it reuses the "positive integer weights" message. Give the empty case its own message.
+  - DO NOT TOUCH:
+    - the early `t ≤ 0` return in `spinProgress`, which also guards against `accelFraction = 0`
+    - the `ids`/`makeOption` fixtures duplicated in `select.test.ts` and `plan.test.ts`; two copies do not justify a shared fixtures module
+  - Open for Phase 2.5: the tail looks long on paper (about 0.6 cells in the last 2 s). Tune `decelPower`, `durationMs` and the spin length in the browser.
+  - **2-2 accepted. Phase 2 complete** on `feat/phase-2-core-domain`.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
