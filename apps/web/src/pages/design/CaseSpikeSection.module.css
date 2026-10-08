@@ -1,0 +1,137 @@
+.layout {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.demoCard,
+.controlGroup {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.toolbar,
+.headingRow,
+.actions,
+.status,
+.chipRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.toolbar,
+.headingRow {
+  justify-content: space-between;
+}
+
+.status {
+  justify-content: flex-end;
+}
+
+.viewport {
+  position: relative;
+  height: calc(var(--space-8) * 5);
+  overflow: hidden;
+  --cell-width: calc(var(--space-8) * 2);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-disabled-bg);
+}
+
+.strip {
+  display: flex;
+  width: max-content;
+  height: 100%;
+  align-items: stretch;
+  will-change: transform;
+}
+
+.cell {
+  display: grid;
+  width: var(--cell-width);
+  flex: 0 0 var(--cell-width);
+  align-content: center;
+  justify-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-right: var(--border-width-thin) solid var(--color-border);
+  background: var(--color-surface);
+  text-align: center;
+}
+
+.cell:first-child {
+  border-left: var(--border-width-thin) solid var(--color-border);
+}
+
+.cellEmoji {
+  font-size: var(--text-xl);
+  line-height: var(--leading-tight);
+}
+
+.cellLabel {
+  width: 100%;
+  overflow: hidden;
+  color: var(--color-text);
+  font-size: var(--text-xs);
+  line-height: var(--leading-tight);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.winnerCell {
+  border: var(--border-width) solid var(--color-primary);
+  background: var(--color-accent);
+}
+
+.marker {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: var(--border-width);
+  background: var(--color-primary);
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.readout,
+.jsonBlock {
+  margin: 0;
+  overflow: auto;
+  padding: var(--space-3);
+  border: var(--border-width-thin) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-disabled-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  line-height: var(--leading-normal);
+  white-space: pre-wrap;
+}
+
+.jsonBlock {
+  max-height: calc(var(--space-8) * 6);
+}
+
+.winnerText,
+.hint {
+  color: var(--color-text-accent);
+  font-weight: var(--font-weight-bold);
+}
+
+.helper {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.parameterGrid {
+  display: grid;
+  gap: var(--space-4);
+}
+
+@media (min-width: 48rem) {
+  .parameterGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

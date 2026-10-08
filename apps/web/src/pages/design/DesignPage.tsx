@@ -1,5 +1,6 @@
 import { useState, type CSSProperties } from 'react';
 
+import CaseSpikeSection from './CaseSpikeSection';
 import ComponentsSection from './ComponentsSection';
 import styles from './DesignPage.module.css';
 
@@ -158,6 +159,7 @@ export default function DesignPage() {
           <a href="#surfaces">Radius, borders & shadows</a>
           <a href="#motion">Motion</a>
           <a href="#components">Components</a>
+          <a href="#case-spike">Case spike</a>
         </nav>
 
         <section className={styles.section} id="colors">
@@ -410,6 +412,7 @@ export default function DesignPage() {
         </section>
 
         <ComponentsSection />
+        <CaseSpikeSection />
       </div>
     </main>
   );
