@@ -1,7 +1,7 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 2 — Core decision domain (2-1 handoff ready)
+- **Current phase:** Phase 2 — Core decision domain (2-1 done; 2-2 animation plan next)
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate
 
 ## Phases
@@ -15,8 +15,8 @@
 | 1b-2 | UI primitives in `/design` | ✅ done | `1b-2-ui-primitives.md` (`5ec3629`) + `1b-2-fix-1.md` (`9503c43`) |
 | 1c-1 | Rebrand to PIKO: full `wswd` → `piko` rename | ✅ done | `1c-1-rebrand-piko.md` (D-023, `d44cca4`) |
 | 1c-2 | Prettier in `make check` + drop unused `@` alias | ✅ done | `1c-2-format-gate.md` (`2a38aaa`) |
-| 2-1 | Domain model + zod/mini + seeded selection engine | 🔧 handoff ready | `2-1-domain-model-selection.md` (D-024, D-025) |
-| 2-2 | Animation plan math (strip, stop offset, timeline params) | ⬜ | After 2-1 review; D-026 seeded stop offset |
+| 2-1 | Domain model + zod/mini + seeded selection engine | ✅ done | `2-1-domain-model-selection.md` (D-024, D-025, `6a61954`) |
+| 2-2 | Animation plan math (strip, stop offset, timeline params) | ⬜ | D-026 seeded stop offset; also folds in the 2-1 nits N1–N3 |
 | 2.5 | Case-opening spike | ⬜ | Rough carousel in `/design` to validate motion feel early |
 | 3 | Case opening (full) | ⬜ | Controller, state machine, timeline, marker, reveal, reduced-motion |
 | 4 | Home | ⬜ | Hero, mode selector (Solo + locked Soon), presets, recent decisions |
@@ -118,6 +118,22 @@
     - 2-1: model, zod/mini and selection
     - 2-2: animation-plan math
   - No topology change: no service, route or table is involved.
+- **2-1 (2026-10-08):** verified against the diff (`6a61954`, 15 files, +439/−7).
+  - Architect re-check: `make check` passes. Tests: domain 26 (3 files), api 7.
+  - The `from 'zod'` grep shows only `apps/api/src/env.ts`. The global-random/time grep in the domain is clean. No lockfile change.
+  - The prod web build has no `/design` leak. **Main JS dropped from 91.72 to 76.98 kB gz (−16 %)**, confirming D-020. CSS is unchanged at 2.08 kB.
+  - The schemas match D-024: NFC + trim before the length checks, limits come only from `DECISION_LIMITS`, and each cross-field check has its own stable code. The PRNG matches the golden values.
+  - Accepted deviation: the emoji regex is written as alternatives instead of a character class, to satisfy ESLint `no-misleading-character-class`. Behavior is the same.
+  - NICE, folded into 2-2:
+    - N1: `select.ts` has a dead `firstCandidate` guard that repeats the "two enabled options" error. Return from inside the weighted walk, and after the loop throw an invariant `Error`.
+    - N2: the `select` golden table lacks seed `42 → b`, which the handoff listed.
+    - N3: the weighted-distribution test repeats six `expect` lines. Use the same loop shape as the equal-weights test.
+  - DO NOT TOUCH:
+    - the fallback ids in the test helpers, required by `noUncheckedIndexedAccess`
+    - the unused `weightDefault`, which the Phase 5 builder will use
+    - the three separate `superRefine` checks, one per issue code
+  - Note for Phase 5: zod skips the object-level refinements while any field is invalid. The builder therefore shows the cross-field errors (duplicates, too few enabled) only after the field errors are fixed. This is acceptable UX, but keep it in mind.
+  - **2-1 accepted.** Fast-forward merged into `main`.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
