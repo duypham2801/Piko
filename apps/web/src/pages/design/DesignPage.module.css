@@ -328,6 +328,7 @@
 }
 
 .motionTrack {
+  container-type: inline-size;
   height: var(--space-6);
   padding: var(--space-2);
   border-radius: var(--radius-pill);
@@ -349,7 +350,7 @@
   }
 
   to {
-    transform: translateX(calc(100% - var(--space-4)));
+    transform: translateX(calc(100cqi - 100%));
   }
 }
 

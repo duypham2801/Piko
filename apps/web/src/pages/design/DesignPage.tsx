@@ -1,5 +1,6 @@
 import { useState, type CSSProperties } from 'react';
 
+import ComponentsSection from './ComponentsSection';
 import styles from './DesignPage.module.css';
 
 type CustomProperties = CSSProperties & { [key: `--${string}`]: string };
@@ -159,6 +160,7 @@ export default function DesignPage() {
           <a href="#spacing">Spacing</a>
           <a href="#surfaces">Radius, borders & shadows</a>
           <a href="#motion">Motion</a>
+          <a href="#components">Components</a>
         </nav>
 
         <section className={styles.section} id="colors">
@@ -405,6 +407,8 @@ export default function DesignPage() {
             })}
           </div>
         </section>
+
+        <ComponentsSection />
       </div>
     </main>
   );

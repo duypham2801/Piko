@@ -65,3 +65,16 @@ svg {
   background: var(--color-selection);
   color: var(--color-text);
 }
+
+.visually-hidden {
+  position: absolute;
+  width: var(--border-width-thin);
+  height: var(--border-width-thin);
+  margin: calc(var(--border-width-thin) * -1);
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

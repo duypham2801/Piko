@@ -1,0 +1,26 @@
+.card {
+  padding: var(--space-5);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-chunky);
+}
+
+.surface {
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.primary {
+  background: var(--color-primary);
+  color: var(--color-on-primary-strong);
+}
+
+.secondary {
+  background: var(--color-secondary);
+  color: var(--color-on-secondary);
+}
+
+.accent {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}

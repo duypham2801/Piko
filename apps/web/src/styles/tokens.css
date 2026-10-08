@@ -67,9 +67,12 @@
 
   --border-width: 3px;
   --border-width-thin: 2px;
-  --shadow-chunky-sm: 0 3px 0 var(--color-shadow);
-  --shadow-chunky: 0 5px 0 var(--color-shadow);
-  --shadow-chunky-lg: 0 8px 0 var(--color-shadow);
+  --shadow-offset-sm: 3px;
+  --shadow-offset: 5px;
+  --shadow-offset-lg: 8px;
+  --shadow-chunky-sm: 0 var(--shadow-offset-sm) 0 var(--color-shadow);
+  --shadow-chunky: 0 var(--shadow-offset) 0 var(--color-shadow);
+  --shadow-chunky-lg: 0 var(--shadow-offset-lg) 0 var(--color-shadow);
   --shadow-soft: 0 12px 32px rgb(15 23 42 / 0.18);
 
   --duration-fast: 120ms;

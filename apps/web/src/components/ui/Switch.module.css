@@ -1,0 +1,61 @@
+.switch {
+  display: inline-flex;
+  min-height: var(--tap-target-min);
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.label {
+  font-weight: var(--font-weight-bold);
+}
+
+.track {
+  display: flex;
+  width: var(--space-8);
+  height: var(--space-6);
+  flex: 0 0 auto;
+  align-items: center;
+  border: var(--border-width-thin) solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-disabled-bg);
+}
+
+.thumb {
+  display: block;
+  width: var(--space-5);
+  height: var(--space-5);
+  border: var(--border-width-thin) solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  transition: transform var(--duration-normal) var(--ease-spring);
+}
+
+.checked .track {
+  background: var(--color-secondary);
+}
+
+.checked .thumb {
+  transform: translateX(
+    calc(var(--space-8) - var(--space-5) - var(--border-width-thin) * 2)
+  );
+}
+
+.switch:disabled {
+  color: var(--color-disabled-text);
+  cursor: not-allowed;
+}
+
+.disabled .track {
+  border-color: var(--color-disabled-text);
+  background: var(--color-disabled-bg);
+}
+
+.disabled .thumb {
+  border-color: var(--color-disabled-text);
+}
