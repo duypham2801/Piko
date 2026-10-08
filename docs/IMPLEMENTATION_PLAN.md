@@ -11,8 +11,8 @@
 | 0 | Discovery | ✅ done | Greenfield; architecture in DECISIONS.md, ops in ENVIRONMENTS.md |
 | 1a-1 | Monorepo + API skeleton + Docker dev | ✅ done | `1a-1-monorepo-dev-foundation.md` + `1a-1-fix-1.md` |
 | 1a-2 | Docker prod (Caddy, migrate, hardening, backup/rollback) | ✅ done | `1a-2-docker-prod.md` + `1a-2-fix-1.md` (merged `1d98559`) |
-| 1b-1 | Tokens + fonts + dev-only `/design` | 🔧 handoff ready | `1b-1-tokens-fonts-design-page.md` → owner browser review |
-| 1b-2 | UI primitives in `/design` | ⬜ | Button, Card, Chip, Input, Toggle, "Soon" badge (after 1b-1 review) |
+| 1b-1 | Tokens + fonts + dev-only `/design` | ✅ done | `1b-1-tokens-fonts-design-page.md` (merged `3513f2c`) |
+| 1b-2 | UI primitives in `/design` | 🔧 handoff ready | `1b-2-ui-primitives.md`: Button, Card, Chip, Badge, TextField, Switch + Motion demo fix |
 | 2 | Core decision domain | ⬜ | `packages/domain`: types, seeded PRNG, selection, validation, animation plan, zod schemas + tests |
 | 2.5 | Case-opening spike | ⬜ | Rough carousel in `/design` to validate motion feel early |
 | 3 | Case opening (full) | ⬜ | Controller, state machine, timeline, marker, reveal, reduced-motion |
@@ -64,6 +64,11 @@
   - Accepted deviations: `@types/node@22.20.5` also in `apps/web` (removes every Node 26 peer resolution); explicit `respond 404` for missing assets so security headers stay.
   - New SHOULD, deferred to tech debt: `prod-deploy` only backs up when the `db` container is **running**.
   - **Phase 1a-2 accepted.** Fast-forward merged into `main`.
+- **1b-1 (2026-10-08):** tokens match the spec exactly, including contrast comments. Fonts are self-hosted (no CDN). `/design` is absent from the prod build. No raw literals outside `tokens.css`; `style` is only used to set CSS variables. `make check` passes. Prod JS went from 90.7 to 91.7 kB gz.
+  - The owner reviewed `/design` in the browser and accepted it.
+  - SHOULD (dev page only): the Motion demo square never moves, because `translateX(calc(100% - 1rem))` uses the square's own width. Folded into 1b-2 (R0) on the owner's choice.
+  - NICE: the Play button hover uses navy text on coral-700 (3.9:1). Primitives in 1b-2 use a transform "press" effect and never darken the background.
+  - **1b-1 accepted.** Fast-forward merged into `main`.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
