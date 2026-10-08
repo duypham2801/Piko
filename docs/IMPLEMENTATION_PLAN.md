@@ -1,9 +1,9 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 3 — Case opening (3-1, 3-2 done and visually approved; awaiting merge into `main`)
-- **Integration branch:** `feat/phase-3-case-opening` (pushed)
-- **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s)
+- **Current phase:** Phase 4 — Home (not started)
+- **Integration branch:** none yet
+- **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`)
 
 ## Phases
 
