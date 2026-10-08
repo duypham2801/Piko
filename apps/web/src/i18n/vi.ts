@@ -16,6 +16,8 @@ export const vi = {
   quickPicks: 'Chọn nhanh',
   notFoundTitle: 'Không tìm thấy trang',
   backHome: 'Về trang chủ',
+  previewLead: 'Tắt những lựa chọn bạn không muốn, rồi mở case.',
+  minOptionsHint: 'Cần ít nhất 2 lựa chọn.',
 } as const;
 
 export type TranslationKey = keyof typeof vi;
