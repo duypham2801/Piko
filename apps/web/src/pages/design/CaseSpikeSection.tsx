@@ -20,6 +20,7 @@ import pageStyles from './DesignPage.module.css';
 import styles from './CaseSpikeSection.module.css';
 
 const INITIAL_SEED = 0x13579bdf;
+const DEFAULT_POOL_SIZE = 8;
 const MILLISECONDS_PER_SECOND = 1_000;
 const HINT_SAMPLE_COUNT = 120;
 
@@ -226,7 +227,7 @@ function parseSeed(value: string): number | undefined {
 }
 
 export default function CaseSpikeSection() {
-  const [poolSize, setPoolSize] = useState<PoolSize>(8);
+  const [poolSize, setPoolSize] = useState<PoolSize>(DEFAULT_POOL_SIZE);
   const [equalWeights, setEqualWeights] = useState(false);
   const [speed, setSpeed] = useState<Speed>(1);
   const [params, setParams] = useState<AnimationPlanParams>(ANIMATION_PLAN_DEFAULTS);
@@ -245,11 +246,13 @@ export default function CaseSpikeSection() {
     const selected = demoOptions.slice(0, poolSize);
     return equalWeights ? selected.map((option) => ({ ...option, weight: 1 })) : selected;
   }, [equalWeights, poolSize]);
-  const initialPlan = useMemo(
-    () => createPlan(activePool, INITIAL_SEED, ANIMATION_PLAN_DEFAULTS),
+  const [plan, setPlan] = useState<AnimationPlan>(() =>
+    createPlan(demoOptions.slice(0, DEFAULT_POOL_SIZE), INITIAL_SEED, ANIMATION_PLAN_DEFAULTS),
+  );
+  const optionById = useMemo(
+    () => new Map(activePool.map((option) => [option.id, option] as const)),
     [activePool],
   );
-  const [plan, setPlan] = useState<AnimationPlan>(initialPlan);
 
   const viewportRef = useRef<HTMLDivElement>(null);
   const stripRef = useRef<HTMLDivElement>(null);
@@ -479,7 +482,7 @@ export default function CaseSpikeSection() {
     }
   }
 
-  const winner = activePool.find((option) => option.id === plan.strip[plan.winnerIndex]);
+  const winner = optionById.get(plan.strip[plan.winnerIndex] ?? '');
   const controlsDisabled = isSpinning;
 
   return (
@@ -509,15 +512,21 @@ export default function CaseSpikeSection() {
             </div>
           </div>
 
-          <div aria-label="Case strip preview" className={styles.viewport} ref={viewportRef}>
+          <div
+            aria-label="Case strip preview"
+            className={styles.viewport}
+            ref={viewportRef}
+            role="group"
+          >
             <div className={styles.strip} ref={stripRef}>
               {plan.strip.map((id, index) => {
-                const option = activePool.find((candidate) => candidate.id === id);
-                const isWinner = index === plan.winnerIndex;
+                const option = optionById.get(id);
+                const isWinnerShown = hasFinished && index === plan.winnerIndex;
                 return (
                   <div
-                    aria-label={`${option?.emoji ?? ''} ${option?.label ?? id}`}
-                    className={`${styles.cell} ${isWinner ? styles.winnerCell : ''}`}
+                    className={[styles.cell, isWinnerShown && styles.winnerCell]
+                      .filter(Boolean)
+                      .join(' ')}
                     key={`${id}-${index}`}
                     title={option?.label ?? id}
                   >
@@ -532,10 +541,7 @@ export default function CaseSpikeSection() {
             <span aria-hidden="true" className={styles.marker} />
           </div>
 
-          <pre className={styles.readout} ref={readoutRef}>
-            elapsed 0 ms / {plan.durationMs} ms{`\n`}position {plan.startPosition.toFixed(3)}
-            {`\n`}speed 0.00 cells/s
-          </pre>
+          <pre className={styles.readout} ref={readoutRef} />
 
           {hasFinished && winner && (
             <p className={styles.winnerText}>
@@ -547,7 +553,7 @@ export default function CaseSpikeSection() {
         <div className={styles.controls}>
           <Card className={styles.controlGroup}>
             <h3>Pool</h3>
-            <div aria-label="Pool size" className={styles.chipRow} role="group">
+            <div className={styles.chipRow}>
               {poolSizes.map((size) => (
                 <Chip
                   disabled={controlsDisabled}
@@ -596,7 +602,7 @@ export default function CaseSpikeSection() {
 
           <Card className={styles.controlGroup}>
             <h3>Speed</h3>
-            <div aria-label="Playback speed" className={styles.chipRow} role="group">
+            <div className={styles.chipRow}>
               {speeds.map((value) => (
                 <Chip
                   disabled={controlsDisabled}
