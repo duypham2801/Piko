@@ -1,7 +1,7 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 4 — Home (4-1 done, 4-2 handed off)
+- **Current phase:** Phase 4 — Home (4-1, 4-2 done; awaiting the owner's visual review before merging to `main`)
 - **Integration branch:** `feat/phase-4-home`
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`)
 
@@ -22,7 +22,7 @@
 | 3-1 | Case-opening core | ✅ done (`3-1-fix-1.md`) | `3-1-case-carousel.md`: state machine, carousel, `revealAtMs`, reduced motion, mounted in `App.tsx`, spike removed (D-027) |
 | 3-2 | Reveal celebration | ✅ done (`3-2-fix-1.md`, `3-2-fix-2.md`) | Winner pop + dim, in-house confetti, winner panel (D-027) |
 | 4-1 | Router + Home + preset case route | ✅ done (`39e7baa`) | `4-1-router-home.md`: React Router 8, Home (brand, question, mode selector, 4 preset cards), `/presets/:slug` case, not found (D-028) |
-| 4-2 | Preset preview | 🟡 handed off | `4-2-preset-preview.md`: includes the 4-1 clean-up (C0) and a `BackLink` primitive. Preview screen with option switches, `?off=` in the URL, case moves to `/presets/:slug/open` (D-028) |
+| 4-2 | Preset preview | ✅ done (`4-2-fix-1.md`, `89fe5cc`) | `4-2-preset-preview.md`: includes the 4-1 clean-up (C0) and a `BackLink` primitive. Preview screen with option switches, `?off=` in the URL, case moves to `/presets/:slug/open` (D-028) |
 | 5 | Decision builder | ⬜ | CRUD decisions/options via API, validation, open case; adds the Home "Create decision" CTA (D-028) |
 | 6 | Result + history | ⬜ | Winner reveal, Let's Go / Spin Again / Not Tonight / Share, history; adds Home "Recent decisions" (D-028) |
 | 7 | Responsive pass | ⬜ | Desktop is not in the mockup and must be designed |
@@ -281,6 +281,24 @@
     - `PresetCasePage` imports `NotFoundPage` from `app/`; that is acceptable for one screen
     - the NotFound link styled locally rather than through `Button`, which the handoff allowed
   - **4-1 accepted.** Fast-forwarded into `feat/phase-4-home`.
+- **4-2 (2026-10-08):** verified against the diff (15 files, +301/−47, 3 commits). `make check` passes and the clean-up grep is empty.
+  - C0–C4 match the handoff:
+    - the 4-1 clean-up is done
+    - `BackLink` is in `/design` (via `MemoryRouter`)
+    - `parseOff`/`formatOff`/`applyOff`, with `applyOff` using the `enabled` flag (no filtering)
+    - the preview with a URL-only state and `replace`
+    - the case at `/open` with Back keeping the search string
+  - SHOULD (`4-2-fix-1.md` F1): on hover-capable devices the press does not work. The `@media (hover: hover)` hover rule comes after `:active` with the same specificity, so hover + active lifts the card (`-4px`) instead of pressing it (`+5px`). The architect measured this by forcing the pseudo-states in Chrome. It came from the C0 split; the handoff did not specify the order.
+  - NICE (in fix-1):
+    - F2: memoize the case `options`, because `applyOff` returns a new array on every render
+    - F3: one row modifier instead of two computed class strings
+  - Deferred to Phase 7: the screen shell (`.screen`/`.content` plus the `48rem` wide-column query) is now copied in Home, Preview, CaseOpening and NotFound. Extract a shared layout when the responsive pass designs desktop. Four copies make this a real reuse boundary, but its shape belongs to Phase 7.
+  - DO NOT TOUCH: the defensive minimum guard in `updateOption`, kept even though the switch is disabled.
+- **4-2-fix-1 (2026-10-08):** verified against the diff (`89fe5cc`, 4 files, +31/−21). `make check` passes and the grep is clean.
+  - F1: the `:active` rules now come after the hover media block. The architect re-measured in Chrome: hover `-4px`, active `+5px`, hover + active `+5px`.
+  - F2: the case `options` are memoized on `formattedOff` + preset. `off` is parsed twice (once outside the memo for the key, once inside). That is harmless and keeps the hook deps honest. DO NOT TOUCH.
+  - F3: the row uses a single `data-off` modifier, and the switch is not dimmed.
+  - **4-2 accepted.** Fast-forwarded into `feat/phase-4-home`.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
