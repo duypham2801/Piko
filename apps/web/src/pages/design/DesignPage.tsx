@@ -118,10 +118,7 @@ const motionSamples = [
   ['slow / spring', '--duration-slow', '--ease-spring'],
 ] as const;
 
-const allColorTokens = [
-  ...semanticColors.map(([token]) => token),
-  ...rawPalette,
-] as const;
+const allColorTokens = [...semanticColors.map(([token]) => token), ...rawPalette] as const;
 
 function useResolvedValues(tokens: readonly string[]): Record<string, string> {
   const [values] = useState<Record<string, string>>(() => {
@@ -149,8 +146,8 @@ export default function DesignPage() {
           <p className={styles.eyebrow}>Developer playground · D-022</p>
           <h1>Design tokens</h1>
           <p>
-            The visual vocabulary for PIKO. Review this page in the browser before
-            building shared UI primitives.
+            The visual vocabulary for PIKO. Review this page in the browser before building shared
+            UI primitives.
           </p>
         </header>
 
@@ -265,39 +262,41 @@ export default function DesignPage() {
           <div className={styles.fontSamples}>
             <div>
               <h3>Display weights</h3>
-              {[['400', 'Regular'], ['600', 'Semibold'], ['800', 'Display']].map(
-                ([weight, label]) => (
-                  <p
-                    className={`${styles.weightSample} ${styles.displayType}`}
-                    key={weight}
-                    style={{ '--sample-weight': weight } as CustomProperties}
-                  >
-                    {label} · Xoay kèo ngay!
-                  </p>
-                ),
-              )}
+              {[
+                ['400', 'Regular'],
+                ['600', 'Semibold'],
+                ['800', 'Display'],
+              ].map(([weight, label]) => (
+                <p
+                  className={`${styles.weightSample} ${styles.displayType}`}
+                  key={weight}
+                  style={{ '--sample-weight': weight } as CustomProperties}
+                >
+                  {label} · Xoay kèo ngay!
+                </p>
+              ))}
             </div>
             <div>
               <h3>Body weights</h3>
-              {[['400', 'Regular'], ['500', 'Medium'], ['700', 'Bold']].map(
-                ([weight, label]) => (
-                  <p
-                    className={`${styles.weightSample} ${styles.bodyType}`}
-                    key={weight}
-                    style={{ '--sample-weight': weight } as CustomProperties}
-                  >
-                    {label} · Hôm nay ăn gì đây?
-                  </p>
-                ),
-              )}
+              {[
+                ['400', 'Regular'],
+                ['500', 'Medium'],
+                ['700', 'Bold'],
+              ].map(([weight, label]) => (
+                <p
+                  className={`${styles.weightSample} ${styles.bodyType}`}
+                  key={weight}
+                  style={{ '--sample-weight': weight } as CustomProperties}
+                >
+                  {label} · Hôm nay ăn gì đây?
+                </p>
+              ))}
             </div>
           </div>
 
           <div className={styles.diacritics}>
             <code>--leading-tight</code>
-            <p className={styles.diacriticsSample}>
-              ẤẦẨẪẬ ỐỒỔỖỘ ỨỪỬỮỰ Đđ Ơơ Ưư Ỹỹ
-            </p>
+            <p className={styles.diacriticsSample}>ẤẦẨẪẬ ỐỒỔỖỘ ỨỪỬỮỰ Đđ Ơơ Ưư Ỹỹ</p>
           </div>
         </section>
 
@@ -370,7 +369,9 @@ export default function DesignPage() {
             <p className={styles.sectionIndex}>05</p>
             <div>
               <h2>Motion</h2>
-              <p>Press Play to preview the timing tokens. Reduced motion shortens the same tokens.</p>
+              <p>
+                Press Play to preview the timing tokens. Reduced motion shortens the same tokens.
+              </p>
             </div>
           </div>
           <div className={styles.motionList}>

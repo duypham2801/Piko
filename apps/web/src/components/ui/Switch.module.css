@@ -41,9 +41,7 @@
 }
 
 .checked .thumb {
-  transform: translateX(
-    calc(var(--space-8) - var(--space-5) - var(--border-width-thin) * 2)
-  );
+  transform: translateX(calc(var(--space-8) - var(--space-5) - var(--border-width-thin) * 2));
 }
 
 .switch:disabled {

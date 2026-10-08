@@ -2,3 +2,4 @@ pnpm-lock.yaml
 **/drizzle/**
 **/dist/**
 node_modules
+*.md

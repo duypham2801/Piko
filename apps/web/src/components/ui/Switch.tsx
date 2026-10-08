@@ -21,9 +21,7 @@ export default function Switch({
   type = 'button',
   ...props
 }: SwitchProps) {
-  const classes = [styles.switch, checked && styles.checked, className]
-    .filter(Boolean)
-    .join(' ');
+  const classes = [styles.switch, checked && styles.checked, className].filter(Boolean).join(' ');
   const generatedId = useId();
   const labelId = `${props.id ?? generatedId}-label`;
 

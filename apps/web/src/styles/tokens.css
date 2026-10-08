@@ -21,7 +21,9 @@
   --color-shadow: var(--palette-navy-900);
   --color-primary: var(--palette-coral-500);
   --color-primary-pressed: var(--palette-coral-700);
-  --color-on-primary: var(--palette-white); /* 3.2:1: large/bold text only (>= 24px, or >= 18.66px bold) */
+  --color-on-primary: var(
+    --palette-white
+  ); /* 3.2:1: large/bold text only (>= 24px, or >= 18.66px bold) */
   --color-on-primary-strong: var(--palette-navy-900); /* 5.6:1: any text size on coral */
   --color-secondary: var(--palette-teal-500);
   --color-on-secondary: var(--palette-navy-900); /* 7.2:1: white on teal is forbidden */
