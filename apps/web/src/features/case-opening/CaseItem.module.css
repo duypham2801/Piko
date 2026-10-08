@@ -13,7 +13,9 @@
   box-shadow: var(--shadow-chunky-sm);
   text-align: center;
   transform: translateY(0);
-  transition: transform var(--duration-fast) var(--ease-standard);
+  transition:
+    transform var(--duration-normal) var(--ease-spring),
+    opacity var(--duration-normal) var(--ease-standard);
 }
 
 .emoji {
@@ -32,6 +34,13 @@
 }
 
 .winner {
+  position: relative;
+  z-index: var(--z-raised);
   border-color: var(--color-primary);
-  transform: translateY(calc(var(--space-1) * -1));
+  box-shadow: var(--shadow-chunky);
+  transform: translateY(calc(var(--space-1) * -1)) scale(var(--scale-pop));
+}
+
+.dimmed {
+  opacity: var(--opacity-dimmed);
 }

@@ -30,6 +30,7 @@ export default function CaseCarousel({
 
           return (
             <CaseItem
+              dimmed={revealed && index !== plan.winnerIndex}
               isWinner={index === plan.winnerIndex}
               key={`${id}-${index}`}
               option={option}

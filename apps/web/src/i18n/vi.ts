@@ -3,7 +3,7 @@ export const vi = {
   tagline: 'Pick. Open. Go.',
   openCase: 'Mở case',
   opening: 'Đang mở…',
-  winnerIs: 'Kết quả:',
+  winnerIs: 'Kết quả',
   spinAgain: 'Quay lại',
 } as const;
 

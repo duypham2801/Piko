@@ -2,9 +2,11 @@ import { useMemo } from 'react';
 import type { DecisionOptionData } from '@piko/domain';
 
 import Button from '../../components/ui/Button';
+import Card from '../../components/ui/Card';
 import { t } from '../../i18n';
 import CaseCarousel from './CaseCarousel';
 import styles from './CaseOpening.module.css';
+import Confetti from './Confetti';
 import { useCaseOpening } from './useCaseOpening';
 
 type CaseOpeningProps = {
@@ -28,19 +30,28 @@ export default function CaseOpening({ options }: CaseOpeningProps) {
           <p>{t('tagline')}</p>
         </header>
 
-        <CaseCarousel
-          optionsById={optionsById}
-          plan={plan}
-          revealed={revealed}
-          stripRef={stripRef}
-          viewportRef={viewportRef}
-        />
+        <div className={styles.stage}>
+          <CaseCarousel
+            optionsById={optionsById}
+            plan={plan}
+            revealed={revealed}
+            stripRef={stripRef}
+            viewportRef={viewportRef}
+          />
+          {revealed && <Confetti />}
+        </div>
 
         <div aria-live="polite" className={styles.result} role="status">
           {winner && (
-            <p>
-              {t('winnerIs')} {winner.emoji} {winner.label}
-            </p>
+            <Card className={styles.winnerPanel} tone="accent">
+              <span aria-hidden="true" className={styles.winnerEmoji}>
+                {winner.emoji}
+              </span>
+              <span className={styles.winnerDetails}>
+                <span className={styles.winnerLabel}>{t('winnerIs')}</span>
+                <span className={styles.winnerName}>{winner.label}</span>
+              </span>
+            </Card>
           )}
         </div>
 
