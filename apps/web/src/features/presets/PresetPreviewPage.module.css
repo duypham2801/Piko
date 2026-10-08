@@ -57,7 +57,8 @@
   font-weight: var(--font-weight-bold);
 }
 
-.optionOff {
+.optionRow[data-off] .optionEmoji,
+.optionRow[data-off] .optionLabel {
   opacity: var(--opacity-dimmed);
 }
 

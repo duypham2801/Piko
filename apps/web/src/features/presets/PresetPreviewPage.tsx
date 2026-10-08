@@ -70,20 +70,18 @@ export default function PresetPreviewPage() {
           <ul className={styles.optionList}>
             {options.map((option, index) => {
               const checked = !off.has(index);
-              const optionClasses = [styles.optionEmoji, !checked && styles.optionOff]
-                .filter(Boolean)
-                .join(' ');
-              const labelClasses = [styles.optionLabel, !checked && styles.optionOff]
-                .filter(Boolean)
-                .join(' ');
 
               return (
                 <li key={option.id}>
-                  <Card className={styles.optionRow} tone="surface">
-                    <span aria-hidden="true" className={optionClasses}>
+                  <Card
+                    className={styles.optionRow}
+                    data-off={!checked ? '' : undefined}
+                    tone="surface"
+                  >
+                    <span aria-hidden="true" className={styles.optionEmoji}>
                       {option.emoji}
                     </span>
-                    <span className={labelClasses}>{option.label}</span>
+                    <span className={styles.optionLabel}>{option.label}</span>
                     <Switch
                       checked={checked}
                       disabled={minimumReached && checked}
