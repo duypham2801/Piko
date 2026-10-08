@@ -1,0 +1,129 @@
+.screen {
+  min-height: 100dvh;
+  padding: var(--space-6) var(--space-4) var(--space-8);
+  background: var(--color-bg);
+}
+
+.content {
+  display: grid;
+  width: min(100%, var(--content-max-width));
+  gap: var(--space-6);
+  margin: 0 auto;
+}
+
+.content h1 {
+  font-size: var(--text-display);
+}
+
+.optionsSection {
+  display: grid;
+  min-width: 0;
+  gap: var(--space-4);
+}
+
+.optionsSection h2 {
+  font-size: var(--text-2xl);
+}
+
+.optionList {
+  display: grid;
+  min-width: 0;
+  gap: var(--space-3);
+}
+
+.optionCard {
+  display: grid;
+  min-width: 0;
+  gap: var(--space-3);
+}
+
+.optionMain {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: var(--space-3);
+}
+
+.optionInput {
+  min-width: 0;
+}
+
+.removeButton {
+  display: inline-grid;
+  width: var(--tap-target-min);
+  min-width: var(--tap-target-min);
+  height: var(--tap-target-min);
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-danger);
+  cursor: pointer;
+  font-size: var(--text-xl);
+  line-height: var(--leading-tight);
+}
+
+.removeButton:disabled {
+  color: var(--color-disabled-text);
+  cursor: not-allowed;
+}
+
+.optionMeta {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.optionMeta > span {
+  white-space: nowrap;
+}
+
+.hint {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+
+.actionBar {
+  position: sticky;
+  bottom: 0;
+  z-index: var(--z-raised);
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3) 0 calc(var(--space-3) + env(safe-area-inset-bottom));
+  background: var(--color-bg);
+}
+
+.status {
+  min-height: var(--tap-target-min);
+  color: var(--color-success);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-bold);
+  text-align: center;
+}
+
+.status:empty {
+  min-height: 0;
+}
+
+.statusError {
+  color: var(--color-danger);
+}
+
+.actionButtons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+@media (min-width: 48rem) {
+  .screen {
+    padding: var(--space-6);
+  }
+}
