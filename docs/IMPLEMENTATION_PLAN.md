@@ -1,9 +1,9 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 4 — Home (4-1, 4-2 done; awaiting the owner's visual review before merging to `main`)
-- **Integration branch:** `feat/phase-4-home`
-- **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`)
+- **Current phase:** Phase 5 — Decision builder (not started)
+- **Integration branch:** none yet
+- **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`); Phase 4 (4-1, 4-2: router, Home, presets, preview, merged into `main`)
 
 ## Phases
 
@@ -299,6 +299,7 @@
   - F2: the case `options` are memoized on `formattedOff` + preset. `off` is parsed twice (once outside the memo for the key, once inside). That is harmless and keeps the hook deps honest. DO NOT TOUCH.
   - F3: the row uses a single `data-off` modifier, and the switch is not dimmed.
   - **4-2 accepted.** Fast-forwarded into `feat/phase-4-home`.
+  - The owner reviewed the Home → preview → case flow in the browser and approved it. **Phase 4 complete.** Merged into `main` with `--no-ff`.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
