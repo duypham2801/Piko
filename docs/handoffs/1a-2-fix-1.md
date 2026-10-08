@@ -53,7 +53,7 @@ Git writes allowed in this task:
 Do **not** commit to `main`, merge, push, or create any other tag. The architect merges after review.
 
 Steps:
-1. Implement F1 and F3–F6 first.
+1. Implement F1 and F3–F7 first.
 2. Create the branch. Commit all 1a-2 work plus these fixes as **one** commit: `feat(ops): production Docker stack with Caddy, migrate gate and release targets`.
    - Make sure `.env.prod`, `backups/` and `.deploy/` are **not** committed. Check with `git show --stat HEAD`.
 3. Reset the local prod state from the earlier test so the run starts clean:
@@ -114,6 +114,13 @@ In `DOCKER_BUILDKIT=1 git archive … | docker build …`, the variable applies 
 
 `make dev` and the dev stages must behave exactly as before. Verify with `make dev` and `make check`.
 
+### F7 (SHOULD): `@types/node` 26 is still in the lockfile
+
+The 1a-1 fix pinned `@types/node` to `22.20.5` in `apps/api` only. The root workspace has no `@types/node`, so the optional peer of `vite` and `vitest` resolves to `@types/node@26.6.4`. Some of the tooling is therefore typed against Node 26, while the runtime is Node 22.
+- Add `"@types/node": "22.20.5"` to the root `devDependencies`. This is the same version that is already in use, not a new dependency.
+- Run the install **inside the dev container** (as the Makefile targets do), not on the host.
+- After the install, `grep -c "@types/node@26" pnpm-lock.yaml` must print `0`.
+
 ## Out of scope (do NOT do)
 - Anything else in the Dockerfile, compose files or Caddyfile.
 - Dev stack changes.
@@ -132,6 +139,7 @@ In `DOCKER_BUILDKIT=1 git archive … | docker build …`, the variable applies 
 - [ ] F4: The three curl checks behave as specified.
 - [ ] F5: `previous` survives a same-tag redeploy.
 - [ ] F6: `make prod-config`, `make check` and `make dev` all work.
+- [ ] F7: the lockfile has no `@types/node@26`, and `make check` still passes.
 - [ ] Cleanup is done. Tags deleted, prod down, dev untouched (`docker volume ls | grep wswd-dev` lists the same volumes as before).
 
 ## Validation
