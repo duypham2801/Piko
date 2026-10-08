@@ -20,7 +20,7 @@
 | 2-2 | Animation plan math (strip, stop offset, timeline params) | ✅ done | `2-2-animation-plan.md` (D-006, D-026, `af1004f`) |
 | 2.5 | Case-opening spike | ✅ done (`2-5-fix-1.md`; duration tuned to 8 s) | `2-5-case-spike.md`: throwaway tuning playground in `/design#case-spike`; the owner tunes `ANIMATION_PLAN_DEFAULTS`; folds in the 2-2 `pickWeighted` nit |
 | 3-1 | Case-opening core | ✅ done (`3-1-fix-1.md`) | `3-1-case-carousel.md`: state machine, carousel, `revealAtMs`, reduced motion, mounted in `App.tsx`, spike removed (D-027) |
-| 3-2 | Reveal celebration | 🟡 handed off (`3-2-celebration.md`) | Winner pop + dim, in-house confetti, winner panel (D-027) |
+| 3-2 | Reveal celebration | 🔧 fix (`3-2-fix-1.md`) | Winner pop + dim, in-house confetti, winner panel (D-027) |
 | 4 | Home | ⬜ | Hero, mode selector (Solo + locked Soon), presets, recent decisions |
 | 5 | Decision builder | ⬜ | CRUD decisions/options via API, validation, open case |
 | 6 | Result + history | ⬜ | Winner reveal, Let's Go / Spin Again / Not Tonight / Share, history |
@@ -225,6 +225,24 @@
   - Lesson (architect): avoid rebasing the task branch while the owner's dev server runs, or tell the owner to restart `web` afterwards.
   - The "no end effect" part of the report is expected: the celebration is 3-2.
   - **3-1 accepted.** Merged into `feat/phase-3-case-opening`.
+- **3-2 (2026-10-08):** reviewed the diff (9 files, +218/−19). `make check` passes (42 domain tests, 7 api tests). Literal greps are clean. The report gives main JS 80.18 kB gz.
+  - Accepted:
+    - the four tokens
+    - pop/dim
+    - 20 deterministic CSS-keyframe confetti pieces
+    - the accent `Card` winner panel inside the live region
+    - reduced motion (no confetti)
+  - **MUST F1: the page renders blank.**
+    - The new `.stage` wrapper is a grid item with `min-width: auto`, so it grows to the strip's max-content width (7.5–10k px). Everything sits off-screen.
+    - `overflow-x: clip` on `.screen` hid the scrollbar, so the implementer's `scrollWidth` check passed.
+    - Headless Chrome measured `.content` at left 3552 px (360 px viewport) and 4592 px (1280 px viewport).
+    - Fix verified in the browser: `.stage { min-width: 0 }` and remove the clip.
+  - SHOULD:
+    - the redundant `dimmed` prop (specified by the architect)
+    - `styles[piece.shape]` points to a nonexistent `.strip` class
+  - NICE: `text-align: start`.
+  - Fixes in `3-2-fix-1.md`.
+  - Lesson: runtime checks must measure element geometry, not only `scrollWidth`.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
