@@ -293,3 +293,44 @@ Format: Decision · Reason · Alternatives · Tradeoffs · Phase/Date
   - Couple/Squad are disabled radios with a "Sắp có" badge (D-004). There is no mode state, because only Solo exists.
 - **Copy:** `spinAgain` changes from "Quay lại" to "Mở lại". "Quay lại" also means "go back", which would be ambiguous next to the new back link.
 - **Phase:** 4 · 2026-10-08 · approved by user (router, preset flow, scope, preset list); default (mode selector, URL `off`, copy)
+
+## D-029 — Phase 5 decision builder: storage, save flow, UI choices
+- **Save flow (owner): an explicit "Lưu" button.**
+  - The builder saves the whole decision with one request (POST to create, PUT to update), then goes to the decision page, where the user opens the case.
+  - If saving fails, the builder shows a non-blocking error and still lets the user open the case with the current draft (rule 5: a network failure never blocks a decision).
+  - No autosave. Last write wins; there is no optimistic-concurrency check in the MVP (one user, one device at a time).
+- **Weights UI (owner): five tappable dots per option**, under one label "Độ ưu tiên".
+  - A filled dot means the level is reached; tapping dot N sets weight N. The default is 1.
+  - It is a radio group per option, so it stays keyboard and screen-reader friendly.
+  - Never show percentages, odds or rarity colors (D-010). This settles the wording left open in D-024.
+- **Saved decisions on Home (owner):** a "Của bạn" section above "Chọn nhanh", with a "Tạo quyết định" button and one card per saved decision, most recently updated first.
+  - When there are no saved decisions, only the button shows.
+  - No separate list page.
+- **Emoji (owner): native emoji from a curated picker.**
+  - The builder offers a small built-in set (about 40 emoji: food, drinks, places, activities) plus "no emoji". No dependency, no SVG set.
+  - This settles the pending "emoji strategy" decision: native emoji.
+- **Customize a preset (owner):** the preset preview gets a secondary "Tùy chỉnh" button. It opens the builder pre-filled with the preset's title and options (new ids), to be saved as the user's own decision.
+- **Storage (default):**
+  - One new table `decisions`: `id`, `user_id` (FK → `users`, cascade delete), `title`, `category` (nullable), `options` (**JSONB**, the validated option array in order), `created_at`, `updated_at`; index on `(user_id, updated_at)`.
+  - Options are a JSONB column, not a separate table: they are always read and written together with their decision, there are at most 20, and a PUT replaces them atomically. History (Phase 6) will store a snapshot of the labels, so it does not need a foreign key to each option.
+  - The server generates the decision id. The client generates option ids (UUID), and the server keeps them, so option ids stay stable across edits.
+  - At most **100 decisions per user** (`DECISION_LIMITS.maxDecisionsPerUser`), checked in a transaction that locks the user row.
+- **API (default):**
+
+  | Method | Path | Result |
+  |---|---|---|
+  | `GET` | `/api/decisions` | the user's decisions, most recently updated first |
+  | `GET` | `/api/decisions/:id` | one decision |
+  | `POST` | `/api/decisions` | create → 201 |
+  | `PUT` | `/api/decisions/:id` | replace title/category/options → 200 |
+  | `DELETE` | `/api/decisions/:id` | delete → 204 |
+
+  - These routes **require an existing session** (401 `session_required`). Unlike `/api/me`, they never create a guest; the web always awaits `ensureSession()` first (rule 12).
+  - A decision that does not exist, belongs to another user, or has a malformed id is a 404. The API does not reveal whether another user's decision exists.
+  - Request bodies are limited to 16 KB.
+- **Category (default):** stays in the model but has no UI in Phase 5, because nothing uses it yet.
+- **Test database (owner): PGlite.** `@electric-sql/pglite` `0.5.8` (Apache-2.0) is an `apps/api` **devDependency**.
+  - It runs real PostgreSQL in WASM inside the test process. The API service and ownership tests run against the real Drizzle migrations, without a database container, so `make check` stays container-free.
+  - It is never part of the prod image (`pnpm deploy --prod`).
+- **Web routes (default, built in 5-2/5-3):** `/decisions/new` (optionally `?from=<preset slug>`), `/decisions/:id` (preview with switches, like presets), `/decisions/:id/edit`, `/decisions/:id/open`.
+- **Phase:** 5 · 2026-10-08 · approved by user (save flow, weights UI, Home list, emoji, preset customize, PGlite); default (storage, API, category, routes)
