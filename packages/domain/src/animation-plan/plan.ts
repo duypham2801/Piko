@@ -6,16 +6,18 @@ import { pickWeighted } from '../selection/weighted.js';
 import { spinProgress } from './curve.js';
 
 const PLAN_SEED_SALT = 0x9e3779b9;
+const REVEAL_BISECTION_ITERATIONS = 40;
 
 export const ANIMATION_PLAN_DEFAULTS = {
   leadingItems: 8,
   trailingItems: 8,
   minSpinItems: 40,
   spinItemsJitter: 8,
-  stopBand: 0.6,
+  stopBand: 0.9,
   durationMs: 8000,
   accelFraction: 0.06,
   decelPower: 3,
+  revealThresholdItems: 0.02,
 } as const;
 
 export type AnimationPlanParams = {
@@ -31,6 +33,7 @@ export type AnimationPlan = {
   durationMs: number;
   accelFraction: number;
   decelPower: number;
+  revealAtMs: number;
 };
 
 export function buildAnimationPlan(
@@ -70,7 +73,7 @@ export function buildAnimationPlan(
     strip[index] = pickWeighted(eligible, rng).id;
   }
 
-  return {
+  const plan: AnimationPlan = {
     strip,
     winnerIndex,
     startPosition,
@@ -79,7 +82,23 @@ export function buildAnimationPlan(
     durationMs: params.durationMs,
     accelFraction: params.accelFraction,
     decelPower: params.decelPower,
+    revealAtMs: params.durationMs,
   };
+
+  let lowerBound = 0;
+  let upperBound = plan.durationMs;
+  for (let iteration = 0; iteration < REVEAL_BISECTION_ITERATIONS; iteration += 1) {
+    const midpoint = (lowerBound + upperBound) / 2;
+    const remaining = plan.stopPosition - positionAt(plan, midpoint);
+    if (remaining < params.revealThresholdItems) {
+      upperBound = midpoint;
+    } else {
+      lowerBound = midpoint;
+    }
+  }
+
+  plan.revealAtMs = Math.min(plan.durationMs, Math.max(0, Math.ceil(upperBound)));
+  return plan;
 }
 
 export function positionAt(plan: AnimationPlan, elapsedMs: number): number {

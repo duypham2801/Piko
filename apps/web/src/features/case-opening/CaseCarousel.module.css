@@ -1,0 +1,82 @@
+.viewport {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  padding-block: var(--space-3);
+  --case-cell-width: calc(var(--space-8) * 2);
+}
+
+.viewport::before,
+.viewport::after {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: var(--space-6);
+  content: '';
+  pointer-events: none;
+}
+
+.viewport::before {
+  left: 0;
+  background: linear-gradient(to right, var(--color-bg), transparent);
+}
+
+.viewport::after {
+  right: 0;
+  background: linear-gradient(to left, var(--color-bg), transparent);
+}
+
+.strip {
+  display: flex;
+  width: max-content;
+  min-height: var(--case-cell-width);
+  align-items: center;
+  gap: 0;
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+}
+
+.strip[data-motion='reduced'] {
+  transition: transform var(--duration-slow) var(--ease-out);
+}
+
+.marker {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: var(--border-width);
+  background: var(--color-primary);
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.marker::before,
+.marker::after {
+  position: absolute;
+  left: 50%;
+  width: 0;
+  height: 0;
+  content: '';
+  transform: translateX(-50%);
+}
+
+.marker::before {
+  top: 0;
+  border-right: var(--space-2) solid transparent;
+  border-bottom: var(--space-2) solid var(--color-primary);
+  border-left: var(--space-2) solid transparent;
+}
+
+.marker::after {
+  bottom: 0;
+  border-top: var(--space-2) solid var(--color-primary);
+  border-right: var(--space-2) solid transparent;
+  border-left: var(--space-2) solid transparent;
+}
+
+@media (min-width: 48rem) {
+  .viewport {
+    --case-cell-width: calc(var(--space-8) * 2.5);
+  }
+}

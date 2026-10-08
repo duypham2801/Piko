@@ -35,6 +35,7 @@
   --color-disabled-bg: var(--palette-slate-200);
   --color-disabled-text: var(--palette-slate-600);
   --color-selection: var(--palette-lemon-400);
+  --opacity-dimmed: 0.4; /* non-winner cells after the reveal */
 
   --font-display: 'Baloo 2 Variable', 'Baloo 2', ui-rounded, system-ui, sans-serif;
   --font-body: 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -80,14 +81,18 @@
   --duration-fast: 120ms;
   --duration-normal: 220ms;
   --duration-slow: 400ms;
+  --duration-celebrate: 1200ms; /* one-shot celebration burst */
+  --scale-pop: 1.08; /* winner pop scale */
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in: cubic-bezier(0.4, 0, 1, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
   --content-max-width: 30rem;
+  --content-wide-max-width: 60rem; /* wide screens such as the case-opening stage */
   --tap-target-min: 44px;
   --z-base: 0;
+  --z-raised: 1; /* lifted elements above their siblings */
   --z-overlay: 100;
   --z-toast: 200;
 }

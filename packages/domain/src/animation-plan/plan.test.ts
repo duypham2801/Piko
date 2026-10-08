@@ -155,7 +155,7 @@ describe('buildAnimationPlan', () => {
       strip: plan.strip.slice(0, 12),
     }).toEqual({
       winnerIndex: 51,
-      stopOffset: 0.2911521795205772,
+      stopOffset: 0.4367282692808658,
       strip: [
         ids[1],
         ids[1],
@@ -171,5 +171,30 @@ describe('buildAnimationPlan', () => {
         ids[1],
       ],
     });
+  });
+
+  it('reveals only inside the final threshold window', () => {
+    for (let seed = 0; seed < 200; seed += 1) {
+      const result = select(options, seed);
+      const plan = buildAnimationPlan(result, options);
+      const remainingAtReveal = plan.stopPosition - positionAt(plan, plan.revealAtMs);
+      const remainingBeforeReveal = plan.stopPosition - positionAt(plan, plan.revealAtMs - 1);
+
+      expect(plan.revealAtMs).toBeGreaterThan(0);
+      expect(plan.revealAtMs).toBeLessThanOrEqual(plan.durationMs);
+      expect(remainingAtReveal).toBeLessThan(ANIMATION_PLAN_DEFAULTS.revealThresholdItems);
+      expect(remainingBeforeReveal).toBeGreaterThanOrEqual(
+        ANIMATION_PLAN_DEFAULTS.revealThresholdItems,
+      );
+    }
+  });
+
+  it('pins the default reveal time for seed 42', () => {
+    const result = select(options, 42);
+    const plan = buildAnimationPlan(result, options);
+
+    expect(plan.revealAtMs).toBe(6_865);
+    expect(plan.revealAtMs).toBeGreaterThanOrEqual(6_000);
+    expect(plan.revealAtMs).toBeLessThanOrEqual(7_500);
   });
 });

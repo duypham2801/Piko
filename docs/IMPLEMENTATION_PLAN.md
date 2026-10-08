@@ -1,8 +1,8 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 3 — Case opening (planning). Phase 2.5 merged into `main`.
-- **Integration branch:** none open. `feat/phase-2-5-case-spike` was merged into `main` and deleted. Phase 3 gets a new one.
+- **Current phase:** Phase 3 — Case opening (3-1, 3-2 done and visually approved; awaiting merge into `main`)
+- **Integration branch:** `feat/phase-3-case-opening` (pushed)
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s)
 
 ## Phases
@@ -19,7 +19,8 @@
 | 2-1 | Domain model + zod/mini + seeded selection engine | ✅ done | `2-1-domain-model-selection.md` (D-024, D-025, `6a61954`) |
 | 2-2 | Animation plan math (strip, stop offset, timeline params) | ✅ done | `2-2-animation-plan.md` (D-006, D-026, `af1004f`) |
 | 2.5 | Case-opening spike | ✅ done (`2-5-fix-1.md`; duration tuned to 8 s) | `2-5-case-spike.md`: throwaway tuning playground in `/design#case-spike`; the owner tunes `ANIMATION_PLAN_DEFAULTS`; folds in the 2-2 `pickWeighted` nit |
-| 3 | Case opening (full) | ⬜ | Controller, state machine, timeline, marker, reveal, reduced-motion |
+| 3-1 | Case-opening core | ✅ done (`3-1-fix-1.md`) | `3-1-case-carousel.md`: state machine, carousel, `revealAtMs`, reduced motion, mounted in `App.tsx`, spike removed (D-027) |
+| 3-2 | Reveal celebration | ✅ done (`3-2-fix-1.md`, `3-2-fix-2.md`) | Winner pop + dim, in-house confetti, winner panel (D-027) |
 | 4 | Home | ⬜ | Hero, mode selector (Solo + locked Soon), presets, recent decisions |
 | 5 | Decision builder | ⬜ | CRUD decisions/options via API, validation, open case |
 | 6 | Result + history | ⬜ | Winner reveal, Let's Go / Spin Again / Not Tonight / Share, history |
@@ -185,6 +186,78 @@
   - DO NOT TOUCH: the other domain exports with no consumer yet (`Decision`, `DecisionOption`, `DECISION_LIMITS`, `SelectionResult`, `Seed`, `SELECTION_ALGORITHM`). They are the public API for the builder (Phase 5) and for history (Phase 6).
   - Phase 3 will delete the spike section (`CaseSpikeSection.*` and its `/design` nav link). It is about 800 lines of throwaway dev code.
   - Phase 3 must decide when the reveal starts, because the 8 s tail looks stopped about 1.5 s early (see D-026).
+- **3-1 (2026-10-08):** reviewed `feat/3-1-case-carousel` (17 files, +685/−912).
+  - Architect re-check: `make check` passes. Tests: domain 42, api 7.
+  - The web-scoped greps are clean.
+  - The report gives seed-42 `revealAtMs` = 6864 ms, main JS 79.62 kB gz (+2.6 kB for the feature) and no `/design` leak.
+  - Accepted:
+    - the domain `revealAtMs` bisection (no extra PRNG draw, so the pins are unchanged)
+    - the pure reducer
+    - refs-only frames, with the reveal dispatched once and the loop running on to `durationMs` (no snap)
+    - the reduced-motion slide driven by the token transition
+    - `ResizeObserver` re-application
+    - the background `ensureSession()`
+    - the spike and the debug strings removed; `createRng`/`spinProgress` unexported
+  - Deviation accepted: `/api/healthz` remains in `apps/api` (used by the prod healthcheck). The handoff grep should have been scoped to `apps/web` (architect mistake).
+  - SHOULD:
+    - F1: the viewport clips the card shadows and the winner lift, because the strip is exactly one cell tall.
+    - F2: desktop is capped at 30 rem, and the media `max-width: 48rem` has no effect.
+    - F3: the preview plan is built twice (hook and screen).
+    - F4: `--case-cell-width` is defined twice.
+  - NICE:
+    - the unused `reset` event (specified too early by the architect)
+    - the hook imports the carousel CSS module for a class name; switch to a `data-motion` attribute
+    - a duplicate `min-height`
+    - a nested `aria-hidden`
+  - Fixes in `3-1-fix-1.md`, which adds one layout token `--content-wide-max-width: 60rem`. The task branch is rebased onto the integration branch.
+- **3-1-fix-1 (2026-10-08):** F1–F7 verified against the diff (8 files, +16/−35). `make check` passes. The report gives main JS 79.61 kB gz.
+  - The owner reported that after the spin no result appeared and the button stayed disabled.
+  - The architect reproduced it in headless Chrome over CDP. The dev server was serving a **stale `packages/domain` module**: its exports still included `createRng`/`spinProgress`, and `ANIMATION_PLAN_DEFAULTS` had no `revealThresholdItems`. So `plan.revealAtMs` was `undefined` and the reveal never fired.
+  - The files inside the container were current. Vite's module cache had missed the changes after the architect rebased the task branch under the running dev server.
+  - `docker compose -f compose.dev.yaml restart web` fixed it.
+  - Re-verified in headless Chrome:
+    - normal motion reveals at about 6.9 s
+    - the button re-enables and shows "Quay lại"
+    - a second spin works
+    - the cell under the marker is the winner and carries the winner class
+    - reduced motion reveals almost immediately after the short slide
+  - **Code is correct, so no code fix is needed.** `ENVIRONMENTS.md` now has a note to restart `web` after switching branches.
+  - Lesson (architect): avoid rebasing the task branch while the owner's dev server runs, or tell the owner to restart `web` afterwards.
+  - The "no end effect" part of the report is expected: the celebration is 3-2.
+  - **3-1 accepted.** Merged into `feat/phase-3-case-opening`.
+- **3-2 (2026-10-08):** reviewed the diff (9 files, +218/−19). `make check` passes (42 domain tests, 7 api tests). Literal greps are clean. The report gives main JS 80.18 kB gz.
+  - Accepted:
+    - the four tokens
+    - pop/dim
+    - 20 deterministic CSS-keyframe confetti pieces
+    - the accent `Card` winner panel inside the live region
+    - reduced motion (no confetti)
+  - **MUST F1: the page renders blank.**
+    - The new `.stage` wrapper is a grid item with `min-width: auto`, so it grows to the strip's max-content width (7.5–10k px). Everything sits off-screen.
+    - `overflow-x: clip` on `.screen` hid the scrollbar, so the implementer's `scrollWidth` check passed.
+    - Headless Chrome measured `.content` at left 3552 px (360 px viewport) and 4592 px (1280 px viewport).
+    - Fix verified in the browser: `.stage { min-width: 0 }` and remove the clip.
+  - SHOULD:
+    - the redundant `dimmed` prop (specified by the architect)
+    - `styles[piece.shape]` points to a nonexistent `.strip` class
+  - NICE: `text-align: start`.
+  - Fixes in `3-2-fix-1.md`.
+  - Lesson: runtime checks must measure element geometry, not only `scrollWidth`.
+- **3-2-fix-1 (2026-10-08):** the diff is 4 files (+9/−10).
+  - Verified:
+    - `.stage { min-width: 0 }`, and the clip is removed
+    - the `dimmed` prop is removed
+    - the confetti `dot: boolean`
+    - `text-align: start`
+  - The report gives `make check` passing, 80.16 kB gz, and geometry 360 → 16/328 and 1280 → 160/960.
+  - **Accepted.** Fast-forwarded `feat/phase-3-case-opening` to `feat/3-2-celebration`.
+  - Owner visual review: "the marker always stops at the same part of the cell". The architect measured 6 spins at 0.21–0.79 of the cell, within the `stopBand` 0.6 band (±0.3).
+  - The owner chose `stopBand` 0.9, uniform with no edge bias (D-026 revised). Handoff `3-2-fix-2.md`.
+- **3-2-fix-2 (2026-10-08):** the diff is the 2 domain files. `stopBand` is 0.9. In the seed-42 pin, `stopOffset` changed from 0.29115… to 0.43673…, while `winnerIndex` 51 and the strip are unchanged.
+  - Unlisted deviation: the implementer deleted the exact `revealAtMs` pin instead of updating it.
+  - With owner approval, the architect restored it directly as `toBe(6_865)` (commit `test(domain): pin the seed-42 reveal time at 6865 ms`).
+  - `make check` passes (42 domain tests, 7 api tests).
+  - The owner is satisfied with the visuals. **3-2 accepted.** Fast-forwarded into `feat/phase-3-case-opening`.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
