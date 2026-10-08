@@ -1,8 +1,8 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 1 — Foundation (monorepo + Docker + design system)
-- **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2)
+- **Current phase:** Phase 2 — Core decision domain (next)
+- **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2)
 
 ## Phases
 
@@ -12,7 +12,7 @@
 | 1a-1 | Monorepo + API skeleton + Docker dev | ✅ done | `1a-1-monorepo-dev-foundation.md` + `1a-1-fix-1.md` |
 | 1a-2 | Docker prod (Caddy, migrate, hardening, backup/rollback) | ✅ done | `1a-2-docker-prod.md` + `1a-2-fix-1.md` (merged `1d98559`) |
 | 1b-1 | Tokens + fonts + dev-only `/design` | ✅ done | `1b-1-tokens-fonts-design-page.md` (merged `3513f2c`) |
-| 1b-2 | UI primitives in `/design` | 🔧 handoff ready | `1b-2-ui-primitives.md`: Button, Card, Chip, Badge, TextField, Switch + Motion demo fix |
+| 1b-2 | UI primitives in `/design` | ✅ done | `1b-2-ui-primitives.md` (`5ec3629`) + `1b-2-fix-1.md` (`9503c43`) |
 | 2 | Core decision domain | ⬜ | `packages/domain`: types, seeded PRNG, selection, validation, animation plan, zod schemas + tests |
 | 2.5 | Case-opening spike | ⬜ | Rough carousel in `/design` to validate motion feel early |
 | 3 | Case opening (full) | ⬜ | Controller, state machine, timeline, marker, reveal, reduced-motion |
@@ -69,6 +69,15 @@
   - SHOULD (dev page only): the Motion demo square never moves, because `translateX(calc(100% - 1rem))` uses the square's own width. Folded into 1b-2 (R0) on the owner's choice.
   - NICE: the Play button hover uses navy text on coral-700 (3.9:1). Primitives in 1b-2 use a transform "press" effect and never darken the background.
   - **1b-1 accepted.** Fast-forward merged into `main`.
+- **1b-2 (2026-10-08):** all acceptance criteria met. Architect re-check: `make check` passes, raw-literal grep clean, `px` grep only the prose line, `/design` absent from the prod build, main JS 91.70 kB gz (+0.0), CSS 2.08 kB gz. Primitives follow the spec: native elements, tokens only, press pattern via transform, D-008 contrast respected, no hard-coded strings, no barrel, no forwardRef.
+  - The owner checked `/design#components` and `/design#motion` in the browser (visuals, keyboard, ARIA state) and accepted them.
+  - SHOULD: `ComponentsSection.module.css` duplicates the `/design` section chrome; the modes chip group has `aria-label` on a role-less `div`.
+  - NICE (cleanup): dead CSS (`transform: none` on disabled, default grid/align rules, an overridden flex selector), Switch `.disabled` class duplicating `:disabled`, redundant `?? ''` / `: ''` in class merging, needless prop destructuring in Chip, two demo nits.
+  - DO NOT TOUCH: `.visually-hidden` sized with `--border-width-thin`; Switch geometry; unused reserve tokens (`--z-*`, `--ease-in`, `--font-weight-medium`, `--shadow-offset-lg`).
+  - Fixes in `docs/handoffs/1b-2-fix-1.md` (pure cleanup, no visual change), one extra commit on `feat/1b-2-ui-primitives`.
+  - Note for Phase 4: a mutually exclusive choice (mode selector) is a radio-group pattern, not `aria-pressed` toggle chips. Decide the primitive when building the mode selector.
+- **1b-2-fix-1 (2026-10-08):** C1–C6 verified against the diff (`9503c43`, 11 files, +18/−79). `make check` passes, both literal greps and both cleanup greps clean, `/design` absent from prod. The prod bundle is byte-identical (same hashes: JS 91.70 kB gz, CSS 2.08 kB gz), which confirms the primitives are tree-shaken and the cleanup changed no shipped code.
+  - **1b-2 accepted.** Fast-forward merged into `main`. **Phase 1 complete.**
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
