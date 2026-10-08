@@ -74,9 +74,11 @@ describe('decision routes', () => {
     const response = await request('/api/decisions/not-a-uuid', { headers: { Cookie: cookie } });
 
     expect(response.status).toBe(404);
-    expect(await response.json()).toEqual({
+    const body = await response.json();
+    expect(body).toEqual({
       error: { code: 'not_found', message: 'The requested resource was not found.' },
     });
+    expect(ApiError.parse(body)).toEqual(body);
   });
 
   it('rejects malformed JSON, invalid bodies, and oversized bodies', async () => {
@@ -136,13 +138,5 @@ describe('decision routes', () => {
       headers: { Cookie: cookie },
     });
     expect(getResponse.status).toBe(404);
-  });
-
-  it('keeps API error payloads compatible with the domain schema', async () => {
-    const cookie = await createSessionCookie();
-    const response = await request('/api/decisions/not-a-uuid', { headers: { Cookie: cookie } });
-    const parsed = ApiError.safeParse(await response.json());
-
-    expect(parsed.success).toBe(true);
   });
 });

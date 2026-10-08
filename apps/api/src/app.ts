@@ -7,7 +7,7 @@ import { FixedWindowRateLimiter } from './auth/rate-limit.js';
 import { createSessionMiddleware, type AppEnv } from './auth/session.middleware.js';
 import type { Database } from './db/client.js';
 import { createOnError, notFound, HttpError } from './lib/errors.js';
-import { healthHandler } from './routes/health.js';
+import { healthHandler, type HealthSql } from './routes/health.js';
 import { meHandler } from './routes/me.js';
 import { createDecisionRoutes } from './routes/decisions.js';
 
@@ -22,9 +22,7 @@ export interface AppConfig {
 
 export interface AppDependencies {
   db: Database;
-  sql: {
-    unsafe: (query: string) => PromiseLike<unknown>;
-  };
+  sql: HealthSql;
   limiter?: FixedWindowRateLimiter;
 }
 

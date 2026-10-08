@@ -11,4 +11,3 @@ export function createDb(databaseUrl: string, options: { max?: number } = {}) {
 }
 
 export type Database = PgDatabase<PgQueryResultHKT, typeof schema>;
-export type Sql = ReturnType<typeof createDb>['sql'];
