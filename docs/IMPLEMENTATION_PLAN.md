@@ -1,7 +1,7 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 4 — Home (4-1 handed off)
+- **Current phase:** Phase 4 — Home (4-1 done, 4-2 handed off)
 - **Integration branch:** `feat/phase-4-home`
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`)
 
@@ -21,8 +21,8 @@
 | 2.5 | Case-opening spike | ✅ done (`2-5-fix-1.md`; duration tuned to 8 s) | `2-5-case-spike.md`: throwaway tuning playground in `/design#case-spike`; the owner tunes `ANIMATION_PLAN_DEFAULTS`; folds in the 2-2 `pickWeighted` nit |
 | 3-1 | Case-opening core | ✅ done (`3-1-fix-1.md`) | `3-1-case-carousel.md`: state machine, carousel, `revealAtMs`, reduced motion, mounted in `App.tsx`, spike removed (D-027) |
 | 3-2 | Reveal celebration | ✅ done (`3-2-fix-1.md`, `3-2-fix-2.md`) | Winner pop + dim, in-house confetti, winner panel (D-027) |
-| 4-1 | Router + Home + preset case route | 🟡 handed off | `4-1-router-home.md`: React Router 8, Home (brand, question, mode selector, 4 preset cards), `/presets/:slug` case, not found (D-028) |
-| 4-2 | Preset preview | ⬜ | Preview screen with option switches, `?off=` in the URL, case moves to `/presets/:slug/open` (D-028) |
+| 4-1 | Router + Home + preset case route | ✅ done (`39e7baa`) | `4-1-router-home.md`: React Router 8, Home (brand, question, mode selector, 4 preset cards), `/presets/:slug` case, not found (D-028) |
+| 4-2 | Preset preview | 🟡 handed off | `4-2-preset-preview.md`: includes the 4-1 clean-up (C0) and a `BackLink` primitive. Preview screen with option switches, `?off=` in the URL, case moves to `/presets/:slug/open` (D-028) |
 | 5 | Decision builder | ⬜ | CRUD decisions/options via API, validation, open case; adds the Home "Create decision" CTA (D-028) |
 | 6 | Result + history | ⬜ | Winner reveal, Let's Go / Spin Again / Not Tonight / Share, history; adds Home "Recent decisions" (D-028) |
 | 7 | Responsive pass | ⬜ | Desktop is not in the mockup and must be designed |
@@ -263,6 +263,24 @@
   - Architect note: v8 (8.4.0) has been current since 2026-06, so it is pinned instead of v7. The declarative exports were verified in the published package.
   - Phase 4 is split in two. 4-1 covers the router, Home and the preset case route. 4-2 covers the preview.
   - Integration branch: `feat/phase-4-home` from `main`.
+- **4-1 (2026-10-08):** verified against the diff (17 files, +584/−82, 3 commits).
+  - `make check` passes. `react-router` 8.4.0 is the only new dependency; the lockfile adds only `cookie-es` and `@remix-run/route-pattern` as transitive deps.
+  - Routes, presets (data matches the handoff, with dev-only `Decision.parse`), Home, mode selector, not found and `CaseOpening` title/back link all match R1–R9. `demoPool` is gone, the literal grep is clean, and `/design` is still dev-only.
+  - Bundle: main JS 80.16 → 95.12 kB gz (+15 kB). This is the expected cost of React Router (D-028), and is accepted.
+  - The owner checked it in the browser: OK.
+  - SHOULD (folded into 4-2 C0, owner choice):
+    - dead `.header p` rule in `CaseOpening.module.css`
+    - a 4-entry tones list that would repeat primary at the 5th card
+    - redundant `aria-disabled` on a native disabled radio
+    - a local `.visuallyHidden` duplicating the global `visually-hidden`. Architect mistake: the 4-1 handoff asked for a local class.
+  - NICE (also in C0):
+    - hover lift sticks on touch, so gate it with `@media (hover: hover)`
+    - the card press should drop the shadow like the large Button
+    - `position: relative` on the mode tile
+  - DO NOT TOUCH:
+    - `PresetCasePage` imports `NotFoundPage` from `app/`; that is acceptable for one screen
+    - the NotFound link styled locally rather than through `Button`, which the handoff allowed
+  - **4-1 accepted.** Fast-forwarded into `feat/phase-4-home`.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
