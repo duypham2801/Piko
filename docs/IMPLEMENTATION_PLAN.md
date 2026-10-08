@@ -1,9 +1,9 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 2.5 ✅ complete on `feat/phase-2-5-case-spike` (pending owner approval to merge into `main`); next: Phase 3 — Case opening
-- **Integration branch:** `feat/phase-2-5-case-spike` (pushed). Phase 2 was merged into `main` via `feat/phase-2-core-domain`, which is now deleted.
-- **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2)
+- **Current phase:** Phase 3 — Case opening (planning). Phase 2.5 merged into `main`.
+- **Integration branch:** none open. `feat/phase-2-5-case-spike` was merged into `main` and deleted. Phase 3 gets a new one.
+- **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s)
 
 ## Phases
 
