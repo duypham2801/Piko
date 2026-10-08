@@ -1,7 +1,7 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 2 — Core decision domain (next)
+- **Current phase:** 1c-2 — format gate (small), then Phase 2 — Core decision domain
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO
 
 ## Phases
@@ -14,6 +14,7 @@
 | 1b-1 | Tokens + fonts + dev-only `/design` | ✅ done | `1b-1-tokens-fonts-design-page.md` (merged `3513f2c`) |
 | 1b-2 | UI primitives in `/design` | ✅ done | `1b-2-ui-primitives.md` (`5ec3629`) + `1b-2-fix-1.md` (`9503c43`) |
 | 1c-1 | Rebrand to PIKO: full `wswd` → `piko` rename | ✅ done | `1c-1-rebrand-piko.md` (D-023, `d44cca4`) |
+| 1c-2 | Prettier in `make check` + drop unused `@` alias | 🔧 handoff ready | `1c-2-format-gate.md` |
 | 2 | Core decision domain | ⬜ | `packages/domain`: types, seeded PRNG, selection, validation, animation plan, zod schemas + tests |
 | 2.5 | Case-opening spike | ⬜ | Rough carousel in `/design` to validate motion feel early |
 | 3 | Case opening (full) | ⬜ | Controller, state machine, timeline, marker, reveal, reduced-motion |
@@ -88,6 +89,21 @@
     - update `.env.prod` (user/db `piko`), `chmod 600`, delete `.deploy/`
     - remove the old `wswd-dev-*` images and `wswd-dev_*` / `wswd-prod_*` volumes
   - **1c-1 accepted.**
+- **End-of-Phase-1 review (2026-10-08, architect, whole repo on `main` = `origin/main` `3efe6ea`):**
+  - Clean:
+    - no old brand names outside docs; historical mentions are intentional
+    - no secrets in history; `pnpm audit --prod` finds no known vulnerabilities
+    - layering respected (`web`/`api` → `domain` only, domain framework-free)
+    - prod hardening, Caddy CSP/headers, guest session (hashed token, CSRF + Origin + JSON, rate limit) and ownership scoping as decided
+  - The GitHub repo `duypham2801/Piko` is **public**. It has no LICENSE (default: all rights reserved) and no README (owner decision pending).
+  - SHOULD: Prettier is configured but not enforced. Six code files have drifted. Fix in `1c-2-format-gate.md`, which adds `format:check` to `check` and ignores Markdown.
+  - NICE: the `@` → `src` alias in Vite/tsconfig is unused. Removed in 1c-2.
+  - DO NOT TOUCH:
+    - `resetSession()`, kept on purpose for logout/linking (1a-1-fix-1)
+    - the Be Vietnam Pro 500 import and the reserve tokens
+    - zod classic in `packages/domain`, converted at the start of Phase 2 (D-020)
+  - Known tech debt (unchanged): `prod-deploy` skips the backup when the `db` container is stopped. Fix before Phase 9.
+  - CSP note for Phase 3: `style-src 'self'` blocks inline `style` attributes in HTML, but not CSSOM/WAAPI writes from JS (React `style`, `element.animate`). The carousel approach is unaffected.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
