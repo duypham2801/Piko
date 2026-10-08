@@ -23,7 +23,7 @@
 | 3-2 | Reveal celebration | ✅ done (`3-2-fix-1.md`, `3-2-fix-2.md`) | Winner pop + dim, in-house confetti, winner panel (D-027) |
 | 4-1 | Router + Home + preset case route | ✅ done (`39e7baa`) | `4-1-router-home.md`: React Router 8, Home (brand, question, mode selector, 4 preset cards), `/presets/:slug` case, not found (D-028) |
 | 4-2 | Preset preview | ✅ done (`4-2-fix-1.md`, `89fe5cc`) | `4-2-preset-preview.md`: includes the 4-1 clean-up (C0) and a `BackLink` primitive. Preview screen with option switches, `?off=` in the URL, case moves to `/presets/:slug/open` (D-028) |
-| 5-1 | Decisions API | 🔧 fix-1 handed off (`5-1-fix-1.md`) | `5-1-decisions-api.md`: `decisions` table (options as JSONB), CRUD routes requiring a session, ownership, 100 per user, PGlite service tests (D-029) |
+| 5-1 | Decisions API | 🔧 fix-2 handed off (`5-1-fix-1.md`, `5-1-fix-2.md`) | `5-1-decisions-api.md`: `decisions` table (options as JSONB), CRUD routes requiring a session, ownership, 100 per user, PGlite service tests (D-029) |
 | 5-2 | Builder screen | ⬜ | `/decisions/new` and `/decisions/:id/edit`: title, options (add/edit/remove), emoji picker, priority dots, shared schema validation, explicit Save, non-blocking save error (D-029) |
 | 5-3 | Saved decisions | ⬜ | `/decisions/:id` preview + `/open` case, Home "Của bạn" section + "Tạo quyết định", delete with confirm, preset "Tùy chỉnh" (D-028, D-029) |
 | 6 | Result + history | ⬜ | Winner reveal, Let's Go / Spin Again / Not Tonight / Share, history; adds Home "Recent decisions" (D-028) |
@@ -330,6 +330,13 @@
   - Notes for 5-2:
     - the global middleware requires `Content-Type: application/json` and `Origin` on **every** mutation, including a body-less `DELETE`
     - a 401 `session_required` (expired or cleared cookie) should call `resetSession()`, then `ensureSession()`, and retry once
+
+- **5-1-fix-1 (2026-10-08):** verified against the diff (`8c357b8`, `2d6177c`). `make check` passes. Tests: domain 44, api 17. The report gives an image of 185.8 MB, no `electric-sql` path, and a working `postgres-js` import.
+  - F2 and F3 are accepted: `HealthSql` is defined once, `Sql` is deleted, the 404 test parses `ApiError`, and the fixture uses only the template.
+  - SHOULD (`5-1-fix-2.md`): F1 works, but it does 18 lines of symlink surgery and copies drizzle-orm into a hand-named `drizzle-orm@0.45.3_postgres@3.4.9`, with hard-coded versions.
+    - Root cause: an architect mistake in the fix-1 guard ("any path whose **name contains** `electric-sql`"), which also matches the harmless name of the drizzle-orm variant directory.
+    - The architect verified a simpler fix on a throwaway build: delete only `@electric-sql` and `.pnpm/@electric-sql+*`, and guard on those names plus `pglite.wasm`. Nothing is left, `postgres-js` imports fine, and `node_modules` is 29.3 MB.
+  - Also: a blank line is missing before `FROM … AS api-prod`.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
