@@ -149,3 +149,32 @@ Format: Decision · Reason · Alternatives · Tradeoffs · Phase/Date
 - **When:** convert the 3 existing schemas at the start of Phase 2 (domain). They are trivial today.
 - **Tradeoffs:** a slightly more verbose API. Default error messages are generic, which is fine because user-facing messages come from i18n.
 - **Phase:** 1a-1 review · 2026-10-07 · default (architect recommendation; owner may override)
+
+## D-021 — Fonts: Baloo 2 (display) + Be Vietnam Pro (body), self-hosted via Fontsource
+- **Choice:**
+  - Display: `@fontsource-variable/baloo-2` (variable 400–800, used at 800).
+  - Body: `@fontsource/be-vietnam-pro` (400/500/700).
+  - Both are OFL-1.1 and both ship a `vietnamese` subset (verified with the Fontsource API on 2026-10-08).
+- **Reason:**
+  - Baloo 2 is rounded and chunky, the closest match to the mood board's "chunky pop" feel.
+  - Be Vietnam Pro is designed for Vietnamese, so its diacritics are excellent.
+  - Fontsource packages let Vite emit hashed `woff2` files into `/assets`. They are same-origin (CSP `font-src 'self'`), immutably cached by Caddy, and have pinned versions.
+- **Rejected:**
+  - Fredoka and Lilita One, the closest to the mockup look, have **no Vietnamese subset**.
+  - Paytone One + Nunito: more "poster", only one display weight.
+  - Bungee: uppercase-only, cramped stacked diacritics.
+  - Committing raw `woff2` files: no dependency, but manual `@font-face` and manual updates.
+- **Rule:** display line-height never below `--leading-tight` (1.15), so stacked Vietnamese marks (Ấ, Ổ, Ữ) don't clip.
+- **Tradeoffs:**
+  - Two runtime dependencies (CSS and font files only, no JS).
+  - Unused subset files (e.g. devanagari) are emitted to `dist`, but browsers never download them thanks to `unicode-range`.
+- **Phase:** 1b · 2026-10-08 · approved by user
+
+## D-022 — `/design` is a dev-only page; no router until Phase 4
+- **Rule:**
+  - `main.tsx` lazy-loads `pages/design/DesignPage` only behind `import.meta.env.DEV` and `pathname === '/design'`, so the chunk is absent from prod builds.
+  - Its developer-facing labels may be English literals (not i18n), because it is not shipped.
+- **Reason:** the owner reviews the design system on `localhost:5173/design`. Users should never see it, and it should not cost bundle size.
+- **Router:** no routing library yet. A single pathname check is enough for one dev page. Choose a router in Phase 4 (Home), when real navigation and deep links are needed.
+- **Tradeoffs:** `/design` cannot be shown to someone without running the dev stack. If a shareable demo is needed later, revisit (e.g. a separate preview build).
+- **Phase:** 1b · 2026-10-08 · approved by user

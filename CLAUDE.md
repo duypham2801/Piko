@@ -129,10 +129,10 @@ Extract components only at a real reuse boundary. Do not build generic framework
 - Tokens live in `apps/web/src/styles/tokens.css`. **Never write raw color, duration or shadow literals in components.**
 - Palette: coral `#FF5722`, teal `#14B8A6`, lemon `#FBBF24`, cream `#FFFBEB`, navy `#0F172A`, plus semantic tokens.
 - Contrast: white text is **not allowed** on teal or lemon. Use navy text or the dark teal token. White text on coral is only allowed for large/bold text.
-- Typography: one chunky display font and one clean body font. **Both must include the Vietnamese subset.** Self-host the fonts (no third-party font CDN in prod).
+- Typography: one chunky display font and one clean body font: **Baloo 2 + Be Vietnam Pro** (D-021). **Both must include the Vietnamese subset.** Self-host the fonts via Fontsource (no third-party font CDN in prod).
 - Motion tokens: fast / normal / slow / spring / easings. No ad-hoc durations.
 - Playful, not childish. Game-like, not casino-like: no rarity tiers, no slot-machine visuals, no fake odds. Do not copy CS/CS2 assets.
-- `/design` playground: verify every shared component change there.
+- `/design` playground (dev-only, D-022): verify every shared component change there.
 
 ## Language
 

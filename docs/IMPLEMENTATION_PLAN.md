@@ -2,7 +2,7 @@
 
 ## Status
 - **Current phase:** Phase 1 — Foundation (monorepo + Docker + design system)
-- **Completed:** Phase 0 — Discovery (decisions D-001…D-017)
+- **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2)
 
 ## Phases
 
@@ -11,7 +11,8 @@
 | 0 | Discovery | ✅ done | Greenfield; architecture in DECISIONS.md, ops in ENVIRONMENTS.md |
 | 1a-1 | Monorepo + API skeleton + Docker dev | ✅ done | `1a-1-monorepo-dev-foundation.md` + `1a-1-fix-1.md` |
 | 1a-2 | Docker prod (Caddy, migrate, hardening, backup/rollback) | ✅ done | `1a-2-docker-prod.md` + `1a-2-fix-1.md` (merged `1d98559`) |
-| 1b | Design system + `/design` | ⬜ | Tokens, fonts (VN subset, self-hosted), primitives, playground |
+| 1b-1 | Tokens + fonts + dev-only `/design` | 🔧 handoff ready | `1b-1-tokens-fonts-design-page.md` → owner browser review |
+| 1b-2 | UI primitives in `/design` | ⬜ | Button, Card, Chip, Input, Toggle, "Soon" badge (after 1b-1 review) |
 | 2 | Core decision domain | ⬜ | `packages/domain`: types, seeded PRNG, selection, validation, animation plan, zod schemas + tests |
 | 2.5 | Case-opening spike | ⬜ | Rough carousel in `/design` to validate motion feel early |
 | 3 | Case opening (full) | ⬜ | Controller, state machine, timeline, marker, reveal, reduced-motion |
@@ -71,7 +72,6 @@
 - **The prod build stage must set `NODE_ENV=production` explicitly** and must not load `.env.dev`/`.env.prod` at build time. Otherwise Vite bundles development React (+60 kB gz). Any `vite build` run inside the dev container produces a dev build and is not representative.
 
 ## Pending decisions
-- Exact fonts (proposed in Phase 1b).
 - Emoji strategy: native vs SVG set (license check).
 - Sound/haptics for case opening (Phase 3).
 - Share format (Phase 6).
