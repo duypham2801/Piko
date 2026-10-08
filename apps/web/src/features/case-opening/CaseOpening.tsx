@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import type { DecisionOptionData } from '@piko/domain';
-import { Link } from 'react-router';
 
+import BackLink from '../../components/ui/BackLink';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import { t } from '../../i18n';
@@ -28,9 +28,7 @@ export default function CaseOpening({ title, options, backTo }: CaseOpeningProps
   return (
     <main className={styles.screen}>
       <div className={styles.content}>
-        <Link className={styles.backLink} to={backTo}>
-          <span aria-hidden="true">←</span> {t('back')}
-        </Link>
+        <BackLink to={backTo}>{t('back')}</BackLink>
 
         <header className={styles.header}>
           <h1>{title}</h1>

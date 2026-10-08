@@ -13,18 +13,6 @@
   justify-items: center;
 }
 
-.backLink {
-  justify-self: start;
-  color: var(--color-text-accent);
-  font-weight: var(--font-weight-bold);
-  text-decoration: none;
-}
-
-.backLink:hover {
-  text-decoration: underline;
-  text-underline-offset: var(--space-1);
-}
-
 .stage {
   position: relative;
   min-width: 0; /* grid item: do not grow to the strip's max-content */
@@ -42,11 +30,6 @@
   color: var(--color-text);
   font-size: var(--text-display);
   line-height: var(--leading-tight);
-}
-
-.header p {
-  color: var(--color-text-muted);
-  font-size: var(--text-lg);
 }
 
 .result {

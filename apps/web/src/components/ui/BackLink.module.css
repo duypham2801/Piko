@@ -1,0 +1,11 @@
+.link {
+  justify-self: start;
+  color: var(--color-text-accent);
+  font-weight: var(--font-weight-bold);
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+  text-underline-offset: var(--space-1);
+}
