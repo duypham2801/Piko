@@ -223,5 +223,11 @@ Format: Decision · Reason · Alternatives · Tradeoffs · Phase/Date
 ## D-026 — The case stops at a seeded offset inside the winner cell
 - **Choice (owner):** the stop position is offset randomly but deterministically (from the seed) within a safe central band of the winner cell, never near its edges. It is not always dead center.
 - **Reason:** it feels natural and suspenseful, and it is still reproducible from the seed.
-- **Details** (band width, strip length, duration) are specified in handoff 2-2 (animation plan) and tuned in Phase 2.5 in the browser.
+- **Details** (handoff 2-2):
+  - The stop lands within ±0.3 of a cell from the winner centre (`stopBand` 0.6).
+  - The plan uses its own PRNG stream, `seed ^ 0x9e3779b9`.
+  - Filler cells are pure weighted draws (D-024 honesty). The only rule is that the two neighbours of the winner are never the winner.
+  - One curve: a linear ramp over the first 6 % of the time, then a velocity decay `((1−t)/(1−a))^3`. Velocity is continuous and the stop is smooth.
+  - Defaults: 40–47 cells, 6 s, peak about 28 cells/s.
+  - Everything is tuned in Phase 2.5 through `ANIMATION_PLAN_DEFAULTS`. On paper, the default tail is long: about 0.6 cells move in the last 2 s. Check it in the browser.
 - **Phase:** 2 · 2026-10-08 · approved by user

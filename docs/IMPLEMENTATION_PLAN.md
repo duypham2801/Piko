@@ -17,7 +17,7 @@
 | 1c-1 | Rebrand to PIKO: full `wswd` → `piko` rename | ✅ done | `1c-1-rebrand-piko.md` (D-023, `d44cca4`) |
 | 1c-2 | Prettier in `make check` + drop unused `@` alias | ✅ done | `1c-2-format-gate.md` (`2a38aaa`) |
 | 2-1 | Domain model + zod/mini + seeded selection engine | ✅ done | `2-1-domain-model-selection.md` (D-024, D-025, `6a61954`) |
-| 2-2 | Animation plan math (strip, stop offset, timeline params) | ⬜ | D-026 seeded stop offset; also folds in the 2-1 nits N1–N3 |
+| 2-2 | Animation plan math (strip, stop offset, timeline params) | 🔧 handoff ready | `2-2-animation-plan.md` (D-006, D-026; folds in the 2-1 nits N1–N3) |
 | 2.5 | Case-opening spike | ⬜ | Rough carousel in `/design` to validate motion feel early |
 | 3 | Case opening (full) | ⬜ | Controller, state machine, timeline, marker, reveal, reduced-motion |
 | 4 | Home | ⬜ | Hero, mode selector (Solo + locked Soon), presets, recent decisions |
