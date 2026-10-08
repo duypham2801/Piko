@@ -81,8 +81,8 @@ apps/web  ──HTTP /api──►  apps/api  ──►  PostgreSQL
 
 | Thành phần | Hiện có |
 |---|---|
-| API routes | ✅ `GET /api/healthz`, `GET /api/me` (tạo guest nếu chưa có)<br>⬜ Phase 5 (5-1): `GET/POST /api/decisions`, `GET/PUT/DELETE /api/decisions/:id`. Bắt buộc đã có session (không tạo guest), chỉ thấy và sửa quyết định của chính mình, tối đa 100 quyết định mỗi user |
-| Bảng DB | ✅ `users`, `sessions` (chỉ lưu sha256 của token)<br>⬜ Phase 5 (5-1): `decisions` (thuộc 1 user, xóa user thì xóa theo; danh sách lựa chọn lưu trong cột JSONB `options`) |
+| API routes | ✅ `GET /api/healthz`, `GET /api/me` (tạo guest nếu chưa có)<br>🔧 Phase 5 (5-1, trên nhánh `feat/phase-5-builder`, chưa vào `main`): `GET/POST /api/decisions`, `GET/PUT/DELETE /api/decisions/:id`. Bắt buộc đã có session (không tạo guest), chỉ thấy và sửa quyết định của chính mình, tối đa 100 quyết định mỗi user |
+| Bảng DB | ✅ `users`, `sessions` (chỉ lưu sha256 của token)<br>🔧 Phase 5 (5-1, chưa vào `main`): `decisions` (thuộc 1 user, xóa user thì xóa theo; danh sách lựa chọn lưu trong cột JSONB `options`) |
 | Web | ✅ Home, preset (xem trước + mở case), màn mở case + hiệu ứng ăn mừng. Chọn ngẫu nhiên chạy ở trình duyệt, chưa lưu gì lên API<br>⬜ Phase 5: builder, quyết định đã lưu (mục "Của bạn" trên Home) |
 | Web routes | ✅ `/` Home, `/presets/:slug` xem trước, `/presets/:slug/open` mở case<br>⬜ Phase 5: `/decisions/new` (`?from=<preset>`), `/decisions/:id` xem trước, `/decisions/:id/edit`, `/decisions/:id/open`<br>Caddy trả `index.html` cho mọi đường dẫn không phải `/api` |
 | Domain | Schema API, model `Decision`, engine chọn có seed (mulberry32), toán animation plan |
@@ -148,7 +148,7 @@ apps/web  ──HTTP /api──►  apps/api  ──►  PostgreSQL
 | Design system + font tiếng Việt tự host | ✅ (token, font, 6 primitive, `/design`) | ✅ | 1b ✅ |
 | Domain engine (selection, animation plan) | ✅ | ✅ | 2 ✅ |
 | UI case opening, home, builder, result, history | ✅ case opening, home, preset; ⬜ builder, result, history | ✅ | 3–4 ✅, 5 → 8 |
-| API + bảng quyết định | ⬜ (đang làm) | ✅ | 5 |
+| API + bảng quyết định | 🔧 code xong (5-1), chưa vào `main` | ✅ | 5 |
 | API + bảng lịch sử | ⬜ | ✅ | 6 |
 | VPS + domain + HTTPS thật | ⬜ chưa chọn | ✅ | 9 |
 | Backup ngoài VPS | ⬜ chưa chọn | ✅ | 9 |
@@ -172,3 +172,4 @@ apps/web  ──HTTP /api──►  apps/api  ──►  PostgreSQL
 | 2026-10-08 | Phase 1b xong (design system). Đổi tên `wswd` → `piko` (D-023): compose project `piko-dev`/`piko-prod`, volume `piko-*`, image `piko-api`/`piko-web`, cookie `piko_sid`, DB user/name `piko`. Áp dụng qua 1c-1; volume/image `wswd-*` cũ xoá thủ công sau. Repo: `github.com/duypham2801/Piko`. |
 | 2026-10-08 | Phase 3 merge vào `main`. Phase 4: web có router (React Router 8, D-028), thêm dòng "Web routes"; sửa dòng Web/Domain cho đúng hiện trạng. Hạ tầng không đổi. |
 | 2026-10-08 | Phase 4 merge vào `main`. Bắt đầu Phase 5 (D-029): kế hoạch thêm bảng `decisions` (JSONB `options`), route `/api/decisions` (bắt buộc session, chỉ dữ liệu của chính user) và route web `/decisions/...`. PGlite chỉ dùng khi test, không vào prod. Sửa bảng khoảng cách cho đúng hiện trạng. |
+| 2026-10-08 | 5-1 xong trên nhánh Phase 5: bảng `decisions` và route `/api/decisions` chuyển ⬜ → 🔧. Image API prod giữ 186 MB (PGlite bị loại khỏi image). |
