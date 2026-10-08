@@ -77,7 +77,7 @@ Format: Decision · Reason · Alternatives · Tradeoffs · Phase/Date
 ## D-013 — Identity: anonymous guest sessions, upgradable later
 - **Design:**
   - On first API call without a session, create `users(kind='guest')` plus a session.
-  - The cookie `wswd_sid` holds an opaque 256-bit token: httpOnly, Secure (prod), SameSite=Lax, 1-year rolling expiry.
+  - The cookie `piko_sid` (renamed from `wswd_sid` by D-023) holds an opaque 256-bit token: httpOnly, Secure (prod), SameSite=Lax, 1-year rolling expiry.
   - The DB stores only `sha256(token)`.
   - Later, account linking attaches email/OAuth identities to the same user row.
 - **Security:**
@@ -97,8 +97,8 @@ Format: Decision · Reason · Alternatives · Tradeoffs · Phase/Date
 
 ## D-015 — Docker environments: isolated dev and prod compose projects
 - **Design:**
-  - `compose.dev.yaml` (project `wswd-dev`): bind-mounted source, Vite HMR, `tsx watch`, DB exposed on host port 5433.
-  - `compose.prod.yaml` (project `wswd-prod`):
+  - `compose.dev.yaml` (project `piko-dev`, renamed by D-023): bind-mounted source, Vite HMR, `tsx watch`, DB exposed on host port 5433.
+  - `compose.prod.yaml` (project `piko-prod`):
     - immutable images tagged `APP_VERSION`
     - Caddy is the only public entry (TLS, static files, `/api` proxy, security headers/CSP)
     - one-off `migrate` service gates `api` startup
@@ -178,3 +178,23 @@ Format: Decision · Reason · Alternatives · Tradeoffs · Phase/Date
 - **Router:** no routing library yet. A single pathname check is enough for one dev page. Choose a router in Phase 4 (Home), when real navigation and deep links are needed.
 - **Tradeoffs:** `/design` cannot be shown to someone without running the dev stack. If a shareable demo is needed later, revisit (e.g. a separate preview build).
 - **Phase:** 1b · 2026-10-08 · approved by user
+
+## D-023 — Brand: PIKO, "Pick. Open. Go."; full rename of internal identifiers
+- **Choice:**
+  - Product name **PIKO** (written uppercase as the wordmark). Tagline **"Pick. Open. Go."** It replaces the working title "What Should We Do?" and the tagline "Stop thinking. Just open."
+  - The repository is `github.com/duypham2801/Piko`.
+  - Brand name and tagline stay English in every locale, but still go through the i18n dictionary (`title`, `tagline`).
+- **Full rename `wswd` → `piko`** (handoff 1c-1):
+  - package scope `@wswd/*` → `@piko/*`, root package `piko`
+  - compose projects `piko-dev` / `piko-prod`, so volumes become `piko-dev_*` / `piko-prod_*`
+  - images `piko-api` / `piko-web`, BuildKit cache id `piko-pnpm`, backup files `backups/piko-prod-*.dump`
+  - session cookie `piko_sid`
+  - example DB user/name `piko`
+- **Reason:** prod has never served real users, so this is the cheapest moment. Leaving `wswd` inside the code would make the internal names diverge from the brand forever.
+- **Consequences:**
+  - Dev starts on a fresh `piko-dev_pgdata` volume. The old dev data was only test guests.
+  - Existing guest cookies (`wswd_sid`) are ignored, so every browser becomes a new guest once. Acceptable because there are no real users.
+  - The old `wswd-*` volumes and images are orphaned and are removed manually by the owner after the rename is verified. The local `.env.dev` / `.env.prod` must be updated by hand (gitignored).
+  - Past handoffs in `docs/handoffs/` keep the old names as historical records.
+- **Not renamed:** the local checkout folder name, and the colors, fonts and visual direction (unchanged).
+- **Phase:** 1c · 2026-10-08 · approved by user

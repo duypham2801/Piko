@@ -1,8 +1,8 @@
-# CLAUDE.md — What Should We Do?
+# CLAUDE.md — PIKO
 
-A playful decision-making web app: the user gives a pool of options, opens a "case", and a horizontal case-opening carousel reveals the winner. Tagline: **"Stop thinking. Just open."**
+A playful decision-making web app: the user gives a pool of options, opens a "case", and a horizontal case-opening carousel reveals the winner. Brand: **PIKO**. Tagline: **"Pick. Open. Go."** (D-023)
 
-- Full product brief: `docs/prompts/WHAT_SHOULD_WE_DO_MASTER_PROMPT.md`. It is the source of truth for vision, phases and the review format.
+- Full product brief: `docs/prompts/PIKO_MASTER_PROMPT.md`. It is the source of truth for vision, phases and the review format.
 - Visual mood board: `images/figma_unisex_screens_design.png`. It is AI-generated, so use it for style only. Its hex values, font names and some screens (slot machine, group room) are **not** spec. The spec lives in `docs/DECISIONS.md` and `apps/web/src/styles/tokens.css`.
 - Environments and operations: `docs/ENVIRONMENTS.md`.
 - Current vs target topology: `docs/TOPOLOGY.md` (for the owner, in Vietnamese).
@@ -56,14 +56,14 @@ This project uses two separate agents. Know which one you are.
 Everything is run from the repo root.
 
 ```bash
-make dev            # start dev stack (web HMR + api watch + db) — project "wswd-dev"
+make dev            # start dev stack (web HMR + api watch + db) — project "piko-dev"
 make dev-down       # stop dev stack (data kept)
 make dev-logs       # follow dev logs
 make db-migrate     # generate/apply migrations in dev
 make check          # typecheck + lint + test (domain/api logic) inside the dev container
 
 make prod-build     # build immutable prod images tagged with APP_VERSION
-make prod-deploy    # backup DB → run migrations → start/replace prod stack — project "wswd-prod"
+make prod-deploy    # backup DB → run migrations → start/replace prod stack — project "piko-prod"
 make prod-rollback  # switch back to the previous image tag
 make prod-backup    # pg_dump prod DB into ./backups
 ```
@@ -87,7 +87,7 @@ Run `check` after meaningful changes and before closing a phase, not after every
 
 ## Environment & Docker rules
 
-- Dev and prod are **fully isolated**. They use different compose project names (`wswd-dev` / `wswd-prod`), so their containers, networks and **database volumes** are separate. Dev must never connect to the prod DB.
+- Dev and prod are **fully isolated**. They use different compose project names (`piko-dev` / `piko-prod`), so their containers, networks and **database volumes** are separate. Dev must never connect to the prod DB.
 - Each environment has its own env file: `.env.dev` and `.env.prod`, both gitignored. `.env.example` is committed. Never commit secrets and never bake them into images.
 - Prod runs **immutable, versioned images** built from a git tag (`APP_VERSION`). There are no bind mounts or dev tools in prod.
 - Prod containers:
@@ -136,7 +136,7 @@ Extract components only at a real reuse boundary. Do not build generic framework
 
 ## Language
 
-- UI copy is **Vietnamese by default**. The brand name "What Should We Do?" stays English. All strings go through `apps/web/src/i18n/`.
+- UI copy is **Vietnamese by default**. The brand name "PIKO" and the tagline "Pick. Open. Go." stay English (they still live in the i18n dictionary). All strings go through `apps/web/src/i18n/`.
 - Code, identifiers, comments and commit messages are in English. Chat with the user in Vietnamese.
 
 ## Testing policy

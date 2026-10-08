@@ -9,9 +9,9 @@ Tài liệu vận hành dành cho chủ dự án. Mục tiêu: **web thật (pro
 |  | **Dev** | **Prod** |
 |---|---|---|
 | Dùng để | Viết code và thử nghiệm | Phục vụ người dùng thật |
-| Tên compose project | `wswd-dev` | `wswd-prod` |
+| Tên compose project | `piko-dev` | `piko-prod` |
 | Code chạy từ | Thư mục source của bạn (sửa là thấy ngay, có HMR) | **Image đóng gói sẵn**, gắn version (vd `v0.3.0`) |
-| Database | Volume `wswd-dev_pgdata` (dữ liệu thử) | Volume `wswd-prod_pgdata` (dữ liệu thật) |
+| Database | Volume `piko-dev_pgdata` (dữ liệu thử) | Volume `piko-prod_pgdata` (dữ liệu thật) |
 | File cấu hình | `.env.dev` | `.env.prod` |
 | Truy cập | `http://localhost:5173` | `https://<domain>` (port 80/443) |
 | Công cụ dev | Có (watch, sourcemap, DB mở port 5433) | Không (chỉ chứa thứ cần để chạy) |
@@ -66,7 +66,7 @@ Trong suốt quá trình này, **prod vẫn chạy version cũ và không bị �
 
 ```
 1. git tag v0.3.0                 # đánh dấu phiên bản
-2. make prod-build                # build image wswd-web:v0.3.0, wswd-api:v0.3.0
+2. make prod-build                # build image piko-web:v0.3.0, piko-api:v0.3.0
 3. make prod-deploy               # tự động: backup DB → migrate → thay container
 ```
 
@@ -85,7 +85,7 @@ Trong suốt quá trình này, **prod vẫn chạy version cũ và không bị �
 
 ## 7. Backup
 
-- `make prod-backup` tạo file `backups/wswd-prod-<thời gian>.sql.gz`.
+- `make prod-backup` tạo file `backups/piko-prod-<thời gian>-<version>.dump`.
 - `make prod-deploy` luôn tự backup trước khi migrate.
 - **Thư mục `backups/` không được commit.** Nên định kỳ chép backup ra nơi khác (máy khác hoặc cloud storage).
 

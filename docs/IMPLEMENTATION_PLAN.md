@@ -1,7 +1,7 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 2 — Core decision domain (next)
+- **Current phase:** 1c-1 — Rebrand to PIKO (D-023), then Phase 2
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2)
 
 ## Phases
@@ -13,6 +13,7 @@
 | 1a-2 | Docker prod (Caddy, migrate, hardening, backup/rollback) | ✅ done | `1a-2-docker-prod.md` + `1a-2-fix-1.md` (merged `1d98559`) |
 | 1b-1 | Tokens + fonts + dev-only `/design` | ✅ done | `1b-1-tokens-fonts-design-page.md` (merged `3513f2c`) |
 | 1b-2 | UI primitives in `/design` | ✅ done | `1b-2-ui-primitives.md` (`5ec3629`) + `1b-2-fix-1.md` (`9503c43`) |
+| 1c-1 | Rebrand to PIKO: full `wswd` → `piko` rename | 🔧 handoff ready | `1c-1-rebrand-piko.md` (D-023) |
 | 2 | Core decision domain | ⬜ | `packages/domain`: types, seeded PRNG, selection, validation, animation plan, zod schemas + tests |
 | 2.5 | Case-opening spike | ⬜ | Rough carousel in `/design` to validate motion feel early |
 | 3 | Case opening (full) | ⬜ | Controller, state machine, timeline, marker, reveal, reduced-motion |
@@ -100,7 +101,7 @@
 - Docker bind mounts + pnpm workspace `node_modules` can be fiddly (handled with container-owned volumes).
 
 ## Technical debt
-- `prod-deploy` skips the backup when the prod stack is stopped (e.g. after `make prod-down`) but `wswd-prod_pgdata` holds data, so migrations would run without a backup. Fix before Phase 9: if the volume exists, start `db` (`up -d --wait db`) and back up before `up`.
+- `prod-deploy` skips the backup when the prod stack is stopped (e.g. after `make prod-down`) but `piko-prod_pgdata` holds data, so migrations would run without a backup. Fix before Phase 9: if the volume exists, start `db` (`up -d --wait db`) and back up before `up`.
 - `prod-restore` does not take a safety backup of the current data before `--clean`. Add one before Phase 9.
 - Restoring an old dump into a newer schema is not guarded. The runbook must say: restore only with the image version that created the dump.
 

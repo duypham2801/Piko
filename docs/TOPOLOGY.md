@@ -1,10 +1,10 @@
-# Topology — hiện tại và mục tiêu
+# Topology PIKO — hiện tại và mục tiêu
 
 Tài liệu cho chủ dự án. Nó cho biết hệ thống **đang** gồm những gì, và hệ thống **sẽ** gồm những gì khi phát hành MVP (Phase 9).
 - Architect cập nhật file này mỗi khi topology thay đổi, và hỏi chủ dự án (HITL) trước khi cập nhật.
 - Chi tiết vận hành nằm trong `ENVIRONMENTS.md`; lý do của từng lựa chọn nằm trong `DECISIONS.md`.
 
-**Cập nhật lần cuối:** 2026-10-08, sau khi merge 1a-2.
+**Cập nhật lần cuối:** 2026-10-08, đổi tên sang PIKO (D-023). Tên `piko-*` có hiệu lực khi handoff 1c-1 được merge; trước đó máy bạn vẫn chạy `wswd-*`.
 
 Ký hiệu:
 - ✅ đã có trên `main`
@@ -16,13 +16,13 @@ Ký hiệu:
 
 ## 1. Hiện tại
 
-### 1.1 Dev — ✅ chạy trên máy của bạn (`make dev`, project `wswd-dev`)
+### 1.1 Dev — ✅ chạy trên máy của bạn (`make dev`, project `piko-dev`)
 
 ```
  Trình duyệt
    │ http://localhost:5173
    ▼
-┌──────────────────────── Docker project: wswd-dev ────────────────────────┐
+┌──────────────────────── Docker project: piko-dev ────────────────────────┐
 │                                                                           │
 │  web  (Vite dev server, HMR)        127.0.0.1:5173                        │
 │    │  proxy /api/*                                                        │
@@ -47,15 +47,15 @@ Ký hiệu:
  Internet / trình duyệt
    │ :80 / :443 (TCP + UDP cho HTTP/3)      local test: :8080 / :8443
    ▼
-┌──────────────────────── Docker project: wswd-prod ───────────────────────┐
+┌──────────────────────── Docker project: piko-prod ───────────────────────┐
 │                                                                           │
-│  caddy  (image wswd-web:<tag>)       ── network: edge ──                 │
+│  caddy  (image piko-web:<tag>)       ── network: edge ──                 │
 │    ├─ /            → file tĩnh của web (đóng sẵn trong image)            │
 │    ├─ /assets/*    → cache 1 năm; file không tồn tại → 404               │
 │    └─ /api/*       → reverse proxy tới api:8787                          │
 │    HTTPS tự động (Let's Encrypt), security headers, CSP                  │
 │                                         │                                 │
-│  api    (image wswd-api:<tag>)       ── edge + backend ──                │
+│  api    (image piko-api:<tag>)       ── edge + backend ──                │
 │    │                                                                      │
 │  migrate (cùng image api, chạy 1 lần trước api, xong thì tắt)            │
 │    │                                                                      │
@@ -99,14 +99,14 @@ apps/web  ──HTTP /api──►  apps/api  ──►  PostgreSQL
 ┌─────────────────────────── 1 VPS (Linux, Docker ≥ 23) ───────────────────┐
 │  Firewall: chỉ mở TCP 22 (SSH), TCP 80/443, UDP 443                       │
 │                                                                           │
-│  wswd-prod   (luôn chạy, phục vụ người dùng)                              │
+│  piko-prod   (luôn chạy, phục vụ người dùng)                              │
 │     caddy → api → db         (như mục 1.2, với domain thật + HTTPS thật)  │
 │                                                                           │
 │  backups/  ──(copy định kỳ)──►  nơi lưu ngoài VPS   ⬜ chưa chọn          │
 └───────────────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────── Máy của bạn ──────────────────────────────────┐
-│  wswd-dev    (phát triển song song, không ảnh hưởng prod)                 │
+│  piko-dev    (phát triển song song, không ảnh hưởng prod)                 │
 │  git: feat/* → main → tag vX.Y.Z  ──(git pull + make prod-build/deploy)──►│ VPS
 └───────────────────────────────────────────────────────────────────────────┘
 ```
@@ -120,7 +120,7 @@ apps/web  ──HTTP /api──►  apps/api  ──►  PostgreSQL
 
 ```
  Trình duyệt
-   1. ensureSession() → GET /api/me            (1 request duy nhất, cookie wswd_sid)
+   1. ensureSession() → GET /api/me            (1 request duy nhất, cookie piko_sid)
    2. Người dùng nhập danh sách lựa chọn
    3. select(options, seed)                    ← chạy NGAY TRÊN TRÌNH DUYỆT (packages/domain)
    4. buildAnimationPlan() → carousel quay → lộ kết quả
@@ -144,7 +144,7 @@ apps/web  ──HTTP /api──►  apps/api  ──►  PostgreSQL
 |---|---|---|---|
 | Dev stack | ✅ | ✅ | 1a-1 |
 | Prod stack (Docker, Caddy, migrate, backup/rollback) | ✅ (chỉ local) | ✅ trên VPS | 1a-2 ✅, VPS ở 9 |
-| Design system + font tiếng Việt tự host | ⬜ | ✅ | 1b |
+| Design system + font tiếng Việt tự host | ✅ (token, font, 6 primitive, `/design`) | ✅ | 1b ✅ |
 | Domain engine (selection, animation plan) | ⬜ | ✅ | 2 |
 | UI case opening, home, builder, result, history | ⬜ | ✅ | 2.5 → 8 |
 | API + bảng lịch sử | ⬜ | ✅ | 6 |
@@ -153,7 +153,7 @@ apps/web  ──HTTP /api──►  apps/api  ──►  PostgreSQL
 
 ## 4. Sau MVP — 💭 chưa quyết định
 
-- **Staging:** project thứ ba `wswd-staging` trên cùng VPS, cùng pattern.
+- **Staging:** project thứ ba `piko-staging` trên cùng VPS, cùng pattern.
 - **Registry + CI:** build image một lần rồi pull về VPS, thay cho việc build ngay trên VPS.
 - **Tài khoản thật:** nâng cấp guest bằng email hoặc Google, không mất lịch sử.
 - **Couple/Squad:** cần realtime (WebSocket hoặc SSE), sẽ thêm một thành phần mới vào topology.
@@ -167,3 +167,4 @@ apps/web  ──HTTP /api──►  apps/api  ──►  PostgreSQL
 |---|---|
 | 2026-10-08 | Tạo file. Hiện tại: dev ✅, prod 🔧 (1a-2 đang sửa). Mục tiêu: 1 VPS, release thủ công từ tag. |
 | 2026-10-08 | Merge 1a-2: prod 🔧 → ✅ (chỉ local, chưa có VPS). Lỗ hổng backup khi DB đang tắt ghi vào tech debt, sửa trước Phase 9. |
+| 2026-10-08 | Phase 1b xong (design system). Đổi tên `wswd` → `piko` (D-023): compose project `piko-dev`/`piko-prod`, volume `piko-*`, image `piko-api`/`piko-web`, cookie `piko_sid`, DB user/name `piko`. Áp dụng qua 1c-1; volume/image `wswd-*` cũ xoá thủ công sau. Repo: `github.com/duypham2801/Piko`. |

@@ -1,3 +1,5 @@
+> **Brand update (2026-10-08, D-023):** the product is now named **PIKO**, tagline **"Pick. Open. Go."** This brief was written under the working title "What Should We Do?" and the old tagline "Stop thinking. Just open." Read every occurrence of those as PIKO / "Pick. Open. Go.". The vision, scope and rules below are unchanged.
+
 # MASTER PROMPT — WHAT SHOULD WE DO?
 ## Claude Code — Product Planning, Implementation, Review & Optimization
 
