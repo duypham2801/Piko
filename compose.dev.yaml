@@ -1,4 +1,4 @@
-name: wswd-dev
+name: piko-dev
 
 services:
   db:
@@ -43,7 +43,7 @@ services:
         condition: service_healthy
       install:
         condition: service_completed_successfully
-    command: sh -c 'pnpm --filter @wswd/api db:migrate && pnpm --filter @wswd/api dev'
+    command: sh -c 'pnpm --filter @piko/api db:migrate && pnpm --filter @piko/api dev'
     ports:
       - '127.0.0.1:8787:8787'
 
@@ -62,7 +62,7 @@ services:
         condition: service_completed_successfully
       api:
         condition: service_started
-    command: pnpm --filter @wswd/web dev
+    command: pnpm --filter @piko/web dev
     ports:
       - '127.0.0.1:5173:5173'
 

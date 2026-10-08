@@ -33,10 +33,10 @@ dev-install: ## Re-run the dependency installation service
 	@$(COMPOSE_DEV) run --rm --no-deps install pnpm install --frozen-lockfile
 
 db-generate: ## Generate Drizzle migrations in a one-off container
-	@$(COMPOSE_DEV) run --rm --no-deps install pnpm --filter @wswd/api db:generate
+	@$(COMPOSE_DEV) run --rm --no-deps install pnpm --filter @piko/api db:generate
 
 db-migrate: ## Apply Drizzle migrations to the development database
-	@$(COMPOSE_DEV) run --rm install pnpm --filter @wswd/api db:migrate
+	@$(COMPOSE_DEV) run --rm install pnpm --filter @piko/api db:migrate
 
 db-psql: ## Open psql in the development database container
 	@$(COMPOSE_DEV) exec db sh -c 'psql -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"'
@@ -45,24 +45,24 @@ check: ## Run typecheck, lint and tests in the development container
 	@$(COMPOSE_DEV) run --rm --no-deps install pnpm check
 
 dev-reset-db: ## Destructively remove only the development database volume
-	@read -r -p 'This removes all data in wswd-dev_pgdata. Continue? [y/N] ' answer; case "$$answer" in y|Y) ;; *) echo 'Cancelled.'; exit 1;; esac; \
+	@read -r -p 'This removes all data in piko-dev_pgdata. Continue? [y/N] ' answer; case "$$answer" in y|Y) ;; *) echo 'Cancelled.'; exit 1;; esac; \
 	$(COMPOSE_DEV) down; \
-	if docker volume inspect wswd-dev_pgdata >/dev/null 2>&1; then docker volume rm wswd-dev_pgdata; fi
+	if docker volume inspect piko-dev_pgdata >/dev/null 2>&1; then docker volume rm piko-dev_pgdata; fi
 
 prod-build: ## Build versioned production images from the exact git tag
 	@if [ ! -f .env.prod ]; then echo 'Missing .env.prod. Copy .env.prod.example and configure it first.' >&2; exit 1; fi
 	@if [ -z "$(TAG)" ]; then echo 'HEAD is not exactly at a git tag. Pass TAG=<tag> explicitly.' >&2; exit 1; fi
 	@echo 'Building production images from git tag $(TAG)...'
-	@git archive --format=tar "$(TAG)" | docker build -f docker/Dockerfile --target api-prod -t wswd-api:$(TAG) -
-	@git archive --format=tar "$(TAG)" | docker build -f docker/Dockerfile --target web-prod -t wswd-web:$(TAG) -
-	@docker image inspect wswd-api:$(TAG) --format='wswd-api:$(TAG) {{.Size}} bytes'
-	@docker image inspect wswd-web:$(TAG) --format='wswd-web:$(TAG) {{.Size}} bytes'
+	@git archive --format=tar "$(TAG)" | docker build -f docker/Dockerfile --target api-prod -t piko-api:$(TAG) -
+	@git archive --format=tar "$(TAG)" | docker build -f docker/Dockerfile --target web-prod -t piko-web:$(TAG) -
+	@docker image inspect piko-api:$(TAG) --format='piko-api:$(TAG) {{.Size}} bytes'
+	@docker image inspect piko-web:$(TAG) --format='piko-web:$(TAG) {{.Size}} bytes'
 
 prod-deploy: ## Deploy a tagged production release with a pre-migration backup
 	@if [ ! -f .env.prod ]; then echo 'Missing .env.prod. Copy .env.prod.example and configure it first.' >&2; exit 1; fi
 	@if [ -z "$(TAG)" ]; then echo 'HEAD is not exactly at a git tag. Pass TAG=<tag> explicitly.' >&2; exit 1; fi
-	@if ! docker image inspect wswd-api:$(TAG) >/dev/null 2>&1; then echo 'Missing image wswd-api:$(TAG). Run make prod-build TAG=$(TAG).' >&2; exit 1; fi
-	@if ! docker image inspect wswd-web:$(TAG) >/dev/null 2>&1; then echo 'Missing image wswd-web:$(TAG). Run make prod-build TAG=$(TAG).' >&2; exit 1; fi
+	@if ! docker image inspect piko-api:$(TAG) >/dev/null 2>&1; then echo 'Missing image piko-api:$(TAG). Run make prod-build TAG=$(TAG).' >&2; exit 1; fi
+	@if ! docker image inspect piko-web:$(TAG) >/dev/null 2>&1; then echo 'Missing image piko-web:$(TAG). Run make prod-build TAG=$(TAG).' >&2; exit 1; fi
 	@if APP_VERSION="$(TAG)" $(COMPOSE_PROD) ps --status running -q db | grep -q .; then \
 		if ! $(MAKE) --no-print-directory prod-backup APP_VERSION="$(CURRENT_DEPLOY_TAG)"; then \
 			echo 'Production backup failed; no deployment changes were made.' >&2; \
@@ -102,7 +102,7 @@ prod-backup: ## Create a mode-600 custom-format production database dump
 	@mkdir -p backups
 	@version="$$(if [ -s .deploy/current ]; then tr -d '\r\n' < .deploy/current; else printf '%s' '$(APP_VERSION)'; fi)"; \
 	timestamp="$$(date -u +%Y%m%dT%H%M%SZ)"; \
-	file="backups/wswd-prod-$${timestamp}-$${version}.dump"; \
+	file="backups/piko-prod-$${timestamp}-$${version}.dump"; \
 	partial="$${file}.partial"; \
 	umask 077; \
 	cleanup() { rm -f "$$partial"; }; \
@@ -117,14 +117,14 @@ prod-backup: ## Create a mode-600 custom-format production database dump
 	fi; \
 	mv "$$partial" "$$file"; \
 	trap - EXIT; \
-	find backups -maxdepth 1 -type f -name 'wswd-prod-*.dump' -printf '%T@ %p\n' | sort -nr | tail -n +31 | cut -d' ' -f2- | while IFS= read -r old; do [ -z "$$old" ] || rm -f "$$old"; done; \
+	find backups -maxdepth 1 -type f -name 'piko-prod-*.dump' -printf '%T@ %p\n' | sort -nr | tail -n +31 | cut -d' ' -f2- | while IFS= read -r old; do [ -z "$$old" ] || rm -f "$$old"; done; \
 	echo "Backup: $$file"; \
 	stat -c 'Size: %s bytes' "$$file"
 
 prod-restore: ## Destructively restore a custom-format dump into the production database
 	@if [ ! -f .env.prod ]; then echo 'Missing .env.prod. Copy .env.prod.example and configure it first.' >&2; exit 1; fi
 	@if [ -z "$(APP_VERSION)" ]; then echo 'No current production release. Pass APP_VERSION=<tag> or deploy a release first.' >&2; exit 1; fi
-	@if [ -z "$(FILE)" ]; then echo 'Usage: make prod-restore FILE=backups/wswd-prod-....dump' >&2; exit 1; fi
+	@if [ -z "$(FILE)" ]; then echo 'Usage: make prod-restore FILE=backups/piko-prod-....dump' >&2; exit 1; fi
 	@if [ ! -f "$(FILE)" ]; then echo 'Restore file not found: $(FILE)' >&2; exit 1; fi
 	@read -r -p 'This will destroy current production data and restore $(FILE). Continue? [y/N] ' answer; case "$$answer" in y|Y) ;; *) echo 'Cancelled.'; exit 1;; esac
 	@set +e; \

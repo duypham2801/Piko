@@ -1,5 +1,5 @@
-import { MeResponse } from '@wswd/domain';
-import type { MeResponseData } from '@wswd/domain';
+import { MeResponse } from '@piko/domain';
+import type { MeResponseData } from '@piko/domain';
 
 import { apiGet } from './client';
 

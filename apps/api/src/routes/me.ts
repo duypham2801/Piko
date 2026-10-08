@@ -1,4 +1,4 @@
-import type { MeResponseData } from '@wswd/domain';
+import type { MeResponseData } from '@piko/domain';
 import type { Context } from 'hono';
 
 import type { AppEnv } from '../auth/session.middleware.js';

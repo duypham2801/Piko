@@ -149,7 +149,7 @@ export default function DesignPage() {
           <p className={styles.eyebrow}>Developer playground · D-022</p>
           <h1>Design tokens</h1>
           <p>
-            The visual vocabulary for What Should We Do? Review this page in the browser before
+            The visual vocabulary for PIKO. Review this page in the browser before
             building shared UI primitives.
           </p>
         </header>

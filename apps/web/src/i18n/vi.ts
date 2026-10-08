@@ -1,5 +1,6 @@
 export const vi = {
-  title: 'What Should We Do?',
+  title: 'PIKO',
+  tagline: 'Pick. Open. Go.',
   loading: 'Đang tải phiên guest…',
   error: 'Không thể tải dữ liệu từ API.',
   health: 'Sức khỏe API',

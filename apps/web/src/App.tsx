@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { HealthResponse } from '@wswd/domain';
-import type { HealthResponseData, MeResponseData } from '@wswd/domain';
+import { HealthResponse } from '@piko/domain';
+import type { HealthResponseData, MeResponseData } from '@piko/domain';
 
 import { t } from './i18n';
 import { apiGet } from './lib/api/client';
@@ -54,6 +54,7 @@ export default function App() {
     return (
       <main>
         <h1>{t('title')}</h1>
+        <p>{t('tagline')}</p>
         <p>{t('error')}</p>
         <button type="button" onClick={retry}>
           {t('retry')}
@@ -66,6 +67,7 @@ export default function App() {
     return (
       <main>
         <h1>{t('title')}</h1>
+        <p>{t('tagline')}</p>
         <p>{t('loading')}</p>
       </main>
     );
@@ -75,6 +77,7 @@ export default function App() {
   return (
     <main>
       <h1>{t('title')}</h1>
+      <p>{t('tagline')}</p>
       <p>
         {t('health')}: {t(health.status)}
       </p>

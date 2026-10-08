@@ -32,18 +32,18 @@ USER node
 FROM base AS build
 
 COPY pnpm-lock.yaml pnpm-workspace.yaml .npmrc package.json ./
-RUN --mount=type=cache,id=wswd-pnpm,target=/pnpm/store \
+RUN --mount=type=cache,id=piko-pnpm,target=/pnpm/store \
   pnpm fetch
 
 COPY . .
-RUN --mount=type=cache,id=wswd-pnpm,target=/pnpm/store \
+RUN --mount=type=cache,id=piko-pnpm,target=/pnpm/store \
   pnpm install --frozen-lockfile --offline
 
-RUN NODE_ENV=production pnpm --filter @wswd/web build
-RUN NODE_ENV=production pnpm --filter @wswd/api build
+RUN NODE_ENV=production pnpm --filter @piko/web build
+RUN NODE_ENV=production pnpm --filter @piko/api build
 
-RUN --mount=type=cache,id=wswd-pnpm,target=/pnpm/store \
-  pnpm --filter @wswd/api deploy --prod --legacy /out/api
+RUN --mount=type=cache,id=piko-pnpm,target=/pnpm/store \
+  pnpm --filter @piko/api deploy --prod --legacy /out/api
 
 FROM node:22-alpine AS api-prod
 

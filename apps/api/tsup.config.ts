@@ -8,7 +8,7 @@ export default defineConfig({
   format: ['esm'],
   target: 'node22',
   bundle: true,
-  noExternal: [/^@wswd\//],
+  noExternal: [/^@piko\//],
   sourcemap: true,
   clean: true,
 });

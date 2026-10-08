@@ -1,4 +1,4 @@
-import type { HealthResponseData } from '@wswd/domain';
+import type { HealthResponseData } from '@piko/domain';
 import type { Context } from 'hono';
 
 import type { Sql } from '../db/client.js';

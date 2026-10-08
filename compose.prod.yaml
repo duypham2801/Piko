@@ -1,4 +1,4 @@
-name: wswd-prod
+name: piko-prod
 
 x-common-hardening: &common-hardening
   read_only: true
@@ -41,7 +41,7 @@ services:
 
   migrate:
     <<: *node-hardening
-    image: wswd-api:${APP_VERSION:?APP_VERSION is required}
+    image: piko-api:${APP_VERSION:?APP_VERSION is required}
     env_file: .env.prod
     command: ['node', 'dist/db/migrate.js']
     depends_on:
@@ -54,7 +54,7 @@ services:
 
   api:
     <<: *node-hardening
-    image: wswd-api:${APP_VERSION:?APP_VERSION is required}
+    image: piko-api:${APP_VERSION:?APP_VERSION is required}
     env_file: .env.prod
     environment:
       APP_VERSION: ${APP_VERSION}
@@ -85,7 +85,7 @@ services:
 
   caddy:
     <<: *common-hardening
-    image: wswd-web:${APP_VERSION:?APP_VERSION is required}
+    image: piko-web:${APP_VERSION:?APP_VERSION is required}
     environment:
       SITE_ADDRESS: ${SITE_ADDRESS:?SITE_ADDRESS is required}
       ACME_EMAIL: ${ACME_EMAIL:?ACME_EMAIL is required}

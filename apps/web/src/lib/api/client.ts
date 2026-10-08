@@ -1,4 +1,4 @@
-import { ApiError } from '@wswd/domain';
+import { ApiError } from '@piko/domain';
 import type { ZodType } from 'zod';
 
 export class ApiClientError extends Error {

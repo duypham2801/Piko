@@ -4,7 +4,7 @@ import type { Database } from '../db/client.js';
 import { sessions, type SessionRow, users, type UserRow } from '../db/schema.js';
 import { generateSessionToken, hashSessionToken } from './token.js';
 
-export const SESSION_COOKIE_NAME = 'wswd_sid';
+export const SESSION_COOKIE_NAME = 'piko_sid';
 export const SESSION_MAX_AGE_SECONDS = 365 * 24 * 60 * 60;
 export const SESSION_MAX_AGE_MS = SESSION_MAX_AGE_SECONDS * 1000;
 export const SESSION_TOUCH_INTERVAL_MS = 24 * 60 * 60 * 1000;
