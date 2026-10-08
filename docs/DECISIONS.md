@@ -237,3 +237,18 @@ Format: Decision · Reason · Alternatives · Tradeoffs · Phase/Date
   - 8 leading and 8 trailing cells
 - With these values the peak speed is about 21 cells/s. Only about 0.2 cells move in the last 2 s, and about 0.01 in the last 1 s. The strip therefore *looks* stopped well before `durationMs`. Phase 3 must decide when the reveal starts, for example once the remaining distance falls below a small threshold, so the user does not wait on a frozen strip.
 - **Phase:** 2 · 2026-10-08 · approved by user
+
+## D-027 — Phase 3 case-opening experience choices
+- **Reveal timing (owner):** the reveal starts when the strip is visually still, i.e. the remaining distance falls below `revealThresholdItems` (0.02 cell, about 2–3 px). It does not wait for the full `durationMs`.
+  - The domain computes `revealAtMs` for each plan, about 6.9 s with the 8 s default.
+  - The rAF loop keeps running until `durationMs`, so the strip lands exactly on `stopPosition` with no snap. The remaining motion is invisible.
+- **Celebration (owner): moderate.**
+  - The winner cell pops slightly with an outline, and the other cells dim.
+  - One short confetti burst, implemented in-house with WAAPI/CSS (no library, D-006).
+  - Then a winner panel with a large name.
+  - Built in Phase 3-2. No flashes, shaking or rarity colors (D-010).
+- **Sound and haptics (owner): deferred to Phase 8.** Sound needs licensed or synthesized assets, a mute control and autoplay handling.
+- **Mount point (owner):** the case-opening screen with a fixed demo pool temporarily replaces the dev health/guest debug screen in `App.tsx`. This allows a full-screen review on phone and desktop. Home (Phase 4) and the builder (Phase 5) replace the demo pool with real data.
+  - The app still warms the guest session in the background (`ensureSession()`, D-019), and never blocks on it (rule 5).
+- **Reduced motion (default, rule 11):** no long spin. The strip starts a few cells before the winner and slides to `stopPosition` with a token-based CSS transition (`--duration-slow`, `--ease-out`). The reveal starts when that transition ends.
+- **Phase:** 3 · 2026-10-08 · approved by user (reduced motion: default)
