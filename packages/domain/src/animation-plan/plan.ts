@@ -13,7 +13,7 @@ export const ANIMATION_PLAN_DEFAULTS = {
   minSpinItems: 40,
   spinItemsJitter: 8,
   stopBand: 0.6,
-  durationMs: 6000,
+  durationMs: 8000,
   accelFraction: 0.06,
   decelPower: 3,
 } as const;
