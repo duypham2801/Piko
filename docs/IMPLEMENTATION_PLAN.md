@@ -10,7 +10,7 @@
 |---|---|---|---|
 | 0 | Discovery | ✅ done | Greenfield; architecture in DECISIONS.md, ops in ENVIRONMENTS.md |
 | 1a-1 | Monorepo + API skeleton + Docker dev | ✅ done | `1a-1-monorepo-dev-foundation.md` + `1a-1-fix-1.md` |
-| 1a-2 | Docker prod (Caddy, migrate, hardening, backup/rollback) | 📤 handed off | `docs/handoffs/1a-2-docker-prod.md` |
+| 1a-2 | Docker prod (Caddy, migrate, hardening, backup/rollback) | 🔧 fixing | `1a-2-docker-prod.md` → review → `1a-2-fix-1.md` |
 | 1b | Design system + `/design` | ⬜ | Tokens, fonts (VN subset, self-hosted), primitives, playground |
 | 2 | Core decision domain | ⬜ | `packages/domain`: types, seeded PRNG, selection, validation, animation plan, zod schemas + tests |
 | 2.5 | Case-opening spike | ⬜ | Rough carousel in `/design` to validate motion feel early |
@@ -47,6 +47,17 @@
   - `make check` passes.
   - Bundle finding: the 151 kB gz figure was a **development React build**. `.env.dev` sets `NODE_ENV=development` and Vite honors it during `vite build`. With `NODE_ENV=production`, the real bundle is **300 kB min / 90.7 kB gz** (React ≈ 68 kB gz, zod classic ≈ 22.5 kB gz). This led to D-020 (zod/mini).
   - **Phase 1a-1 accepted.**
+- **1a-2 (2026-10-08):** the stack works locally, per the report and the architect's inspection:
+  - migrate gate, healthy services, SPA fallback, JSON 404 for `/api`
+  - security headers, read-only api with `CapEff=0`, XFF spoof blocked (429)
+  - backup mode 600, restore round-trip, local rollback, dev untouched
+  - Not tested: the build **from a git tag**, because the handoff forbade commits. This was the architect's mistake in the handoff.
+  - Accepted deviation: `setcap -r /usr/bin/caddy`. Non-root Caddy needs it under `cap_drop: ALL` + `no-new-privileges`. It costs a 52 MB copy-up layer.
+  - Image sizes accepted: api 186 MB (the `node:22-alpine` base is about 160 MB; deleting npm in a later layer cannot shrink it), web 119 MB. The 150/60 MB soft targets were unrealistic.
+  - MUST: a failed `pg_dump` is silent and `prod-deploy` migrates without a backup; the tag-based acceptance is still missing.
+  - SHOULD: caddy gets the DB password through `env_file`; a missing `/assets/*` file returns `index.html` with an immutable cache header; a same-tag redeploy overwrites the rollback target.
+  - NICE: `DOCKER_BUILDKIT=1` is on the wrong command.
+  - Fixes in `docs/handoffs/1a-2-fix-1.md`. Implementer commits are allowed on `feat/1a-2-prod-docker` only.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
@@ -70,4 +81,11 @@
 - Docker bind mounts + pnpm workspace `node_modules` can be fiddly (handled with container-owned volumes).
 
 ## Technical debt
-- (none yet)
+- `prod-restore` does not take a safety backup of the current data before `--clean`. Add one before Phase 9.
+- Restoring an old dump into a newer schema is not guarded. The runbook must say: restore only with the image version that created the dump.
+
+## Before Phase 9 (VPS runbook, to be written in ENVIRONMENTS.md)
+- Docker Engine ≥ 23 (BuildKit by default, unprivileged low ports inside containers), `make`, `git`.
+- `chmod 600 .env.prod`. Firewall: TCP 80/443 and UDP 443 only; never expose 5432.
+- HSTS uses `includeSubDomains`. Confirm that every subdomain of the chosen domain serves HTTPS, or drop that flag.
+- Off-site copy of `backups/`.

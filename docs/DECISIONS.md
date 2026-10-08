@@ -109,6 +109,10 @@ Format: Decision · Reason · Alternatives · Tradeoffs · Phase/Date
   - memory limits, json-file log rotation
 - **Images:** multi-stage builds on `node:22-alpine`, `pnpm fetch` for layer caching, `pnpm deploy --prod` for the api. The web image is `caddy:2-alpine` + `dist`.
 - **Operations:** `Makefile` targets (dev, check, prod-build, prod-deploy with automatic pre-migration backup, prod-rollback, prod-backup).
+- **Amendment (1a-2 review, 2026-10-08):**
+  - Prod Caddy runs non-root with the file capability removed (`setcap -r`), because `cap_drop: ALL` + `no-new-privileges` would otherwise block it from starting.
+  - Accepted image sizes are about 190 MB (api) and 120 MB (web). Each service gets only the env vars it needs; caddy never sees DB credentials.
+  - A failed backup aborts the deploy.
 - **Reason:** The user needs to keep developing while prod stays live and unaffected. Separate project names give separate containers, networks and DB volumes, so dev can never touch prod data.
 - **Alternatives:** Base + override compose files (less duplication, but easier to mix environments by mistake); API serving static files (2 containers, needs an external TLS proxy).
 - **Tradeoffs:** The `db` service definition is duplicated across the two files (small, explicit). This setup assumes a single VPS with a domain. A staging environment can be added later as a third project with the same pattern.
