@@ -236,6 +236,11 @@ Format: Decision · Reason · Alternatives · Tradeoffs · Phase/Date
   - `decelPower` 3
   - 8 leading and 8 trailing cells
 - With these values the peak speed is about 21 cells/s. Only about 0.2 cells move in the last 2 s, and about 0.01 in the last 1 s. The strip therefore *looks* stopped well before `durationMs`. Phase 3 must decide when the reveal starts, for example once the remaining distance falls below a small threshold, so the user does not wait on a frozen strip.
+- **Revised in the 3-2 visual review (owner, 2026-10-08):** `stopBand` 0.6 → **0.9**.
+  - The offset is uniform within ±0.45 cell, so the marker lands between 5 % and 95 % of the winner cell. With ±0.3 the stops always looked "near the middle".
+  - It remains uniform and seeded. It is never biased towards the edges, because an engineered near-miss is forbidden (D-010).
+  - The "never near its edges" wording above is superseded.
+  - Handoff `3-2-fix-2.md`.
 - **Phase:** 2 · 2026-10-08 · approved by user
 
 ## D-027 — Phase 3 case-opening experience choices

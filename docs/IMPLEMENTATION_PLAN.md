@@ -20,7 +20,7 @@
 | 2-2 | Animation plan math (strip, stop offset, timeline params) | ✅ done | `2-2-animation-plan.md` (D-006, D-026, `af1004f`) |
 | 2.5 | Case-opening spike | ✅ done (`2-5-fix-1.md`; duration tuned to 8 s) | `2-5-case-spike.md`: throwaway tuning playground in `/design#case-spike`; the owner tunes `ANIMATION_PLAN_DEFAULTS`; folds in the 2-2 `pickWeighted` nit |
 | 3-1 | Case-opening core | ✅ done (`3-1-fix-1.md`) | `3-1-case-carousel.md`: state machine, carousel, `revealAtMs`, reduced motion, mounted in `App.tsx`, spike removed (D-027) |
-| 3-2 | Reveal celebration | 🔧 fix (`3-2-fix-1.md`) | Winner pop + dim, in-house confetti, winner panel (D-027) |
+| 3-2 | Reveal celebration | 🔧 fix (`3-2-fix-1.md` ✅, `3-2-fix-2.md`) | Winner pop + dim, in-house confetti, winner panel (D-027) |
 | 4 | Home | ⬜ | Hero, mode selector (Solo + locked Soon), presets, recent decisions |
 | 5 | Decision builder | ⬜ | CRUD decisions/options via API, validation, open case |
 | 6 | Result + history | ⬜ | Winner reveal, Let's Go / Spin Again / Not Tonight / Share, history |
@@ -243,6 +243,16 @@
   - NICE: `text-align: start`.
   - Fixes in `3-2-fix-1.md`.
   - Lesson: runtime checks must measure element geometry, not only `scrollWidth`.
+- **3-2-fix-1 (2026-10-08):** the diff is 4 files (+9/−10).
+  - Verified:
+    - `.stage { min-width: 0 }`, and the clip is removed
+    - the `dimmed` prop is removed
+    - the confetti `dot: boolean`
+    - `text-align: start`
+  - The report gives `make check` passing, 80.16 kB gz, and geometry 360 → 16/328 and 1280 → 160/960.
+  - **Accepted.** Fast-forwarded `feat/phase-3-case-opening` to `feat/3-2-celebration`.
+  - Owner visual review: "the marker always stops at the same part of the cell". The architect measured 6 spins at 0.21–0.79 of the cell, within the `stopBand` 0.6 band (±0.3).
+  - The owner chose `stopBand` 0.9, uniform with no edge bias (D-026 revised). Handoff `3-2-fix-2.md`.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
