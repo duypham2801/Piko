@@ -23,7 +23,7 @@
 | 3-2 | Reveal celebration | ✅ done (`3-2-fix-1.md`, `3-2-fix-2.md`) | Winner pop + dim, in-house confetti, winner panel (D-027) |
 | 4-1 | Router + Home + preset case route | ✅ done (`39e7baa`) | `4-1-router-home.md`: React Router 8, Home (brand, question, mode selector, 4 preset cards), `/presets/:slug` case, not found (D-028) |
 | 4-2 | Preset preview | ✅ done (`4-2-fix-1.md`, `89fe5cc`) | `4-2-preset-preview.md`: includes the 4-1 clean-up (C0) and a `BackLink` primitive. Preview screen with option switches, `?off=` in the URL, case moves to `/presets/:slug/open` (D-028) |
-| 5-1 | Decisions API | 🔧 handed off | `5-1-decisions-api.md`: `decisions` table (options as JSONB), CRUD routes requiring a session, ownership, 100 per user, PGlite service tests (D-029) |
+| 5-1 | Decisions API | 🔧 fix-1 handed off (`5-1-fix-1.md`) | `5-1-decisions-api.md`: `decisions` table (options as JSONB), CRUD routes requiring a session, ownership, 100 per user, PGlite service tests (D-029) |
 | 5-2 | Builder screen | ⬜ | `/decisions/new` and `/decisions/:id/edit`: title, options (add/edit/remove), emoji picker, priority dots, shared schema validation, explicit Save, non-blocking save error (D-029) |
 | 5-3 | Saved decisions | ⬜ | `/decisions/:id` preview + `/open` case, Home "Của bạn" section + "Tạo quyết định", delete with confirm, preset "Tùy chỉnh" (D-028, D-029) |
 | 6 | Result + history | ⬜ | Winner reveal, Let's Go / Spin Again / Not Tonight / Share, history; adds Home "Recent decisions" (D-028) |
@@ -308,6 +308,28 @@
   - Default: one `decisions` table with JSONB options, 100 decisions per user, decision routes require an existing session and never create a guest, 404 for other users' decisions, no category UI.
   - Split into 5-1 (API + domain draft schema), 5-2 (builder), 5-3 (decision preview/case, Home list, delete, preset customize).
   - The owner approved updating `TOPOLOGY.md` with the planned table and routes, marked as in progress.
+
+- **5-1 (2026-10-08):** reviewed `feat/5-1-decisions-api` (6 commits, 21 files, +1009/−18).
+  - Architect re-check: `make check` passes. Tests: domain 44, api 18. The migration is additive only (one table, the FK, one index).
+  - Accepted:
+    - `DecisionDraft` and `Decision` share one field shape and the three refinements
+    - every query filters by `user_id`; the user-row `FOR UPDATE` lock before the count
+    - `allowGuestCreation: false` returns 401 without touching the limiter (tested: no user row created)
+    - malformed ids are a 404; `invalid_json`/`invalid_body`/413 are tested
+    - deviations: `Database` = `PgDatabase<PgQueryResultHKT, typeof schema>` with no casts, and `AppDependencies.sql` narrowed to `unsafe()` for a typed test stub
+  - MUST (`5-1-fix-1.md` F1): **PGlite ships in the prod api image** (25.2 MB; image 186 → 211 MB). It is an optional peer of drizzle-orm, so pnpm resolves a drizzle-orm variant that depends on it, and `pnpm deploy --prod` installs it. The 5-1 check only looked at the top-level `node_modules/@electric-sql`. The architect's handoff command was too weak to catch this.
+    - Fix: delete it after `deploy` and add a build guard.
+  - SHOULD (F2): the narrowed SQL type is written inline twice (`app.ts`, `health.ts`), and `Sql` in `db/client.ts` is now dead.
+  - NICE (F3):
+    - one route test only re-parses the same 404 body
+    - the fixture keeps an `optionIds` list that the index template already produces
+  - DO NOT TOUCH:
+    - classic `zod` for `z.uuid()` in `routes/decisions.ts`, the same as `env.ts`
+    - the service test storing an untrimmed draft: it proves the service stores what it is given; the route parses first
+    - `beforeEach` deleting all users in the test files
+  - Notes for 5-2:
+    - the global middleware requires `Content-Type: application/json` and `Origin` on **every** mutation, including a body-less `DELETE`
+    - a 401 `session_required` (expired or cleared cookie) should call `resetSession()`, then `ensureSession()`, and retry once
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.

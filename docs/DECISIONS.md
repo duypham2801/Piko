@@ -331,6 +331,6 @@ Format: Decision · Reason · Alternatives · Tradeoffs · Phase/Date
 - **Category (default):** stays in the model but has no UI in Phase 5, because nothing uses it yet.
 - **Test database (owner): PGlite.** `@electric-sql/pglite` `0.5.8` (Apache-2.0) is an `apps/api` **devDependency**.
   - It runs real PostgreSQL in WASM inside the test process. The API service and ownership tests run against the real Drizzle migrations, without a database container, so `make check` stays container-free.
-  - It is never part of the prod image (`pnpm deploy --prod`).
+  - It is never part of the prod image. Because PGlite is an optional peer of drizzle-orm, `pnpm deploy --prod` would still install it, so the Dockerfile deletes it after `deploy` and the build fails if any `@electric-sql` path remains (5-1-fix-1).
 - **Web routes (default, built in 5-2/5-3):** `/decisions/new` (optionally `?from=<preset slug>`), `/decisions/:id` (preview with switches, like presets), `/decisions/:id/edit`, `/decisions/:id/open`.
 - **Phase:** 5 · 2026-10-08 · approved by user (save flow, weights UI, Home list, emoji, preset customize, PGlite); default (storage, API, category, routes)
