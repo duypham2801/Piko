@@ -1,0 +1,119 @@
+.screen {
+  min-height: 100dvh;
+  padding: var(--space-6) var(--space-4) var(--space-8);
+  background: var(--color-bg);
+}
+
+.content {
+  display: grid;
+  width: min(100%, var(--content-max-width));
+  gap: var(--space-7);
+  margin: 0 auto;
+}
+
+.brand,
+.intro {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  text-align: center;
+}
+
+.wordmark {
+  color: var(--color-text);
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  font-weight: var(--font-weight-display);
+  line-height: var(--leading-tight);
+  letter-spacing: 0.04em;
+}
+
+.tagline {
+  color: var(--color-text-muted);
+  font-size: var(--text-lg);
+}
+
+.intro h1 {
+  font-size: var(--text-display);
+}
+
+.intro p {
+  max-width: var(--content-max-width);
+  color: var(--color-text-muted);
+  font-size: var(--text-lg);
+}
+
+.quickPicks {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.quickPicks h2 {
+  font-size: var(--text-2xl);
+}
+
+.presetList {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+}
+
+.presetLink {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  transition: transform var(--duration-normal) var(--ease-spring);
+}
+
+.presetLink:hover {
+  transform: translateY(calc(var(--space-1) * -1));
+}
+
+.presetLink:active {
+  transform: translateY(var(--shadow-offset-sm));
+}
+
+.presetCard {
+  display: grid;
+  min-width: 0;
+  min-height: calc(var(--space-8) * 2);
+  align-content: center;
+  gap: var(--space-2);
+}
+
+.presetEmoji {
+  font-size: var(--text-3xl);
+  line-height: var(--leading-tight);
+}
+
+.presetTitle {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: var(--font-weight-display);
+  line-height: var(--leading-tight);
+}
+
+.presetHint {
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .presetLink {
+    transition: none;
+  }
+}
+
+@media (min-width: 48rem) {
+  .screen {
+    padding: var(--space-6);
+  }
+
+  .content {
+    width: min(100%, var(--content-wide-max-width));
+  }
+
+  .presetList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
