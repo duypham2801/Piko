@@ -65,12 +65,12 @@
   transition: transform var(--duration-normal) var(--ease-spring);
 }
 
-.presetLink:hover {
-  transform: translateY(calc(var(--space-1) * -1));
+.presetLink:active {
+  transform: translateY(var(--shadow-offset));
 }
 
-.presetLink:active {
-  transform: translateY(var(--shadow-offset-sm));
+.presetLink:active .presetCard {
+  box-shadow: none;
 }
 
 .presetCard {
@@ -101,6 +101,12 @@
 @media (prefers-reduced-motion: reduce) {
   .presetLink {
     transition: none;
+  }
+}
+
+@media (hover: hover) {
+  .presetLink:hover {
+    transform: translateY(calc(var(--space-1) * -1));
   }
 }
 

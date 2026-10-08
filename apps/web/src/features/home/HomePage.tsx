@@ -6,7 +6,7 @@ import ModeSelector from './ModeSelector';
 import styles from './HomePage.module.css';
 import { PRESETS } from '../presets/presets';
 
-const tones = ['primary', 'secondary', 'accent', 'primary'] as const;
+const tones = ['primary', 'secondary', 'accent'] as const;
 
 export default function HomePage() {
   return (

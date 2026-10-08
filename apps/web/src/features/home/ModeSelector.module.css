@@ -20,6 +20,7 @@
 }
 
 .option {
+  position: relative;
   display: grid;
   min-width: 0;
   min-height: var(--tap-target-min);
@@ -62,16 +63,4 @@
   font-weight: var(--font-weight-bold);
   line-height: var(--leading-tight);
   overflow-wrap: anywhere;
-}
-
-.visuallyHidden {
-  position: absolute;
-  width: var(--border-width-thin);
-  height: var(--border-width-thin);
-  margin: calc(var(--border-width-thin) * -1);
-  padding: 0;
-  overflow: hidden;
-  border: 0;
-  clip-path: inset(50%);
-  white-space: nowrap;
 }

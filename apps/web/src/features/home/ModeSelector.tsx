@@ -23,10 +23,9 @@ export default function ModeSelector() {
         {modes.map((mode) => (
           <label className={styles.option} key={mode.value}>
             <input
-              className={styles.visuallyHidden}
+              className="visually-hidden"
               defaultChecked={mode.value === 'solo'}
               disabled={mode.disabled}
-              aria-disabled={mode.disabled || undefined}
               name="mode"
               type="radio"
               value={mode.value}
