@@ -13,9 +13,7 @@ export class ApiClientError extends Error {
   }
 }
 
-export async function apiGet<T>(path: string, schema: ZodMiniType<T>): Promise<T> {
-  const response = await fetch(path, { credentials: 'same-origin' });
-
+async function parseResponse<T>(response: Response, schema: ZodMiniType<T>): Promise<T> {
   if (!response.ok) {
     const body: unknown = await response.json().catch(() => undefined);
     const parsed = ApiError.safeParse(body);
@@ -26,4 +24,28 @@ export async function apiGet<T>(path: string, schema: ZodMiniType<T>): Promise<T
   }
 
   return schema.parse(await response.json());
+}
+
+export async function apiGet<T>(
+  path: string,
+  schema: ZodMiniType<T>,
+  options?: Pick<RequestInit, 'signal'>,
+): Promise<T> {
+  const response = await fetch(path, { credentials: 'same-origin', signal: options?.signal });
+  return parseResponse(response, schema);
+}
+
+export async function apiSend<T>(
+  method: 'POST' | 'PUT',
+  path: string,
+  body: unknown,
+  schema: ZodMiniType<T>,
+): Promise<T> {
+  const response = await fetch(path, {
+    body: JSON.stringify(body),
+    credentials: 'same-origin',
+    headers: { 'Content-Type': 'application/json' },
+    method,
+  });
+  return parseResponse(response, schema);
 }
