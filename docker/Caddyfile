@@ -1,0 +1,56 @@
+{
+	email {$ACME_EMAIL}
+	admin off
+}
+
+{$SITE_ADDRESS} {
+	encode zstd gzip
+	root * /srv
+
+	# Keep trusted_proxies unset. Caddy discards client-supplied X-Forwarded-*
+	# headers and writes X-Forwarded-For from the real client connection.
+	log {
+		output stdout
+		format json
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		X-Frame-Options "DENY"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+		-Server
+	}
+
+	@api path /api/*
+	handle @api {
+		reverse_proxy api:8787
+	}
+
+	@assetFiles {
+		path /assets/*
+		file
+	}
+	handle @assetFiles {
+		header Cache-Control "public, max-age=31536000, immutable"
+		file_server
+	}
+
+	@assets path /assets/*
+	handle @assets {
+		header Cache-Control "no-cache"
+		respond 404
+	}
+
+	handle {
+		header Cache-Control "no-cache"
+		try_files {path} /index.html
+		file_server
+	}
+}
+
+http://:8081 {
+	respond /healthz "ok" 200
+}

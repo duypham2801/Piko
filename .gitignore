@@ -4,4 +4,6 @@ dist
 *.log
 .env*
 !.env.example
+!.env.prod.example
+.deploy/
 backups/

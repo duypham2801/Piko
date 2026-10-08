@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1
+
 FROM node:22-alpine AS base
 
 ENV COREPACK_HOME=/opt/corepack
@@ -26,3 +28,57 @@ RUN mkdir -p \
 
 ENV npm_config_store_dir=/pnpm/store
 USER node
+
+FROM base AS build
+
+COPY pnpm-lock.yaml pnpm-workspace.yaml .npmrc package.json ./
+RUN --mount=type=cache,id=wswd-pnpm,target=/pnpm/store \
+  pnpm fetch
+
+COPY . .
+RUN --mount=type=cache,id=wswd-pnpm,target=/pnpm/store \
+  pnpm install --frozen-lockfile --offline
+
+RUN NODE_ENV=production pnpm --filter @wswd/web build
+RUN NODE_ENV=production pnpm --filter @wswd/api build
+
+RUN --mount=type=cache,id=wswd-pnpm,target=/pnpm/store \
+  pnpm --filter @wswd/api deploy --prod --legacy /out/api
+
+FROM node:22-alpine AS api-prod
+
+ENV NODE_ENV=production
+
+RUN rm -rf \
+    /usr/local/lib/node_modules/npm \
+    /usr/local/lib/node_modules/corepack \
+    /usr/local/lib/node_modules/yarn \
+    /usr/local/bin/npm \
+    /usr/local/bin/npx \
+    /usr/local/bin/corepack \
+    /usr/local/bin/yarn \
+    /usr/local/bin/yarnpkg \
+    /opt/yarn-*
+
+WORKDIR /app
+
+COPY --from=build /out/api/node_modules ./node_modules
+COPY --from=build /out/api/package.json ./package.json
+COPY --from=build /repo/apps/api/dist ./dist
+COPY --from=build /repo/apps/api/drizzle ./drizzle
+
+USER node
+EXPOSE 8787
+CMD ["node", "dist/index.js"]
+
+FROM caddy:2-alpine AS web-prod
+
+RUN addgroup -S caddy \
+  && adduser -S -G caddy caddy \
+  && setcap -r /usr/bin/caddy \
+  && chown -R caddy:caddy /data /config
+
+COPY docker/Caddyfile /etc/caddy/Caddyfile
+COPY --from=build /repo/apps/web/dist /srv
+
+USER caddy
