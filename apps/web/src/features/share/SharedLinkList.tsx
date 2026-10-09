@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
 import type { SharedCaseData } from '@piko/domain';
 
@@ -28,14 +28,6 @@ export default function SharedLinkList({ shares, now, onRevoked }: SharedLinkLis
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
   const [revokingId, setRevokingId] = useState<string | null>(null);
   const [errorId, setErrorId] = useState<string | null>(null);
-  const mountedRef = useRef(true);
-
-  useEffect(() => {
-    mountedRef.current = true;
-    return () => {
-      mountedRef.current = false;
-    };
-  }, []);
 
   useEffect(() => {
     if (!confirmingId) {
@@ -71,28 +63,17 @@ export default function SharedLinkList({ shares, now, onRevoked }: SharedLinkLis
 
     try {
       await revokeShare(id);
-      if (!mountedRef.current) {
-        return;
-      }
-
-      setRevokingId(null);
-      setConfirmingId(null);
-      onRevoked(id);
     } catch (error: unknown) {
-      if (!mountedRef.current) {
-        return;
-      }
-
-      if (error instanceof ApiClientError && error.status === 404) {
+      if (!(error instanceof ApiClientError && error.status === 404)) {
         setRevokingId(null);
-        setConfirmingId(null);
-        onRevoked(id);
+        setErrorId(id);
         return;
       }
-
-      setRevokingId(null);
-      setErrorId(id);
     }
+
+    setRevokingId(null);
+    setConfirmingId(null);
+    onRevoked(id);
   };
 
   return (

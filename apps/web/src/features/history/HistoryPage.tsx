@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import { useNavigate } from 'react-router';
 
 import BackLink from '../../components/ui/BackLink';
@@ -16,28 +16,15 @@ export default function HistoryPage() {
   const { removeShare, shares, status: sharesStatus } = useShareList();
   const sharedLinksHeadingRef = useRef<HTMLHeadingElement>(null);
   const historyEntriesHeadingRef = useRef<HTMLHeadingElement>(null);
-  const focusAfterRevokeRef = useRef(false);
   const now = new Date();
 
-  const handleRevoked = useCallback(
-    (id: string) => {
-      focusAfterRevokeRef.current = true;
-      removeShare(id);
-    },
-    [removeShare],
-  );
-
-  useEffect(() => {
-    if (!focusAfterRevokeRef.current || sharesStatus !== 'loaded') {
-      return;
-    }
-
-    focusAfterRevokeRef.current = false;
-    const heading =
-      shares.length > 0 ? sharedLinksHeadingRef.current : historyEntriesHeadingRef.current;
-    const frame = requestAnimationFrame(() => heading?.focus());
-    return () => cancelAnimationFrame(frame);
-  }, [shares, sharesStatus]);
+  const handleRevoked = (id: string) => {
+    const rowsRemain = shares.length > 1;
+    removeShare(id);
+    requestAnimationFrame(() =>
+      (rowsRemain ? sharedLinksHeadingRef : historyEntriesHeadingRef).current?.focus(),
+    );
+  };
 
   return (
     <>
