@@ -7,6 +7,7 @@ export const vi = {
   spinAgain: 'Mở lại',
   goNow: 'Đi thôi',
   notToday: 'Không phải hôm nay',
+  lastTwoOptionsHint: 'Chỉ còn 2 lựa chọn cuối.',
   back: 'Trở về',
   homeQuestion: 'Hôm nay chọn gì?',
   homeLead: 'Khỏi đắn đo, PIKO mở case chọn giùm bạn.',

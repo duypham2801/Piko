@@ -94,15 +94,11 @@
   text-align: center;
 }
 
-.historyStatus {
-  color: var(--color-success);
+.historyStatusError {
+  color: var(--color-danger);
   font-size: var(--text-sm);
   font-weight: var(--font-weight-bold);
   text-align: center;
-}
-
-.historyStatusError {
-  color: var(--color-danger);
 }
 
 @keyframes winnerPanelIn {

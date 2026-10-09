@@ -22,7 +22,7 @@ type CaseOpeningProps = {
 
 type HistorySaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
-const minOptionsHintId = 'case-min-options-hint';
+const lastTwoOptionsHintId = 'case-min-options-hint';
 
 function excludeOptions(
   options: readonly DecisionOptionData[],
@@ -170,7 +170,7 @@ export default function CaseOpening({
                 {t('spinAgain')}
               </Button>
               <Button
-                aria-describedby={notTodayDisabled ? minOptionsHintId : undefined}
+                aria-describedby={notTodayDisabled ? lastTwoOptionsHintId : undefined}
                 disabled={notTodayDisabled}
                 fullWidth
                 variant="outline"
@@ -180,15 +180,19 @@ export default function CaseOpening({
               </Button>
             </div>
             {notTodayDisabled && (
-              <p className={styles.hint} id={minOptionsHintId}>
-                {t('minOptionsHint')}
+              <p className={styles.hint} id={lastTwoOptionsHintId}>
+                {t('lastTwoOptionsHint')}
               </p>
             )}
             <p
               aria-live="polite"
-              className={`${styles.historyStatus} ${
-                historySaveStatus === 'error' ? styles.historyStatusError : ''
-              }`}
+              className={
+                historySaveStatus === 'saved'
+                  ? 'visually-hidden'
+                  : historySaveStatus === 'error'
+                    ? styles.historyStatusError
+                    : ''
+              }
             >
               {historyStatusMessage}
             </p>
