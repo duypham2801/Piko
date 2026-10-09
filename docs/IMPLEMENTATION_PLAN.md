@@ -36,7 +36,7 @@
 | 6-6 | Live viewing + interactions | ⏸ moved | Deferred to the Realtime phase (D-031) |
 | 7-1 | Navigation shell | ✅ (`7-1-fix-1.md`) | `7-1-navigation-shell.md`: layout route + screen shell (back link at one position), mobile top bar, desktop sidebar frame from `64rem`, focus mode on case screens, `/s/:id` outside; replaces the copied screen layouts (D-032) |
 | 7-2 | Sidebar lists + desktop Home | ✅ (`7-2-fix-1.md`) | "Của bạn" and "Gần đây" in the sidebar (reload on route change), Home drops both sections from `64rem` (D-032) |
-| 7-3 | Case overlay | 🔄 fix (`7-3-fix-1.md`) | The case opens as a modal overlay above the preview/builder (nested `/open` routes, full-screen on phones, × / Esc / Back to close), focus mode removed, plus the 7-2 carry-overs (C0) (D-033) |
+| 7-3 | Case overlay | 🔄 fix (`7-3-fix-1.md`, `7-3-fix-2.md`) | The case opens as a modal overlay above the preview/builder (nested `/open` routes, full-screen on phones, × / Esc / Back to close), focus mode removed, plus the 7-2 carry-overs (C0) (D-033) |
 | 7-4 | Responsive pass | ⬜ | Every screen at 360 / 768 / 1024 / 1280 / 1920 after the overlay: carousel, winner reveal, CTAs, card grids, option layout |
 | 8 | Polish | ⬜ | States, micro-interactions, consistency |
 | 9 | First prod release | ⬜ | Deploy `v0.1.0` to VPS, verify backup/rollback |
@@ -764,6 +764,16 @@
     - `if (!id) return null` / `if (!preset) return null` in the case pages (unreachable guards for the type checker)
     - the case pages no longer set `<title>` (the preview's title is the same)
   - → `7-3-fix-1.md`.
+- **7-3-fix-1 (2026-10-09):** verified (`e630769`, 2 files).
+  - **Verified:**
+    - Closing the share dialog (`Esc` or "Đóng") keeps the case overlay open with its result, and focus returns to "Chia sẻ".
+    - Initial focus is on "Mở case".
+    - At 360 px the title and "×" no longer overlap.
+    - The "×" glyph is larger.
+  - **Test note:** with CDP `Runtime.evaluate` clicks (no user activation), one `Esc` closed both dialogs. Chrome's close watcher groups dialogs opened without user activation. With real mouse input via `Input.dispatchMouseEvent`, it behaves correctly. Future nested-dialog checks must use real input.
+  - **Still open (F3):** the desktop overlay is 736 px tall for 498–622 px of content. `inset: 0` makes `height: auto` stretch. `height: fit-content` was verified in the browser (568 px, centred; clamps and scrolls at 1280×500).
+  - The implementer reported one transient PGlite timeout in `history.test.ts` that passed on rerun (known flake, technical debt).
+  - → `7-3-fix-2.md`.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
