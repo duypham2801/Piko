@@ -215,22 +215,26 @@ export function useCaseOpening(pool: readonly DecisionOptionData[]) {
   useEffect(() => () => cancelAnimation(), [cancelAnimation]);
 
   const open = useCallback(
-    (spinOptions: readonly DecisionOptionData[] = pool) => {
+    (spinOptions: readonly DecisionOptionData[] = pool, seed?: number) => {
       if (state.status === 'spinning') {
-        return;
+        return undefined;
       }
 
-      const values = crypto.getRandomValues(new Uint32Array(1));
-      const seed = values[0];
-      if (seed === undefined) {
-        return;
+      let spinSeed = seed;
+      if (spinSeed === undefined) {
+        const values = crypto.getRandomValues(new Uint32Array(1));
+        spinSeed = values[0];
+        if (spinSeed === undefined) {
+          return undefined;
+        }
       }
 
       cancelAnimation();
       reducedMotionRef.current = window.matchMedia(REDUCED_MOTION_QUERY).matches;
-      const result = select(spinOptions, seed);
+      const result = select(spinOptions, spinSeed);
       const plan = buildAnimationPlan(result, spinOptions);
       dispatch({ type: 'open', plan, result, options: spinOptions });
+      return { options: [...spinOptions], result };
     },
     [cancelAnimation, pool, state.status],
   );

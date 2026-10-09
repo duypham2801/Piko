@@ -1,6 +1,12 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { DECISION_LIMITS } from '@piko/domain';
-import type { DecisionOptionData, HistorySourceInputData } from '@piko/domain';
+import type {
+  DecisionDraftData,
+  DecisionOptionData,
+  HistorySourceInputData,
+  SelectionResultData,
+  SharedCaseData,
+} from '@piko/domain';
 
 import BackLink from '../../components/ui/BackLink';
 import Button from '../../components/ui/Button';
@@ -10,6 +16,8 @@ import CaseCarousel from './CaseCarousel';
 import styles from './CaseOpening.module.css';
 import Confetti from './Confetti';
 import WinnerPanel from './WinnerPanel';
+import ShareDialog from '../share/ShareDialog';
+import { recordShareSpin } from '../../lib/api/shares';
 import { useCaseOpening } from './useCaseOpening';
 
 type CaseOpeningProps = {
@@ -23,6 +31,7 @@ type CaseOpeningProps = {
 type HistorySaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
 const lastTwoOptionsHintId = 'case-min-options-hint';
+const shareToggleId = 'case-share-toggle';
 
 function excludeOptions(
   options: readonly DecisionOptionData[],
@@ -42,6 +51,10 @@ export default function CaseOpening({
 }: CaseOpeningProps) {
   const [excludedIds, setExcludedIds] = useState<ReadonlySet<string>>(() => new Set());
   const [historySaveStatus, setHistorySaveStatus] = useState<HistorySaveStatus>('idle');
+  const [share, setShare] = useState<SharedCaseData | null>(null);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [shareDecision, setShareDecision] = useState<DecisionDraftData | null>(null);
+  const [shareResult, setShareResult] = useState<SelectionResultData | null>(null);
   const saveRequestRef = useRef(0);
   const pool = useMemo(() => excludeOptions(options, excludedIds), [excludedIds, options]);
   const { state, plan, open, viewportRef, stripRef } = useCaseOpening(pool);
@@ -49,10 +62,20 @@ export default function CaseOpening({
     saveRequestRef.current += 1;
     setHistorySaveStatus('idle');
   }, []);
+  const recordSpin = useCallback(
+    (spin: ReturnType<typeof open>) => {
+      if (!share || !spin) {
+        return;
+      }
+
+      void recordShareSpin(share.id, spin).catch(() => {});
+    },
+    [share],
+  );
   const spin = useCallback(() => {
     resetSaveStatus();
-    open();
-  }, [open, resetSaveStatus]);
+    recordSpin(open());
+  }, [open, recordSpin, resetSaveStatus]);
   const rejectWinner = useCallback(() => {
     if (state.status !== 'revealed') {
       return;
@@ -68,8 +91,25 @@ export default function CaseOpening({
 
     resetSaveStatus();
     setExcludedIds(nextExcludedIds);
-    open(nextPool);
-  }, [excludedIds, open, options, resetSaveStatus, state]);
+    recordSpin(open(nextPool));
+  }, [excludedIds, open, options, recordSpin, resetSaveStatus, state]);
+  const openShareDialog = useCallback(() => {
+    if (state.status !== 'revealed') {
+      return;
+    }
+
+    setShareDecision({
+      ...(category === undefined ? {} : { category }),
+      options: state.options,
+      title,
+    });
+    setShareResult(state.result);
+    setShareDialogOpen(true);
+  }, [category, state, title]);
+  const closeShareDialog = useCallback(() => {
+    setShareDialogOpen(false);
+    requestAnimationFrame(() => document.getElementById(shareToggleId)?.focus());
+  }, []);
   const saveResult = useCallback(async () => {
     if (
       state.status !== 'revealed' ||
@@ -169,6 +209,15 @@ export default function CaseOpening({
                 {t('notToday')}
               </Button>
             </div>
+            <Button
+              aria-haspopup="dialog"
+              fullWidth
+              id={shareToggleId}
+              variant="outline"
+              onClick={openShareDialog}
+            >
+              {t('share')}
+            </Button>
             {notTodayDisabled && (
               <p className={styles.hint} id={lastTwoOptionsHintId}>
                 {t('lastTwoOptionsHint')}
@@ -193,6 +242,15 @@ export default function CaseOpening({
           </Button>
         )}
       </div>
+      {shareDialogOpen && shareDecision && shareResult && (
+        <ShareDialog
+          decision={shareDecision}
+          result={shareResult}
+          share={share}
+          onClose={closeShareDialog}
+          onShared={setShare}
+        />
+      )}
     </main>
   );
 }
