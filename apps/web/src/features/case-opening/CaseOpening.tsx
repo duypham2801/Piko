@@ -4,12 +4,12 @@ import type { DecisionOptionData, HistorySourceInputData } from '@piko/domain';
 
 import BackLink from '../../components/ui/BackLink';
 import Button from '../../components/ui/Button';
-import Card from '../../components/ui/Card';
 import { t } from '../../i18n';
 import { createHistoryEntry } from '../../lib/api/history';
 import CaseCarousel from './CaseCarousel';
 import styles from './CaseOpening.module.css';
 import Confetti from './Confetti';
+import WinnerPanel from './WinnerPanel';
 import { useCaseOpening } from './useCaseOpening';
 
 type CaseOpeningProps = {
@@ -138,17 +138,7 @@ export default function CaseOpening({
         </div>
 
         <div aria-live="polite" className={styles.result} role="status">
-          {winner && (
-            <Card className={styles.winnerPanel} tone="accent">
-              <span aria-hidden="true" className={styles.winnerEmoji}>
-                {winner.emoji}
-              </span>
-              <span className={styles.winnerDetails}>
-                <span className={styles.winnerLabel}>{t('winnerIs')}</span>
-                <span className={styles.winnerName}>{winner.label}</span>
-              </span>
-            </Card>
-          )}
+          {winner && <WinnerPanel label={t('winnerIs')} option={winner} />}
         </div>
 
         {revealed ? (

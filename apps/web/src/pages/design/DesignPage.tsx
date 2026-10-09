@@ -1,5 +1,7 @@
 import { useState, type CSSProperties } from 'react';
 
+import Button from '../../components/ui/Button';
+import Sheet from '../../components/ui/Sheet';
 import ComponentsSection from './ComponentsSection';
 import styles from './DesignPage.module.css';
 
@@ -141,6 +143,7 @@ function tokenValue(values: Record<string, string>, token: string): string {
 export default function DesignPage() {
   const values = useResolvedValues(allColorTokens);
   const [played, setPlayed] = useState<Record<string, number>>({});
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   return (
     <main className={styles.page}>
@@ -161,6 +164,7 @@ export default function DesignPage() {
           <a href="#surfaces">Radius, borders & shadows</a>
           <a href="#motion">Motion</a>
           <a href="#components">Components</a>
+          <a href="#sheet">Sheet</a>
         </nav>
 
         <section className={styles.section} id="colors">
@@ -413,6 +417,22 @@ export default function DesignPage() {
         </section>
 
         <ComponentsSection />
+
+        <section className={styles.section} id="sheet">
+          <div className={styles.sectionHeading}>
+            <p className={styles.sectionIndex}>07</p>
+            <div>
+              <h2>Sheet</h2>
+              <p>Native dialog shell with a responsive bottom-sheet layout.</p>
+            </div>
+          </div>
+          <Button onClick={() => setSheetOpen(true)}>Open Sheet</Button>
+          {sheetOpen && (
+            <Sheet closeLabel="Close" title="Sheet demo" onClose={() => setSheetOpen(false)}>
+              <p>This is a short Sheet demo for the design playground.</p>
+            </Sheet>
+          )}
+        </section>
       </div>
     </main>
   );

@@ -1,55 +1,6 @@
-.panel {
-  position: fixed;
-  inset: auto 0 0;
-  width: 100%;
-  max-width: none;
-  max-height: 85dvh;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  background: var(--color-surface);
-  box-shadow: var(--shadow-chunky);
-  animation: sheetIn var(--duration-normal) var(--ease-out) both;
-}
-
-.panel::backdrop {
-  background: var(--color-backdrop);
-}
-
-.shell {
-  display: grid;
-  min-height: 0;
-  max-height: 85dvh;
-  grid-template-rows: auto minmax(0, 1fr);
-}
-
-.headingRow {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  padding: var(--space-3);
-  background: var(--color-surface);
-}
-
-.headingRow h2,
 .section h3 {
   min-width: 0;
   overflow-wrap: anywhere;
-}
-
-.headingRow h2 {
-  font-size: var(--text-lg);
-}
-
-.body {
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding: 0 var(--space-3) calc(var(--space-3) + env(safe-area-inset-bottom));
 }
 
 .section {
@@ -115,36 +66,4 @@
   min-width: 0;
   max-width: 100%;
   overflow-wrap: anywhere;
-}
-
-@keyframes sheetIn {
-  from {
-    opacity: 0;
-    transform: translateY(var(--space-6));
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .panel {
-    animation: none;
-  }
-}
-
-@media (min-width: 48rem) {
-  .panel {
-    inset: 0;
-    width: min(calc(100% - (var(--space-6) * 2)), var(--content-max-width));
-    max-height: 80dvh;
-    margin: auto;
-    border-radius: var(--radius-lg);
-  }
-
-  .shell {
-    max-height: 80dvh;
-  }
 }
