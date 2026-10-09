@@ -46,6 +46,14 @@ export const vi = {
   loading: 'Đang tải…',
   loadFailed: 'Không tải được quyết định.',
   retry: 'Thử lại',
+  yourDecisions: 'Của bạn',
+  listFailed: 'Chưa tải được quyết định của bạn.',
+  edit: 'Sửa',
+  delete: 'Xóa',
+  deleteConfirm: 'Xóa quyết định này?',
+  cancel: 'Hủy',
+  deleting: 'Đang xóa…',
+  deleteFailed: 'Chưa xóa được. Thử lại sau.',
 } as const;
 
 export type TranslationKey = keyof typeof vi;
