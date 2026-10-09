@@ -455,3 +455,28 @@ Format: Decision · Reason · Alternatives · Tradeoffs · Phase/Date
 - **Known gap until then:** spin records are fire-and-forget, so two quick spins can reach the server out of order. That is harmless without live viewing, but the Realtime phase must order spins.
 - **Phase:** 6 · 2026-10-09 · approved by user
 
+## D-032 — Phase 7 navigation shell and breakpoints
+- **Mobile navigation (owner):** a slim **top bar**.
+  - Left: the PIKO logo, linking to Home.
+  - Right: "Lịch sử" (`/history`) and "+ Tạo" (`/decisions/new`).
+  - No bottom tabs and no drawer. The app has only two or three top-level destinations, and bottom tabs would collide with the case screen's bottom CTAs.
+- **Desktop navigation (owner):** a **sidebar** from `64rem` (1024 px). It holds:
+  - the logo
+  - "+ Tạo"
+  - "Lịch sử"
+  - "Của bạn" (saved decisions, scrolling inside the sidebar)
+  - "Gần đây" (the 5 newest entries, with "Xem tất cả" → `/history`)
+- **Breakpoints (owner):**
+  - mobile below `48rem`
+  - tablet from `48rem` to `64rem`: mobile navigation, wider content
+  - desktop from `64rem`: sidebar
+- **Home on desktop (owner):** Home drops its "Của bạn" and "Gần đây" sections, because the sidebar shows them. It keeps the question, the mode selector, the "Tạo mới" card and the presets. Home on mobile and tablet is unchanged.
+- **Focus mode (owner):** the case-opening screens (`/presets/:slug/open`, `/decisions/:id/open`) show no sidebar, so the stage gets the full width.
+  - A 60rem stage plus a ~16rem sidebar does not fit at 1024 px.
+  - Architect default: these screens also hide the mobile top bar. The rule is "case screens are focus screens at every width", and the back link is the only way out.
+- **Shell rules (architect):**
+  - One layout route renders the navigation. One screen-shell component places the back link at the same position on every screen. It replaces the copied `.screen`/`.content` + `48rem` blocks.
+  - `/s/:id` stays outside the shell and outside `SessionLayout`, with no navigation and no session.
+  - The sidebar lists reuse the existing hooks (`useDecisionList`, `useHistoryList`) and reload when the route changes, so a save, delete or "Đi thôi" shows up after the next navigation. There is no global store.
+- **Topology:** unchanged (no routes, tables or services).
+- **Phase:** 7 · 2026-10-09 · approved by user

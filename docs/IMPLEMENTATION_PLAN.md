@@ -1,8 +1,8 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 7 — Responsive pass + navigation shell (next; kickoff with the owner). Phase 6 merged into `main` on 2026-10-09; live viewing moved to the Realtime phase (D-031).
-- **Integration branch:** `feat/phase-6-result-history`
+- **Current phase:** Phase 7 — Responsive pass + navigation shell (kickoff done, D-032). Next task: 7-1. Phase 6 merged into `main` on 2026-10-09; live viewing moved to the Realtime phase (D-031).
+- **Integration branch:** `feat/phase-7-responsive`
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`); Phase 4 (4-1, 4-2: router, Home, presets, preview, merged into `main`); Phase 5 (5-1…5-4: decisions API, builder, saved decisions, reuse options, merged into `main`)
 
 ## Phases
@@ -34,7 +34,9 @@
 | 6-5a | Share UI + public page | ✅ (`6-5a-fix-1.md`) | `6-5a-share-ui.md`: "Chia sẻ" dialog (lifetime, Web Share / copy), later spins recorded, `/s/:id` (options, replay, "Tự quay thử", unavailable page) with no session bootstrap; extracts `Sheet` and `WinnerPanel` (D-030) |
 | 6-5b | Shared links list + revoke | ✅ (`6-5b-fix-1.md`) | `6-5b-shared-links.md`: "Link đã chia sẻ" in `/history` (title → `/s/:id`, winner, expiry) with an inline revoke confirm; `Button variant="danger"` (D-030) |
 | 6-6 | Live viewing + interactions | ⏸ moved | Deferred to the Realtime phase (D-031) |
-| 7 | Responsive pass + navigation shell | ⬜ | Desktop is not in the mockup and must be designed. **First task: a navigation shell** (owner, 2026-10-09):<br>- a desktop sidebar holding "Của bạn" and "Gần đây"<br>- a mobile navigation pattern (top bar, drawer or bottom tabs), chosen at kickoff<br>- the shared screen shell with the back link at the same position on every screen<br>- the public `/s/:id` page stays outside the shell |
+| 7-1 | Navigation shell | ⬜ | Layout route + screen shell (back link at one position), mobile top bar, desktop sidebar frame from `64rem`, focus mode on case screens, `/s/:id` outside; replaces the copied screen layouts (D-032) |
+| 7-2 | Sidebar lists + desktop Home | ⬜ | "Của bạn" and "Gần đây" in the sidebar (reload on route change), Home drops both sections from `64rem` (D-032) |
+| 7-3 | Responsive pass | ⬜ | Every screen at 360 / 768 / 1024 / 1280 / 1920: carousel, winner reveal, CTAs, card grids, option layout |
 | 8 | Polish | ⬜ | States, micro-interactions, consistency |
 | 9 | First prod release | ⬜ | Deploy `v0.1.0` to VPS, verify backup/rollback |
 | — | Final engineering review | ⬜ | Format per master prompt §47–48 |
@@ -653,6 +655,10 @@
   - 6-5b accepted. The implementer reported one transient PGlite setup timeout in `shares.test.ts` that passed on rerun; not reproduced in this review.
 - **6-6 decision (2026-10-09):** the owner asked whether live viewing should wait, since Couple/Squad will also need live spins. Owner chose to defer (D-031): Phase 6 closes at 6-5b, and live viewing moves to a Realtime phase after `v0.1.0`, designed once with Couple/Squad. Nothing built in 6-1…6-5b is wasted: `shared_cases` keeps the latest spin and `POST /api/shares/:id/spins` is recorded at spin start.
 - **Phase 6 closed (2026-10-09):** the owner did the browser review on phone and desktop and approved it. `feat/phase-6-result-history` was merged into `main` with `--no-ff`. `TOPOLOGY.md` was updated (owner approved).
+- **Phase 7 kickoff (2026-10-09):** integration branch `feat/phase-7-responsive` created from `main` (`06139c3`). Decisions in D-032.
+  - Owner: mobile top bar (logo, "Lịch sử", "+ Tạo"); desktop sidebar from `64rem` with "Của bạn" and "Gần đây"; Home drops both sections on desktop; case screens are focus screens with no sidebar.
+  - Architect defaults: case screens also hide the mobile top bar; one layout route + one screen-shell component; sidebar lists reload on route change, no global store; `/s/:id` stays outside the shell.
+  - Split into 7-1 (shell), 7-2 (sidebar lists + desktop Home), 7-3 (responsive pass per screen). No topology change.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
@@ -661,7 +667,6 @@
 - **The prod build stage must set `NODE_ENV=production` explicitly** and must not load `.env.dev`/`.env.prod` at build time. Otherwise Vite bundles development React (+60 kB gz). Any `vite build` run inside the dev container produces a dev build and is not representative.
 
 ## Pending decisions
-- Phase 7 navigation shell: desktop sidebar layout, mobile pattern (top bar / drawer / bottom tabs), what moves off Home.
 - Realtime phase (D-031): room model, presence, viewer/participant identity, interaction kinds, anti-spam (decide at its kickoff).
 - Inactive guest cleanup policy (e.g. delete after N months of inactivity).
 - Hosting target: VPS provider + domain (needed before Phase 9).
