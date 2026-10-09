@@ -26,7 +26,7 @@
 | 5-1 | Decisions API | ✅ done (`5-1-fix-1.md`, `5-1-fix-2.md`, `60387fc`) | `5-1-decisions-api.md`: `decisions` table (options as JSONB), CRUD routes requiring a session, ownership, 100 per user, PGlite service tests (D-029) |
 | 5-2 | Builder screen | ✅ done (`5-2-fix-1.md`, `ea973cf`) | `/decisions/new` and `/decisions/:id/edit`: title, options (add/edit/remove), emoji picker, priority dots, shared schema validation, explicit Save, non-blocking save error (D-029) |
 | 5-3 | Saved decisions | ✅ done (`5-3-fix-1.md`, `58e5f14`) | `/decisions/:id` preview (Sửa/Xóa with inline confirm) + `/open` case, Home "Của bạn" (create card + saved cards), a create lands on the preview. Shared `features/preview/` (preview, `?off=` helpers) used by presets too; `useDecisionRecord` shows the state record, then refetches (D-029) |
-| 5-4 | Reuse existing options | 🔧 fix-1 handed off (`5-4-reuse-options.md`, `5-4-fix-1.md`) | Preset "Tùy chỉnh" (`/decisions/new?from=<slug>`) and builder "Thêm từ có sẵn", which copies options from presets/saved decisions (D-029) |
+| 5-4 | Reuse existing options | 🔧 fix-2 handed off (`5-4-fix-1.md`, `5-4-fix-2.md`) | Preset "Tùy chỉnh" (`/decisions/new?from=<slug>`) and builder "Thêm từ có sẵn", which copies options from presets/saved decisions (D-029) |
 | 6 | Result + history | ⬜ | Winner reveal, Let's Go / Spin Again / Not Tonight / Share, history; adds Home "Recent decisions" (D-028) |
 | 7 | Responsive pass | ⬜ | Desktop is not in the mockup and must be designed |
 | 8 | Polish | ⬜ | States, micro-interactions, consistency |
@@ -450,6 +450,22 @@
     - No shared `Dialog` primitive until a second modal exists.
   - SHOULD (F1): a create navigates to `/decisions/${id}${location.search}`, so a create from `?from=food` leaves `?from=food` on the preview URL.
   - NICE (F2): `findPreset` is called twice in `DecisionBuilderPage`, and the new-option literal is repeated in `draft.ts` instead of reusing `emptyOption()`.
+
+- **5-4-fix-1 (2026-10-09):** verified against the diff (`eea31ef`, `8e45320`, 8 files, +157/−87). `make check` passes.
+  - Measured by the architect in Chrome:
+    - 390 px: a bottom sheet (`x=0`, width 390, bottom-anchored)
+    - 1280 px: a centred dialog (`x=400`, width 480)
+    - a backdrop click closes it and focuses the toggle; no overflow
+  - Accepted:
+    - native `showModal()` (no custom trap), `aria-labelledby`, a sticky header and scrolling body
+    - the scroll lock via `:root:has(dialog[open])`
+    - `--color-backdrop` (`color-mix`) is listed in `/design`
+    - a create drops the search; `findPreset` is called once; `emptyOption()` is reused
+  - SHOULD (`5-4-fix-2.md`, screenshot): already-added chips are `selected` + `disabled`, and `Chip`'s `:disabled` paints them grey. "Added" therefore looks like "blocked by the limit", and the teal selected state never shows.
+    - Fix: a `.selected:disabled` rule in the primitive (shown in `/design`) and a `✓` mark.
+  - NICE:
+    - only the chip's `disabled` state guards against duplicates: three same-label clicks in one task produced `Phở | Bún | Phở`. Guard inside the updater.
+    - the `handleClose` wrapper, the unused `existingOptionsPanelId`, and `useCallback` on `closeExisting`
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
