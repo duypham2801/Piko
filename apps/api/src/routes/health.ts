@@ -1,10 +1,12 @@
 import type { HealthResponseData } from '@piko/domain';
 import type { Context } from 'hono';
 
-import type { Sql } from '../db/client.js';
+export type HealthSql = {
+  unsafe: (query: string) => PromiseLike<unknown>;
+};
 
 export interface HealthRouteDependencies {
-  sql: Sql;
+  sql: HealthSql;
   version: string;
 }
 

@@ -1,0 +1,75 @@
+.optionCard {
+  display: grid;
+  min-width: 0;
+  gap: var(--space-3);
+}
+
+.optionMain {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: var(--space-3);
+}
+
+.trigger {
+  display: inline-grid;
+  width: var(--tap-target-min);
+  min-width: var(--tap-target-min);
+  height: var(--tap-target-min);
+  place-items: center;
+  padding: 0;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: var(--text-xl);
+  line-height: var(--leading-tight);
+}
+
+.hasEmoji {
+  background: var(--color-accent);
+}
+
+.empty {
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+}
+
+.optionInput {
+  min-width: 0;
+}
+
+.removeButton {
+  display: inline-grid;
+  width: var(--tap-target-min);
+  min-width: var(--tap-target-min);
+  height: var(--tap-target-min);
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-danger);
+  cursor: pointer;
+  font-size: var(--text-xl);
+  line-height: var(--leading-tight);
+}
+
+.removeButton:disabled {
+  color: var(--color-disabled-text);
+  cursor: not-allowed;
+}
+
+.optionMeta {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.optionMeta > span {
+  white-space: nowrap;
+}

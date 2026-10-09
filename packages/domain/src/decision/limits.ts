@@ -1,4 +1,5 @@
 export const DECISION_LIMITS = {
+  maxDecisionsPerUser: 100,
   minOptions: 2,
   maxOptions: 20,
   minEnabledOptions: 2,

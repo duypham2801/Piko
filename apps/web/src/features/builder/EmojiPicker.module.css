@@ -1,0 +1,42 @@
+.panel {
+  min-width: 0;
+  grid-column: 1 / -1;
+  padding: var(--space-3);
+  border: var(--border-width-thin) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+}
+
+.grid {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--space-1);
+}
+
+.emojiButton {
+  display: grid;
+  min-width: 0;
+  min-height: var(--tap-target-min);
+  place-items: center;
+  padding: var(--space-1);
+  border: var(--border-width-thin) solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  cursor: pointer;
+  font-size: var(--text-xl);
+  line-height: var(--leading-tight);
+}
+
+.emojiButton[aria-pressed='true'] {
+  border-color: var(--color-focus-ring);
+  background: var(--color-surface);
+}
+
+.noEmoji {
+  grid-column: 1 / -1;
+  justify-self: stretch;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-bold);
+}

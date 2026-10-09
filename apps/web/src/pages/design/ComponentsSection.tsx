@@ -114,6 +114,9 @@ export default function ComponentsSection() {
               <Chip disabled selected={false}>
                 Squad <Badge>Sắp có</Badge>
               </Chip>
+              <Chip disabled selected>
+                Đã chọn
+              </Chip>
             </div>
           </div>
         </div>

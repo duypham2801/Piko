@@ -1,13 +1,15 @@
 import { csrf } from 'hono/csrf';
 import { Hono } from 'hono';
 import { logger } from 'hono/logger';
+import { bodyLimit } from 'hono/body-limit';
 
 import { FixedWindowRateLimiter } from './auth/rate-limit.js';
 import { createSessionMiddleware, type AppEnv } from './auth/session.middleware.js';
-import type { Database, Sql } from './db/client.js';
+import type { Database } from './db/client.js';
 import { createOnError, notFound, HttpError } from './lib/errors.js';
-import { healthHandler } from './routes/health.js';
+import { healthHandler, type HealthSql } from './routes/health.js';
 import { meHandler } from './routes/me.js';
+import { createDecisionRoutes } from './routes/decisions.js';
 
 export interface AppConfig {
   nodeEnv: 'development' | 'production' | 'test';
@@ -20,7 +22,7 @@ export interface AppConfig {
 
 export interface AppDependencies {
   db: Database;
-  sql: Sql;
+  sql: HealthSql;
   limiter?: FixedWindowRateLimiter;
 }
 
@@ -56,9 +58,27 @@ export function createApp(config: AppConfig, dependencies: AppDependencies): Hon
       cookieSecure: config.cookieSecure,
       trustProxy: config.trustProxy,
       limiter,
+      allowGuestCreation: true,
     }),
   );
   app.get('/api/me', meHandler);
+
+  const decisionSession = createSessionMiddleware({
+    db: dependencies.db,
+    cookieSecure: config.cookieSecure,
+    trustProxy: config.trustProxy,
+    limiter,
+    allowGuestCreation: false,
+  });
+  const decisionBodyLimit = bodyLimit({
+    maxSize: 16 * 1024,
+    onError: () => {
+      throw new HttpError(413, 'payload_too_large', 'The request body is too large.');
+    },
+  });
+  app.use('/api/decisions', decisionBodyLimit, decisionSession);
+  app.use('/api/decisions/*', decisionBodyLimit, decisionSession);
+  app.route('/api/decisions', createDecisionRoutes({ db: dependencies.db }));
 
   app.onError(createOnError(config.nodeEnv));
   app.notFound(notFound);

@@ -35,6 +35,7 @@
   --color-disabled-bg: var(--palette-slate-200);
   --color-disabled-text: var(--palette-slate-600);
   --color-selection: var(--palette-lemon-400);
+  --color-backdrop: color-mix(in srgb, var(--palette-navy-900) 50%, transparent);
   --opacity-dimmed: 0.4; /* non-winner cells after the reveal */
 
   --font-display: 'Baloo 2 Variable', 'Baloo 2', ui-rounded, system-ui, sans-serif;

@@ -1,8 +1,8 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 5 — Decision builder (not started)
-- **Integration branch:** none yet
+- **Current phase:** Phase 5 — Decision builder (5-1…5-4 done; awaiting the owner's review before merging into `main`)
+- **Integration branch:** `feat/phase-5-builder`
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`); Phase 4 (4-1, 4-2: router, Home, presets, preview, merged into `main`)
 
 ## Phases
@@ -23,7 +23,10 @@
 | 3-2 | Reveal celebration | ✅ done (`3-2-fix-1.md`, `3-2-fix-2.md`) | Winner pop + dim, in-house confetti, winner panel (D-027) |
 | 4-1 | Router + Home + preset case route | ✅ done (`39e7baa`) | `4-1-router-home.md`: React Router 8, Home (brand, question, mode selector, 4 preset cards), `/presets/:slug` case, not found (D-028) |
 | 4-2 | Preset preview | ✅ done (`4-2-fix-1.md`, `89fe5cc`) | `4-2-preset-preview.md`: includes the 4-1 clean-up (C0) and a `BackLink` primitive. Preview screen with option switches, `?off=` in the URL, case moves to `/presets/:slug/open` (D-028) |
-| 5 | Decision builder | ⬜ | CRUD decisions/options via API, validation, open case; adds the Home "Create decision" CTA (D-028) |
+| 5-1 | Decisions API | ✅ done (`5-1-fix-1.md`, `5-1-fix-2.md`, `60387fc`) | `5-1-decisions-api.md`: `decisions` table (options as JSONB), CRUD routes requiring a session, ownership, 100 per user, PGlite service tests (D-029) |
+| 5-2 | Builder screen | ✅ done (`5-2-fix-1.md`, `ea973cf`) | `/decisions/new` and `/decisions/:id/edit`: title, options (add/edit/remove), emoji picker, priority dots, shared schema validation, explicit Save, non-blocking save error (D-029) |
+| 5-3 | Saved decisions | ✅ done (`5-3-fix-1.md`, `58e5f14`) | `/decisions/:id` preview (Sửa/Xóa with inline confirm) + `/open` case, Home "Của bạn" (create card + saved cards), a create lands on the preview. Shared `features/preview/` (preview, `?off=` helpers) used by presets too; `useDecisionRecord` shows the state record, then refetches (D-029) |
+| 5-4 | Reuse existing options | ✅ done (`5-4-fix-1.md`, `5-4-fix-2.md`, `aa21530`) | Preset "Tùy chỉnh" (`/decisions/new?from=<slug>`) and builder "Thêm từ có sẵn", which copies options from presets/saved decisions (D-029) |
 | 6 | Result + history | ⬜ | Winner reveal, Let's Go / Spin Again / Not Tonight / Share, history; adds Home "Recent decisions" (D-028) |
 | 7 | Responsive pass | ⬜ | Desktop is not in the mockup and must be designed |
 | 8 | Polish | ⬜ | States, micro-interactions, consistency |
@@ -292,7 +295,13 @@
   - NICE (in fix-1):
     - F2: memoize the case `options`, because `applyOff` returns a new array on every render
     - F3: one row modifier instead of two computed class strings
-  - Deferred to Phase 7: the screen shell (`.screen`/`.content` plus the `48rem` wide-column query) is now copied in Home, Preview, CaseOpening and NotFound. Extract a shared layout when the responsive pass designs desktop. Four copies make this a real reuse boundary, but its shape belongs to Phase 7.
+  - **Owner feedback (2026-10-09), back link position:** the back link moves between screens.
+  - Measured:
+    - at 390 px, the case screen puts it at y=130 instead of 32, because its content is centred vertically
+    - at 1280 px, it sits at x=153 (preview), 160 (case) and 393 (builder), following each screen's column width
+  - The architect proposed a shared screen shell with a fixed top bar right after 5-2-fix-1.
+  - **The owner chose to keep it for Phase 7**, together with the screen-shell extraction below. Phase 7 must place the back link at the same position on every screen.
+- Deferred to Phase 7: the screen shell (`.screen`/`.content` plus the `48rem` wide-column query) is now copied in Home, Preview, CaseOpening and NotFound. Extract a shared layout when the responsive pass designs desktop. Four copies make this a real reuse boundary, but its shape belongs to Phase 7.
   - DO NOT TOUCH: the defensive minimum guard in `updateOption`, kept even though the switch is disabled.
 - **4-2-fix-1 (2026-10-08):** verified against the diff (`89fe5cc`, 4 files, +31/−21). `make check` passes and the grep is clean.
   - F1: the `:active` rules now come after the hover media block. The architect re-measured in Chrome: hover `-4px`, active `+5px`, hover + active `+5px`.
@@ -301,6 +310,170 @@
   - **4-2 accepted.** Fast-forwarded into `feat/phase-4-home`.
   - The owner reviewed the Home → preview → case flow in the browser and approved it. **Phase 4 complete.** Merged into `main` with `--no-ff`.
 
+- **Phase 5 kickoff (2026-10-08):** integration branch `feat/phase-5-builder` created from `main`. Decisions in D-029.
+  - Owner: explicit Save (no autosave), five priority dots per option, saved decisions in a Home "Của bạn" section, curated native-emoji picker, preset "Tùy chỉnh", PGlite for API tests.
+  - Default: one `decisions` table with JSONB options, 100 decisions per user, decision routes require an existing session and never create a guest, 404 for other users' decisions, no category UI.
+  - Split into 5-1 (API + domain draft schema), 5-2 (builder), 5-3 (decision preview/case, Home list, delete, preset customize).
+  - The owner approved updating `TOPOLOGY.md` with the planned table and routes, marked as in progress.
+
+- **5-1 (2026-10-08):** reviewed `feat/5-1-decisions-api` (6 commits, 21 files, +1009/−18).
+  - Architect re-check: `make check` passes. Tests: domain 44, api 18. The migration is additive only (one table, the FK, one index).
+  - Accepted:
+    - `DecisionDraft` and `Decision` share one field shape and the three refinements
+    - every query filters by `user_id`; the user-row `FOR UPDATE` lock before the count
+    - `allowGuestCreation: false` returns 401 without touching the limiter (tested: no user row created)
+    - malformed ids are a 404; `invalid_json`/`invalid_body`/413 are tested
+    - deviations: `Database` = `PgDatabase<PgQueryResultHKT, typeof schema>` with no casts, and `AppDependencies.sql` narrowed to `unsafe()` for a typed test stub
+  - MUST (`5-1-fix-1.md` F1): **PGlite ships in the prod api image** (25.2 MB; image 186 → 211 MB). It is an optional peer of drizzle-orm, so pnpm resolves a drizzle-orm variant that depends on it, and `pnpm deploy --prod` installs it. The 5-1 check only looked at the top-level `node_modules/@electric-sql`. The architect's handoff command was too weak to catch this.
+    - Fix: delete it after `deploy` and add a build guard.
+  - SHOULD (F2): the narrowed SQL type is written inline twice (`app.ts`, `health.ts`), and `Sql` in `db/client.ts` is now dead.
+  - NICE (F3):
+    - one route test only re-parses the same 404 body
+    - the fixture keeps an `optionIds` list that the index template already produces
+  - DO NOT TOUCH:
+    - classic `zod` for `z.uuid()` in `routes/decisions.ts`, the same as `env.ts`
+    - the service test storing an untrimmed draft: it proves the service stores what it is given; the route parses first
+    - `beforeEach` deleting all users in the test files
+  - Notes for 5-2:
+    - the global middleware requires `Content-Type: application/json` and `Origin` on **every** mutation, including a body-less `DELETE`
+    - a 401 `session_required` (expired or cleared cookie) should call `resetSession()`, then `ensureSession()`, and retry once
+
+- **5-1-fix-1 (2026-10-08):** verified against the diff (`8c357b8`, `2d6177c`). `make check` passes. Tests: domain 44, api 17. The report gives an image of 185.8 MB, no `electric-sql` path, and a working `postgres-js` import.
+  - F2 and F3 are accepted: `HealthSql` is defined once, `Sql` is deleted, the 404 test parses `ApiError`, and the fixture uses only the template.
+  - SHOULD (`5-1-fix-2.md`): F1 works, but it does 18 lines of symlink surgery and copies drizzle-orm into a hand-named `drizzle-orm@0.45.3_postgres@3.4.9`, with hard-coded versions.
+    - Root cause: an architect mistake in the fix-1 guard ("any path whose **name contains** `electric-sql`"), which also matches the harmless name of the drizzle-orm variant directory.
+    - The architect verified a simpler fix on a throwaway build: delete only `@electric-sql` and `.pnpm/@electric-sql+*`, and guard on those names plus `pglite.wasm`. Nothing is left, `postgres-js` imports fine, and `node_modules` is 29.3 MB.
+  - Also: a blank line is missing before `FROM … AS api-prod`.
+
+- **5-1-fix-2 (2026-10-08):** verified against the diff (`60387fc`, Dockerfile only, +4/−15 versus fix-1). Compared with `59d2dd1`, the step is the comment, `deploy`, one `find … rm` and the guard. There are no hard-coded versions.
+  - Architect re-check:
+    - `make check` passes (domain 44, api 17)
+    - the `api-prod` image built from `HEAD` has no `@electric-sql`, `@electric-sql+*` or `pglite.wasm` path, imports `drizzle-orm/postgres-js`, and is 185.8 MB
+    - the dev DB has the `decisions` table
+  - **5-1 accepted.** Fast-forwarded into `feat/phase-5-builder`.
+
+- **5-2 handoff (2026-10-08):** the owner approved two empty options as the builder start. Architect defaults, recorded in D-029:
+  - "Mở case" is always available in the builder. It opens the current draft in place (`?view=case`), so a save failure never blocks a decision.
+  - Until 5-3, a create lands on `/decisions/:id/edit`, with the record passed in the router state.
+
+- **5-2 (2026-10-09):** reviewed `feat/5-2-decision-builder` (2 commits, 15 files, +1204/−3).
+  - Architect re-check:
+    - `make check` passes, and the literal and `style=` greps are clean
+    - the builder was driven in headless Chrome at 360 and 1280 px
+  - Prod bundle: main JS 96.47 → **100.70 kB gz** (+4.2 kB), measured with `NODE_ENV=production`. The 164 kB in the report was a dev build.
+  - Accepted:
+    - the API client: one shared response parser; `withSession` resets the session and retries once on 401 `session_required`
+    - the `AbortController` load with 404 → Not found
+    - duplicate labels computed in the web (both rows are marked while another field is empty)
+    - focus goes to the first invalid input
+    - "Mở case" opens in place under `?view=case`, and Back returns to the form with the draft intact
+    - no overflow at 360 px with a long label and the panel open
+    - the 40 emoji are checked against the schema in dev
+  - MUST (`5-2-fix-1.md` F1):
+    - **After a create, Save is stuck on "Đang lưu…" (disabled), and the title stays untrimmed** (reproduced). The form has no `key`, so React reuses the `/new` instance on `/:id/edit`; the handoff asked for one.
+    - The router state record is never refreshed after an update, so a reload shows the content from the create.
+  - SHOULD:
+    - F2 (reproduced): "Kiểm tra lại các ô…" stays after every error is fixed, because it is stored as a status instead of derived
+    - F3 (screenshot): `display: contents` puts the emoji panel between the trigger and the label input, which breaks line 1 of the row
+    - F4: `draftOf`, the empty-option factory and the option input id each exist twice
+  - NICE (F5): the `messages` injection in `formErrors.ts`, `<title>` repeated in five returns, `OptionRow` borrowing `DecisionForm.module.css`.
+  - The report claimed "Save, edit và save lại" passed, but the architect reproduced the opposite.
+
+- **5-2-fix-1 (2026-10-09):** verified against the diff (`41dd691`, `ea973cf`, 9 files, +228/−296). `make check` passes.
+  - The architect re-ran the flows in headless Chrome:
+    - create → `/edit` shows "Đã lưu", the trimmed title and an enabled Save
+    - edit → the status clears; save → "Đã lưu"
+    - reload → the latest values
+    - after a failed attempt, a valid draft clears "Kiểm tra lại…"
+    - at 360 px with the emoji panel open, the trigger and the input stay on one line with the panel below, and there is no overflow
+    - `Escape` closes the panel and focuses its trigger
+  - F4/F5 are done: `draft.ts` is the single source, `formErrors` uses `t()`, `<title>` renders once, and `OptionRow.module.css` exists. No unused CSS class is left in the builder modules.
+  - The report gives a prod main JS of 100.60 kB gz.
+  - NICE, folded into 5-3: `FormErrors.form` is computed but never read, because the status line derives "form invalid" from `parsed.success`. Remove the field and its branches.
+  - **5-2 accepted.** Fast-forwarded into `feat/phase-5-builder`.
+
+- **5-3 handoff (2026-10-09):** the owner agreed to split the end of Phase 5 into 5-3 (saved decisions) and 5-4 (preset "Tùy chỉnh" + "Thêm từ có sẵn").
+  - Architect defaults:
+    - the preset preview/case UI is extracted once (`features/preview/`) and reused, not copied
+    - saved-decision pages show the router-state record at once and always refetch, so they are never stale after Back and still work offline (rule 5)
+    - delete uses an inline confirm row, not a dialog
+    - Home "Của bạn" starts with a dashed "Tạo quyết định" card in the same grid
+
+- **5-3 (2026-10-09):** reviewed `feat/5-3-saved-decisions` (5 commits, 25 files, +809/−279). `make check` passes (domain 44, api 17). The report gives a prod main JS of 101.74 kB gz.
+  - The architect drove these flows in headless Chrome:
+    - Home "Của bạn": the create card plus saved cards, most recent first
+    - create → `/decisions/:id` (no loading flash) → `?off=0` → case → Back keeps `?off=0`
+    - Sửa → save → browser Back shows the **edited** title (refetch)
+    - delete: focus goes to Hủy, Hủy returns focus to Xóa, and confirming lands on Home with the card gone
+    - unknown and malformed ids → Not found; `/decisions/new` → builder
+  - Screenshots: Home at 1280 px and the confirm row at 390 px look right.
+  - Accepted:
+    - `features/preview/` (`DecisionPreview`, `off.ts`, `useOffOptions`), with the preset pages as thin wrappers and the CSS moved, not copied
+    - `useDecisionRecord` + `DecisionLoadState` shared by the builder, preview and case
+    - `apiDelete` with `Content-Type`; a 404 on delete is treated as gone
+  - MUST (`5-3-fix-1.md` F1): revert `8c57316`. It is an out-of-scope confetti rewrite: 20 classes of magic numbers replace the computed geometry.
+    - It was triggered by an **architect mistake**: the handoff grep checked `style=` across all of `features/`.
+    - React `style` custom properties are allowed (the CSP note from 1c). Future handoffs scope the `style=` grep to new files only.
+  - NICE:
+    - F2: `useDecisionRecord` stores a `retry` closure only to replace it, and refetches whenever the router state changes, which costs one extra `GET` per builder save
+    - F3: `initialStatus` in `DecisionForm` is dead
+    - F4: the Home map destructures the record and then rebuilds it
+    - F5: preview rows without an emoji keep an empty grid column, so the labels are indented by one gap
+
+- **5-3-fix-1 (2026-10-09):** verified against the diff (`82df9a8` revert, `58e5f14`).
+  - `features/case-opening` is identical to `feat/phase-5-builder`.
+  - `useDecisionRecord`:
+    - errors are stored without a closure
+    - the fetch effect depends on `id` + retry only, and the state record is read through a ref
+    - the report shows 1 `GET` before and after a builder save
+  - `initialStatus` is gone. The Home map passes the record as is. Preview rows without an emoji drop the empty column (`data-no-emoji`).
+  - Architect re-check: `make check` passes. The full Chrome flow passes again: create → preview → off → case → Back → edit → Back shows the edited title → delete → Home.
+  - **5-3 accepted.** Fast-forwarded into `feat/phase-5-builder`.
+
+- **5-4 handoff (2026-10-09):** architect defaults, recorded in D-029:
+  - "Tùy chỉnh" copies **all** preset options (the preview's `?off=` is not carried over), and an unknown `from` falls back to an empty draft
+  - "Thêm từ có sẵn" is an inline panel with one `<details>` per decision and `Chip`s per option
+    - chips whose label is already in the draft are selected and disabled
+    - a chip first fills an empty row, then appends
+    - saved decisions are fetched only when the panel opens, and the decision being edited is excluded
+  - The validation grep is now scoped to the changed files, after the 5-3 confetti incident.
+
+- **5-4 (2026-10-09):** reviewed `feat/5-4-reuse-options` (`91ad413`, 10 files, +390/−23). `make check` passes (domain 44, api 17). The report gives a prod main JS of 102.73 kB gz.
+  - Accepted:
+    - `normalizeLabel` is the single normalization, also used by `formErrors`
+    - `draftFromPreset` and `withCopiedOption` are pure; the chip dedupe is by normalized label
+    - the panel mounts `useDecisionList` only when open, so saved decisions are fetched on demand, excluding the edited one
+    - "Tùy chỉnh" is a single-class wrapper child
+    - the builder case back link keeps the search but drops `view` (an unreported but correct deviation: it keeps `?from=` on Back from the case)
+  - **Owner decision:** "Thêm từ có sẵn" must be a floating modal, not an inline panel. The architect agrees, because the list can be long and inline it fights the sticky action bar.
+    - Spec (`5-4-fix-1.md` M1/M2): a native `<dialog>` with `showModal()`, a bottom sheet on phones and centred from 48rem, a sticky header, a page scroll lock and a new `--color-backdrop` token.
+    - No shared `Dialog` primitive until a second modal exists.
+  - SHOULD (F1): a create navigates to `/decisions/${id}${location.search}`, so a create from `?from=food` leaves `?from=food` on the preview URL.
+  - NICE (F2): `findPreset` is called twice in `DecisionBuilderPage`, and the new-option literal is repeated in `draft.ts` instead of reusing `emptyOption()`.
+
+- **5-4-fix-1 (2026-10-09):** verified against the diff (`eea31ef`, `8e45320`, 8 files, +157/−87). `make check` passes.
+  - Measured by the architect in Chrome:
+    - 390 px: a bottom sheet (`x=0`, width 390, bottom-anchored)
+    - 1280 px: a centred dialog (`x=400`, width 480)
+    - a backdrop click closes it and focuses the toggle; no overflow
+  - Accepted:
+    - native `showModal()` (no custom trap), `aria-labelledby`, a sticky header and scrolling body
+    - the scroll lock via `:root:has(dialog[open])`
+    - `--color-backdrop` (`color-mix`) is listed in `/design`
+    - a create drops the search; `findPreset` is called once; `emptyOption()` is reused
+  - SHOULD (`5-4-fix-2.md`, screenshot): already-added chips are `selected` + `disabled`, and `Chip`'s `:disabled` paints them grey. "Added" therefore looks like "blocked by the limit", and the teal selected state never shows.
+    - Fix: a `.selected:disabled` rule in the primitive (shown in `/design`) and a `✓` mark.
+  - NICE:
+    - only the chip's `disabled` state guards against duplicates: three same-label clicks in one task produced `Phở | Bún | Phở`. Guard inside the updater.
+    - the `handleClose` wrapper, the unused `existingOptionsPanelId`, and `useCallback` on `closeExisting`
+
+- **5-4-fix-2 (2026-10-09):** verified against the diff (`aa21530`, 4 files, +25/−11). `make check` passes (domain 44, api 17). Grep clean.
+  - `Chip`: `.selected:disabled` keeps the teal selected look; the unselected disabled chip stays grey; `/design` shows both.
+  - Added chips show `✓`. The updater checks the limit and the normalized label on the current draft: the architect's same-task script with four chips now yields `Phở | Bún`.
+  - `handleClose`, `existingOptionsPanelId` and the `useCallback` are gone.
+  - Architect screenshot at 390 px: teal `✓ Phở` / `✓ Bún` chips in the bottom sheet.
+  - **5-4 accepted. Phase 5 code complete** on `feat/phase-5-builder`.
+
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
 - `migrate` resolves `../../drizzle` relative to `dist/db/migrate.js`, so the prod api image must ship `apps/api/drizzle/` next to `dist/`.
@@ -308,7 +481,6 @@
 - **The prod build stage must set `NODE_ENV=production` explicitly** and must not load `.env.dev`/`.env.prod` at build time. Otherwise Vite bundles development React (+60 kB gz). Any `vite build` run inside the dev container produces a dev build and is not representative.
 
 ## Pending decisions
-- Emoji strategy: native vs SVG set (license check).
 - Share format (Phase 6).
 - Inactive guest cleanup policy (e.g. delete after N months of inactivity).
 - Hosting target: VPS provider + domain (needed before Phase 9).

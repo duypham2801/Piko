@@ -48,8 +48,18 @@
   gap: var(--space-3);
 }
 
+.yourDecisions {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.yourDecisions h2,
 .quickPicks h2 {
   font-size: var(--text-2xl);
+}
+
+.createCard {
+  border-style: dashed;
 }
 
 .presetList {
@@ -79,6 +89,8 @@
 }
 
 .presetTitle {
+  min-width: 0;
+  overflow-wrap: anywhere;
   font-family: var(--font-display);
   font-size: var(--text-xl);
   font-weight: var(--font-weight-display);
@@ -86,8 +98,15 @@
 }
 
 .presetHint {
+  min-width: 0;
+  overflow-wrap: anywhere;
   font-size: var(--text-sm);
   line-height: var(--leading-normal);
+}
+
+.listFailed {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
 }
 
 @media (prefers-reduced-motion: reduce) {

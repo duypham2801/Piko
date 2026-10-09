@@ -4,7 +4,7 @@ Tài liệu cho chủ dự án. Nó cho biết hệ thống **đang** gồm nh�
 - Architect cập nhật file này mỗi khi topology thay đổi, và hỏi chủ dự án (HITL) trước khi cập nhật.
 - Chi tiết vận hành nằm trong `ENVIRONMENTS.md`; lý do của từng lựa chọn nằm trong `DECISIONS.md`.
 
-**Cập nhật lần cuối:** 2026-10-08, đổi tên sang PIKO (D-023, đã merge qua 1c-1).
+**Cập nhật lần cuối:** 2026-10-08, bắt đầu Phase 5: thêm bảng `decisions` và route `/api/decisions` (D-029, đang làm).
 
 Ký hiệu:
 - ✅ đã có trên `main`
@@ -81,10 +81,10 @@ apps/web  ──HTTP /api──►  apps/api  ──►  PostgreSQL
 
 | Thành phần | Hiện có |
 |---|---|
-| API routes | `GET /api/healthz`, `GET /api/me` (tạo guest nếu chưa có) |
-| Bảng DB | `users`, `sessions` (chỉ lưu sha256 của token) |
-| Web | Màn mở case + hiệu ứng ăn mừng (Phase 3). Chọn ngẫu nhiên chạy ở trình duyệt, chưa lưu gì lên API |
-| Web routes | `/` Home, `/presets/:slug` mở case (4-1); 4-2 thêm `/presets/:slug` xem trước + `/presets/:slug/open` mở case. Caddy trả `index.html` cho mọi đường dẫn không phải `/api` |
+| API routes | ✅ `GET /api/healthz`, `GET /api/me` (tạo guest nếu chưa có)<br>🔧 Phase 5 (5-1, trên nhánh `feat/phase-5-builder`, chưa vào `main`): `GET/POST /api/decisions`, `GET/PUT/DELETE /api/decisions/:id`. Bắt buộc đã có session (không tạo guest), chỉ thấy và sửa quyết định của chính mình, tối đa 100 quyết định mỗi user |
+| Bảng DB | ✅ `users`, `sessions` (chỉ lưu sha256 của token)<br>🔧 Phase 5 (5-1, chưa vào `main`): `decisions` (thuộc 1 user, xóa user thì xóa theo; danh sách lựa chọn lưu trong cột JSONB `options`) |
+| Web | ✅ Home, preset (xem trước + mở case), màn mở case + hiệu ứng ăn mừng. Chọn ngẫu nhiên chạy ở trình duyệt, chưa lưu gì lên API<br>🔧 Phase 5 (chưa vào `main`): builder, quyết định đã lưu (mục "Của bạn" trên Home) |
+| Web routes | ✅ `/` Home, `/presets/:slug` xem trước, `/presets/:slug/open` mở case<br>🔧 Phase 5 (5-2, 5-3, chưa vào `main`): `/decisions/new`, `/decisions/:id` xem trước (Sửa/Xóa), `/decisions/:id/edit` (builder, mở case ngay từ bản nháp bằng `?view=case`), `/decisions/:id/open`, `/decisions/new?from=<preset>` (tùy chỉnh preset)<br>Caddy trả `index.html` cho mọi đường dẫn không phải `/api` |
 | Domain | Schema API, model `Decision`, engine chọn có seed (mulberry32), toán animation plan |
 
 ---
@@ -146,8 +146,9 @@ apps/web  ──HTTP /api──►  apps/api  ──►  PostgreSQL
 | Dev stack | ✅ | ✅ | 1a-1 |
 | Prod stack (Docker, Caddy, migrate, backup/rollback) | ✅ (chỉ local) | ✅ trên VPS | 1a-2 ✅, VPS ở 9 |
 | Design system + font tiếng Việt tự host | ✅ (token, font, 6 primitive, `/design`) | ✅ | 1b ✅ |
-| Domain engine (selection, animation plan) | ⬜ | ✅ | 2 |
-| UI case opening, home, builder, result, history | ⬜ | ✅ | 2.5 → 8 |
+| Domain engine (selection, animation plan) | ✅ | ✅ | 2 ✅ |
+| UI case opening, home, builder, result, history | ✅ case opening, home, preset; ⬜ builder, result, history | ✅ | 3–4 ✅, 5 → 8 |
+| API + bảng quyết định | 🔧 code xong (5-1), chưa vào `main` | ✅ | 5 |
 | API + bảng lịch sử | ⬜ | ✅ | 6 |
 | VPS + domain + HTTPS thật | ⬜ chưa chọn | ✅ | 9 |
 | Backup ngoài VPS | ⬜ chưa chọn | ✅ | 9 |
@@ -170,3 +171,8 @@ apps/web  ──HTTP /api──►  apps/api  ──►  PostgreSQL
 | 2026-10-08 | Merge 1a-2: prod 🔧 → ✅ (chỉ local, chưa có VPS). Lỗ hổng backup khi DB đang tắt ghi vào tech debt, sửa trước Phase 9. |
 | 2026-10-08 | Phase 1b xong (design system). Đổi tên `wswd` → `piko` (D-023): compose project `piko-dev`/`piko-prod`, volume `piko-*`, image `piko-api`/`piko-web`, cookie `piko_sid`, DB user/name `piko`. Áp dụng qua 1c-1; volume/image `wswd-*` cũ xoá thủ công sau. Repo: `github.com/duypham2801/Piko`. |
 | 2026-10-08 | Phase 3 merge vào `main`. Phase 4: web có router (React Router 8, D-028), thêm dòng "Web routes"; sửa dòng Web/Domain cho đúng hiện trạng. Hạ tầng không đổi. |
+| 2026-10-08 | Phase 4 merge vào `main`. Bắt đầu Phase 5 (D-029): kế hoạch thêm bảng `decisions` (JSONB `options`), route `/api/decisions` (bắt buộc session, chỉ dữ liệu của chính user) và route web `/decisions/...`. PGlite chỉ dùng khi test, không vào prod. Sửa bảng khoảng cách cho đúng hiện trạng. |
+| 2026-10-08 | 5-1 xong trên nhánh Phase 5: bảng `decisions` và route `/api/decisions` chuyển ⬜ → 🔧. Image API prod giữ 186 MB (PGlite bị loại khỏi image). |
+| 2026-10-09 | 5-2 xong trên nhánh Phase 5: route web `/decisions/new` và `/decisions/:id/edit` chuyển ⬜ → 🔧. Hạ tầng không đổi. |
+| 2026-10-09 | 5-3 xong trên nhánh Phase 5: route web `/decisions/:id` và `/decisions/:id/open`, mục "Của bạn" trên Home chuyển ⬜ → 🔧. Hạ tầng không đổi. |
+| 2026-10-09 | 5-4 xong: `/decisions/new?from=<preset>` và modal "Thêm từ có sẵn". Toàn bộ Phase 5 có code trên nhánh `feat/phase-5-builder` (🔧), chờ merge vào `main`. Hạ tầng không đổi. |

@@ -293,3 +293,68 @@ Format: Decision · Reason · Alternatives · Tradeoffs · Phase/Date
   - Couple/Squad are disabled radios with a "Sắp có" badge (D-004). There is no mode state, because only Solo exists.
 - **Copy:** `spinAgain` changes from "Quay lại" to "Mở lại". "Quay lại" also means "go back", which would be ambiguous next to the new back link.
 - **Phase:** 4 · 2026-10-08 · approved by user (router, preset flow, scope, preset list); default (mode selector, URL `off`, copy)
+
+## D-029 — Phase 5 decision builder: storage, save flow, UI choices
+- **Save flow (owner): an explicit "Lưu" button.**
+  - The builder saves the whole decision with one request (POST to create, PUT to update), then goes to the decision page, where the user opens the case.
+  - If saving fails, the builder shows a non-blocking error and still lets the user open the case with the current draft (rule 5: a network failure never blocks a decision).
+  - No autosave. Last write wins; there is no optimistic-concurrency check in the MVP (one user, one device at a time).
+- **Builder details (5-2):**
+  - It starts with an empty title and **two empty options** (owner).
+  - "Mở case" is always available next to "Lưu". It validates, then opens the case with the current draft in place, under the search param `?view=case` (push), so Back returns to the form with unsaved edits intact. Saving is never required to open the case (default).
+  - Validation errors show after the first attempt, per field, in Vietnamese. Duplicate labels are computed in the web with the same normalization as the schema, because zod skips refinements while a field is invalid (default).
+  - After a create, the builder replaces the URL with the saved decision. It goes to `/decisions/:id/edit` until 5-3, then to the preview (default).
+- **Weights UI (owner): five tappable dots per option**, under one label "Độ ưu tiên".
+  - A filled dot means the level is reached; tapping dot N sets weight N. The default is 1.
+  - It is a radio group per option, so it stays keyboard and screen-reader friendly.
+  - Never show percentages, odds or rarity colors (D-010). This settles the wording left open in D-024.
+- **Saved decisions on Home (owner):** a "Của bạn" section above "Chọn nhanh", with a "Tạo quyết định" button and one card per saved decision, most recently updated first.
+  - When there are no saved decisions, only the button shows.
+  - No separate list page.
+- **Emoji (owner): native emoji from a curated picker.**
+  - The builder offers a small built-in set (about 40 emoji: food, drinks, places, activities) plus "no emoji". No dependency, no SVG set.
+  - This settles the pending "emoji strategy" decision: native emoji.
+- **Customize a preset (owner):** the preset preview gets a secondary "Tùy chỉnh" button. It opens the builder pre-filled with the preset's title and options (new ids), to be saved as the user's own decision.
+- **Quick-add from existing options (owner, 2026-10-09, built in 5-3):**
+  - The builder gets a second button, "Thêm từ có sẵn", next to "Thêm lựa chọn". It lists the options of the presets and of the user's saved decisions, grouped by decision.
+  - Tapping one **copies** it into the draft: the label and emoji, with a new id and weight 1. There is no link to the source.
+  - Labels already in the draft are shown as added, and the limit of 20 still applies.
+  - There is no model change.
+  - Rejected for now: an option that points to another decision (chained cases), which needs a model change and loop handling. It is a post-MVP idea.
+  - **It opens as a modal (owner, 2026-10-09):** a native `<dialog>`, as a bottom sheet on phones and centred from 48rem, over a dimmed backdrop (`--color-backdrop`). Escape, "Xong" or a backdrop click closes it.
+  - Details (5-4, default):
+    - the panel lists the saved decisions (fetched when it opens, excluding the one being edited) and the presets, each as a collapsible group of chips
+    - a chip whose label (normalized like the schema) is already in the draft shows as selected and cannot be added again
+    - adding first fills an empty row (no label, no emoji), then appends
+- **Customize a preset, details (5-4, default):** `/decisions/new?from=<slug>` copies the title and **all** options of the preset, with new ids and weight 1. The preview's `?off=` switches are not carried over. An unknown slug opens the empty builder.
+- **Saved decisions UI (5-3, default):**
+  - Home "Của bạn" is a grid. Its first card is a dashed "Tạo quyết định" card, followed by the saved decisions, most recently updated first.
+    - While loading, or when the list is empty, only the create card shows.
+    - A load error shows a muted message and never blocks Home.
+  - `/decisions/:id` reuses the preset preview (switches, `?off=`), plus "Sửa" and "Xóa".
+    - Delete asks for confirmation in an inline row ("Xóa quyết định này?" Hủy / Xóa), then returns to Home.
+  - A saved-decision page renders the record passed in the router state at once, then always refetches it. A 404 means Not found. Other errors keep the state record, so the page works offline.
+- **Storage (default):**
+  - One new table `decisions`: `id`, `user_id` (FK → `users`, cascade delete), `title`, `category` (nullable), `options` (**JSONB**, the validated option array in order), `created_at`, `updated_at`; index on `(user_id, updated_at)`.
+  - Options are a JSONB column, not a separate table: they are always read and written together with their decision, there are at most 20, and a PUT replaces them atomically. History (Phase 6) will store a snapshot of the labels, so it does not need a foreign key to each option.
+  - The server generates the decision id. The client generates option ids (UUID), and the server keeps them, so option ids stay stable across edits.
+  - At most **100 decisions per user** (`DECISION_LIMITS.maxDecisionsPerUser`), checked in a transaction that locks the user row.
+- **API (default):**
+
+  | Method | Path | Result |
+  |---|---|---|
+  | `GET` | `/api/decisions` | the user's decisions, most recently updated first |
+  | `GET` | `/api/decisions/:id` | one decision |
+  | `POST` | `/api/decisions` | create → 201 |
+  | `PUT` | `/api/decisions/:id` | replace title/category/options → 200 |
+  | `DELETE` | `/api/decisions/:id` | delete → 204 |
+
+  - These routes **require an existing session** (401 `session_required`). Unlike `/api/me`, they never create a guest; the web always awaits `ensureSession()` first (rule 12).
+  - A decision that does not exist, belongs to another user, or has a malformed id is a 404. The API does not reveal whether another user's decision exists.
+  - Request bodies are limited to 16 KB.
+- **Category (default):** stays in the model but has no UI in Phase 5, because nothing uses it yet.
+- **Test database (owner): PGlite.** `@electric-sql/pglite` `0.5.8` (Apache-2.0) is an `apps/api` **devDependency**.
+  - It runs real PostgreSQL in WASM inside the test process. The API service and ownership tests run against the real Drizzle migrations, without a database container, so `make check` stays container-free.
+  - It is never part of the prod image. Because PGlite is an optional peer of drizzle-orm, `pnpm deploy --prod` would still install it, so the Dockerfile deletes the `@electric-sql` entries after `deploy`, and the build fails if any `@electric-sql` directory or `pglite.wasm` remains (5-1-fix-1, simplified in 5-1-fix-2).
+- **Web routes (default, built in 5-2/5-3):** `/decisions/new` (optionally `?from=<preset slug>`), `/decisions/:id` (preview with switches, like presets), `/decisions/:id/edit`, `/decisions/:id/open`.
+- **Phase:** 5 · 2026-10-08 · approved by user (save flow, weights UI, Home list, emoji, preset customize, PGlite); default (storage, API, category, routes)

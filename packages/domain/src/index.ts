@@ -1,12 +1,14 @@
 export { ApiError } from './api/error.js';
 export type { ApiError as ApiErrorData } from './api/error.js';
+export { DecisionListResponse, DecisionRecord } from './api/decisions.js';
+export type { DecisionListResponseData, DecisionRecordData } from './api/decisions.js';
 export { HealthResponse } from './api/health.js';
 export type { HealthResponse as HealthResponseData } from './api/health.js';
 export { MeResponse } from './api/me.js';
 export type { MeResponse as MeResponseData } from './api/me.js';
 export { DECISION_LIMITS } from './decision/limits.js';
-export { Decision, DecisionOption } from './decision/schemas.js';
-export type { DecisionData, DecisionOptionData } from './decision/schemas.js';
+export { Decision, DecisionDraft, DecisionOption } from './decision/schemas.js';
+export type { DecisionData, DecisionDraftData, DecisionOptionData } from './decision/schemas.js';
 export { select } from './selection/select.js';
 export { Seed, SelectionResult, SELECTION_ALGORITHM } from './selection/result.js';
 export type { SeedData, SelectionResultData } from './selection/result.js';

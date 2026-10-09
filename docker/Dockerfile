@@ -42,8 +42,16 @@ RUN --mount=type=cache,id=piko-pnpm,target=/pnpm/store \
 RUN NODE_ENV=production pnpm --filter @piko/web build
 RUN NODE_ENV=production pnpm --filter @piko/api build
 
+# PGlite is test-only, but Drizzle's optional peer makes pnpm deploy --prod include it.
 RUN --mount=type=cache,id=piko-pnpm,target=/pnpm/store \
-  pnpm --filter @piko/api deploy --prod --legacy /out/api
+  pnpm --filter @piko/api deploy --prod --legacy /out/api \
+  && find /out/api/node_modules -depth \( -name '@electric-sql' -o -name '@electric-sql+*' \) -exec rm -rf {} + \
+  && remaining_paths="$(find /out/api/node_modules \( -name '@electric-sql' -o -name '@electric-sql+*' -o -name 'pglite.wasm' \) -print)" \
+  && if [ -n "$remaining_paths" ]; then \
+    echo 'Unexpected PGlite path in the production API dependencies:' >&2; \
+    echo "$remaining_paths" >&2; \
+    exit 1; \
+  fi
 
 FROM node:22-alpine AS api-prod
 

@@ -1,0 +1,40 @@
+.fieldset {
+  min-width: 0;
+  padding: 0;
+  border: 0;
+}
+
+.options {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+}
+
+.option {
+  display: inline-grid;
+  width: var(--tap-target-min);
+  min-width: var(--tap-target-min);
+  height: var(--tap-target-min);
+  place-items: center;
+  cursor: pointer;
+}
+
+.dot {
+  width: var(--space-3);
+  height: var(--space-3);
+  border: var(--border-width-thin) solid var(--color-primary);
+  border-radius: var(--radius-pill);
+}
+
+.filled {
+  background: var(--color-primary);
+}
+
+.outlined {
+  background: transparent;
+}
+
+.option:has(input:focus-visible) .dot {
+  outline: var(--border-width) solid var(--color-focus-ring);
+  outline-offset: var(--border-width);
+}

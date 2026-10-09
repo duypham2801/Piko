@@ -27,6 +27,7 @@ export interface SessionMiddlewareOptions {
   cookieSecure: boolean;
   trustProxy: boolean;
   limiter: FixedWindowRateLimiter;
+  allowGuestCreation: boolean;
 }
 
 function clientIp(c: Parameters<MiddlewareHandler<AppEnv>>[0], trustProxy: boolean): string {
@@ -67,6 +68,10 @@ export function createSessionMiddleware(
       if (wasTouched) writeSessionCookie(c, token, options.cookieSecure);
       await next();
       return;
+    }
+
+    if (!options.allowGuestCreation) {
+      throw new HttpError(401, 'session_required', 'A session is required.');
     }
 
     if (!options.limiter.consume(clientIp(c, options.trustProxy))) {
