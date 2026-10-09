@@ -1,0 +1,73 @@
+.actions,
+.confirmActions {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.actions a,
+.actions button {
+  display: inline-flex;
+  min-height: var(--tap-target-min);
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-weight: var(--font-weight-bold);
+  text-decoration: none;
+}
+
+.editAction {
+  color: var(--color-text-accent);
+}
+
+.deleteAction {
+  color: var(--color-danger);
+}
+
+.confirmRow {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+  text-align: center;
+}
+
+.confirmActions {
+  align-items: center;
+}
+
+.confirmDelete {
+  display: inline-flex;
+  min-height: var(--tap-target-min);
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2) var(--space-4);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-danger);
+  box-shadow: var(--shadow-chunky-sm);
+  color: var(--color-on-primary);
+  cursor: pointer;
+  font-weight: var(--font-weight-bold);
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
+
+.confirmDelete:active:not(:disabled) {
+  transform: translateY(var(--shadow-offset-sm));
+  box-shadow: none;
+}
+
+.confirmDelete:disabled {
+  background: var(--color-disabled-bg);
+  color: var(--color-disabled-text);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.deleteError {
+  color: var(--color-danger);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-bold);
+}
