@@ -84,7 +84,7 @@ apps/web  ──HTTP /api──►  apps/api  ──►  PostgreSQL
 | API routes | ✅ `GET /api/healthz`, `GET /api/me` (tạo guest nếu chưa có)<br>🔧 Phase 5 (5-1, trên nhánh `feat/phase-5-builder`, chưa vào `main`): `GET/POST /api/decisions`, `GET/PUT/DELETE /api/decisions/:id`. Bắt buộc đã có session (không tạo guest), chỉ thấy và sửa quyết định của chính mình, tối đa 100 quyết định mỗi user |
 | Bảng DB | ✅ `users`, `sessions` (chỉ lưu sha256 của token)<br>🔧 Phase 5 (5-1, chưa vào `main`): `decisions` (thuộc 1 user, xóa user thì xóa theo; danh sách lựa chọn lưu trong cột JSONB `options`) |
 | Web | ✅ Home, preset (xem trước + mở case), màn mở case + hiệu ứng ăn mừng. Chọn ngẫu nhiên chạy ở trình duyệt, chưa lưu gì lên API<br>🔧 Phase 5 (chưa vào `main`): builder, quyết định đã lưu (mục "Của bạn" trên Home) |
-| Web routes | ✅ `/` Home, `/presets/:slug` xem trước, `/presets/:slug/open` mở case<br>🔧 Phase 5 (5-2, 5-3, chưa vào `main`): `/decisions/new`, `/decisions/:id` xem trước (Sửa/Xóa), `/decisions/:id/edit` (builder, mở case ngay từ bản nháp bằng `?view=case`), `/decisions/:id/open`<br>⬜ 5-4: `/decisions/new?from=<preset>`<br>Caddy trả `index.html` cho mọi đường dẫn không phải `/api` |
+| Web routes | ✅ `/` Home, `/presets/:slug` xem trước, `/presets/:slug/open` mở case<br>🔧 Phase 5 (5-2, 5-3, chưa vào `main`): `/decisions/new`, `/decisions/:id` xem trước (Sửa/Xóa), `/decisions/:id/edit` (builder, mở case ngay từ bản nháp bằng `?view=case`), `/decisions/:id/open`, `/decisions/new?from=<preset>` (tùy chỉnh preset)<br>Caddy trả `index.html` cho mọi đường dẫn không phải `/api` |
 | Domain | Schema API, model `Decision`, engine chọn có seed (mulberry32), toán animation plan |
 
 ---
@@ -175,3 +175,4 @@ apps/web  ──HTTP /api──►  apps/api  ──►  PostgreSQL
 | 2026-10-08 | 5-1 xong trên nhánh Phase 5: bảng `decisions` và route `/api/decisions` chuyển ⬜ → 🔧. Image API prod giữ 186 MB (PGlite bị loại khỏi image). |
 | 2026-10-09 | 5-2 xong trên nhánh Phase 5: route web `/decisions/new` và `/decisions/:id/edit` chuyển ⬜ → 🔧. Hạ tầng không đổi. |
 | 2026-10-09 | 5-3 xong trên nhánh Phase 5: route web `/decisions/:id` và `/decisions/:id/open`, mục "Của bạn" trên Home chuyển ⬜ → 🔧. Hạ tầng không đổi. |
+| 2026-10-09 | 5-4 xong: `/decisions/new?from=<preset>` và modal "Thêm từ có sẵn". Toàn bộ Phase 5 có code trên nhánh `feat/phase-5-builder` (🔧), chờ merge vào `main`. Hạ tầng không đổi. |

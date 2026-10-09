@@ -1,7 +1,7 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 5 — Decision builder (5-1, 5-2, 5-3 done; 5-4 handed off)
+- **Current phase:** Phase 5 — Decision builder (5-1…5-4 done; awaiting the owner's review before merging into `main`)
 - **Integration branch:** `feat/phase-5-builder`
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`); Phase 4 (4-1, 4-2: router, Home, presets, preview, merged into `main`)
 
@@ -26,7 +26,7 @@
 | 5-1 | Decisions API | ✅ done (`5-1-fix-1.md`, `5-1-fix-2.md`, `60387fc`) | `5-1-decisions-api.md`: `decisions` table (options as JSONB), CRUD routes requiring a session, ownership, 100 per user, PGlite service tests (D-029) |
 | 5-2 | Builder screen | ✅ done (`5-2-fix-1.md`, `ea973cf`) | `/decisions/new` and `/decisions/:id/edit`: title, options (add/edit/remove), emoji picker, priority dots, shared schema validation, explicit Save, non-blocking save error (D-029) |
 | 5-3 | Saved decisions | ✅ done (`5-3-fix-1.md`, `58e5f14`) | `/decisions/:id` preview (Sửa/Xóa with inline confirm) + `/open` case, Home "Của bạn" (create card + saved cards), a create lands on the preview. Shared `features/preview/` (preview, `?off=` helpers) used by presets too; `useDecisionRecord` shows the state record, then refetches (D-029) |
-| 5-4 | Reuse existing options | 🔧 fix-2 handed off (`5-4-fix-1.md`, `5-4-fix-2.md`) | Preset "Tùy chỉnh" (`/decisions/new?from=<slug>`) and builder "Thêm từ có sẵn", which copies options from presets/saved decisions (D-029) |
+| 5-4 | Reuse existing options | ✅ done (`5-4-fix-1.md`, `5-4-fix-2.md`, `aa21530`) | Preset "Tùy chỉnh" (`/decisions/new?from=<slug>`) and builder "Thêm từ có sẵn", which copies options from presets/saved decisions (D-029) |
 | 6 | Result + history | ⬜ | Winner reveal, Let's Go / Spin Again / Not Tonight / Share, history; adds Home "Recent decisions" (D-028) |
 | 7 | Responsive pass | ⬜ | Desktop is not in the mockup and must be designed |
 | 8 | Polish | ⬜ | States, micro-interactions, consistency |
@@ -466,6 +466,13 @@
   - NICE:
     - only the chip's `disabled` state guards against duplicates: three same-label clicks in one task produced `Phở | Bún | Phở`. Guard inside the updater.
     - the `handleClose` wrapper, the unused `existingOptionsPanelId`, and `useCallback` on `closeExisting`
+
+- **5-4-fix-2 (2026-10-09):** verified against the diff (`aa21530`, 4 files, +25/−11). `make check` passes (domain 44, api 17). Grep clean.
+  - `Chip`: `.selected:disabled` keeps the teal selected look; the unselected disabled chip stays grey; `/design` shows both.
+  - Added chips show `✓`. The updater checks the limit and the normalized label on the current draft: the architect's same-task script with four chips now yields `Phở | Bún`.
+  - `handleClose`, `existingOptionsPanelId` and the `useCallback` are gone.
+  - Architect screenshot at 390 px: teal `✓ Phở` / `✓ Bún` chips in the bottom sheet.
+  - **5-4 accepted. Phase 5 code complete** on `feat/phase-5-builder`.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
