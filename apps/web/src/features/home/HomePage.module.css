@@ -2,26 +2,11 @@
   gap: var(--space-7);
 }
 
-.brand,
 .intro {
   display: grid;
   justify-items: center;
   gap: var(--space-2);
   text-align: center;
-}
-
-.wordmark {
-  color: var(--color-text);
-  font-family: var(--font-display);
-  font-size: var(--text-3xl);
-  font-weight: var(--font-weight-display);
-  line-height: var(--leading-tight);
-  letter-spacing: 0.04em;
-}
-
-.tagline {
-  color: var(--color-text-muted);
-  font-size: var(--text-lg);
 }
 
 .intro h1 {

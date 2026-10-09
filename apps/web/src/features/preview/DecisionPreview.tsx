@@ -64,7 +64,7 @@ export default function DecisionPreview({
   };
 
   return (
-    <Screen backTo={backTo} width="wide" className={styles.content}>
+    <Screen backTo={backTo} width="wide">
       <header className={styles.header}>
         {emoji && (
           <span aria-hidden="true" className={styles.headerEmoji}>

@@ -21,11 +21,6 @@ export default function HomePage() {
     <>
       <title>{`${t('title')} — ${t('tagline')}`}</title>
       <Screen width="wide" className={styles.content}>
-        <header className={styles.brand}>
-          <p className={styles.wordmark}>{t('title')}</p>
-          <p className={styles.tagline}>{t('tagline')}</p>
-        </header>
-
         <section className={styles.intro}>
           <h1>{t('homeQuestion')}</h1>
           <p>{t('homeLead')}</p>

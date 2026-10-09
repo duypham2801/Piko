@@ -7,15 +7,16 @@ export default function AppNav() {
   return (
     <nav aria-label={t('navLabel')} className={styles.nav}>
       <Link className={styles.logo} to="/">
-        {t('title')}
+        <span className={styles.wordmark}>{t('title')}</span>
+        <span className={styles.tagline}>{t('tagline')}</span>
       </Link>
       <div className={styles.links}>
-        <Link aria-label={t('builderNewTitle')} className={styles.create} to="/decisions/new">
-          <span aria-hidden="true">+</span> {t('navCreate')}
-        </Link>
         <NavLink className={styles.history} to="/history">
           {t('historyTitle')}
         </NavLink>
+        <Link aria-label={t('builderNewTitle')} className={styles.create} to="/decisions/new">
+          <span aria-hidden="true">+</span> {t('navCreate')}
+        </Link>
       </div>
     </nav>
   );
