@@ -35,7 +35,7 @@
 | 6-5b | Shared links list + revoke | ✅ (`6-5b-fix-1.md`) | `6-5b-shared-links.md`: "Link đã chia sẻ" in `/history` (title → `/s/:id`, winner, expiry) with an inline revoke confirm; `Button variant="danger"` (D-030) |
 | 6-6 | Live viewing + interactions | ⏸ moved | Deferred to the Realtime phase (D-031) |
 | 7-1 | Navigation shell | ✅ (`7-1-fix-1.md`) | `7-1-navigation-shell.md`: layout route + screen shell (back link at one position), mobile top bar, desktop sidebar frame from `64rem`, focus mode on case screens, `/s/:id` outside; replaces the copied screen layouts (D-032) |
-| 7-2 | Sidebar lists + desktop Home | 🔄 handoff `7-2-sidebar-lists.md` | "Của bạn" and "Gần đây" in the sidebar (reload on route change), Home drops both sections from `64rem` (D-032) |
+| 7-2 | Sidebar lists + desktop Home | 🔄 fix (`7-2-fix-1.md`) | "Của bạn" and "Gần đây" in the sidebar (reload on route change), Home drops both sections from `64rem` (D-032) |
 | 7-3 | Responsive pass | ⬜ | Every screen at 360 / 768 / 1024 / 1280 / 1920: carousel, winner reveal, CTAs, card grids, option layout |
 | 8 | Polish | ⬜ | States, micro-interactions, consistency |
 | 9 | First prod release | ⬜ | Deploy `v0.1.0` to VPS, verify backup/rollback |
@@ -696,6 +696,31 @@
     - The list hooks take an optional reload key; the sidebar passes `pathname`, so `?off=` changes do not reload, and the current data stays visible while reloading.
     - "Của bạn" scrolls on its own; "Gần đây" shows winner + title without time.
     - Desktop Home keeps the create card alone.
+- **7-2 review (2026-10-09):** reviewed `4b5c55a`, `2e83b94`, `f7b97cb`, `7ba2497` (9 files, +352/−69). `make check` passes (domain 48, api 41), with **1 lint warning**.
+  - **Browser:**
+    - **Requests:**
+      - At 1280 px, `/` makes one `GET /api/decisions` and one `GET /api/history?limit=5`, both from the sidebar; Home renders only "Chọn nhanh".
+      - At 360 px there are no nav lists and Home keeps its sections (dev StrictMode doubles its two GETs).
+    - **Layout and links:**
+      - Resizing across `64rem` switches the layout live.
+      - The active row has `aria-current`.
+    - **Reloads:**
+      - `?off=` toggles make no list request.
+      - "Đi thôi" → "Trở về" puts the new entry first without emptying the sidebar.
+      - A deleted decision disappears after the redirect.
+  - **MUST:** "Của bạn" with many decisions shows a horizontal scrollbar. `.list` is an `auto` grid column, so `nowrap` labels widen each `<li>`. The heading also scrolls away with the rows.
+  - **SHOULD:**
+    - `react-refresh/only-export-components` warning from exporting `historyEntryHref` in `HistoryList.tsx` (architect handoff mistake) → own module.
+    - `NavLists.module.css` repeats `global.css` resets and has two heading selectors.
+    - Redundant `aria-label` on the sidebar rows.
+    - An unused server snapshot in `useMediaQuery`.
+  - **NICE (Phase 8):**
+    - the active row is not scrolled into view
+    - recent rows without a winner emoji start further left (same as the 6-3 note)
+  - **DO NOT TOUCH:**
+    - "Xem tất cả" next to the nav's "Lịch sử" (D-032)
+    - `RecentSection` returning `null` before its first load
+  - → `7-2-fix-1.md`.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
