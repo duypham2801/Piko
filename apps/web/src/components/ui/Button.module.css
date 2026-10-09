@@ -51,6 +51,11 @@
   color: var(--color-text);
 }
 
+.danger {
+  background: var(--color-danger);
+  color: var(--color-on-primary);
+}
+
 .fullWidth {
   width: 100%;
 }

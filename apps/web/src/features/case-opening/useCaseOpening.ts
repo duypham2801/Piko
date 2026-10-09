@@ -18,11 +18,11 @@ type Layout = {
   viewportWidth: number;
 };
 
-export function useCaseOpening(options: readonly DecisionOptionData[]) {
+export function useCaseOpening(pool: readonly DecisionOptionData[]) {
   const [state, dispatch] = useReducer(caseOpeningReducer, { status: 'ready' });
   const previewPlan = useMemo(
-    () => buildAnimationPlan(select(options, CASE_PREVIEW_SEED), options),
-    [options],
+    () => buildAnimationPlan(select(pool, CASE_PREVIEW_SEED), pool),
+    [pool],
   );
   const displayedPlan = state.status === 'ready' ? previewPlan : state.plan;
 
@@ -214,23 +214,26 @@ export function useCaseOpening(options: readonly DecisionOptionData[]) {
 
   useEffect(() => () => cancelAnimation(), [cancelAnimation]);
 
-  const open = useCallback(() => {
-    if (state.status === 'spinning') {
-      return;
-    }
+  const open = useCallback(
+    (spinOptions: readonly DecisionOptionData[] = pool, seed?: number) => {
+      if (state.status === 'spinning') {
+        return undefined;
+      }
 
-    const values = crypto.getRandomValues(new Uint32Array(1));
-    const seed = values[0];
-    if (seed === undefined) {
-      return;
-    }
+      const spinSeed = seed ?? crypto.getRandomValues(new Uint32Array(1))[0];
+      if (spinSeed === undefined) {
+        return undefined;
+      }
 
-    cancelAnimation();
-    reducedMotionRef.current = window.matchMedia(REDUCED_MOTION_QUERY).matches;
-    const result = select(options, seed);
-    const plan = buildAnimationPlan(result, options);
-    dispatch({ type: 'open', plan, result });
-  }, [cancelAnimation, options, state.status]);
+      cancelAnimation();
+      reducedMotionRef.current = window.matchMedia(REDUCED_MOTION_QUERY).matches;
+      const result = select(spinOptions, spinSeed);
+      const plan = buildAnimationPlan(result, spinOptions);
+      dispatch({ type: 'open', plan, result, options: spinOptions });
+      return { options: [...spinOptions], result };
+    },
+    [cancelAnimation, pool, state.status],
+  );
 
   return { state, plan: displayedPlan, open, viewportRef, stripRef };
 }

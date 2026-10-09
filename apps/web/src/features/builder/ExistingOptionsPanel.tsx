@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useRef, type MouseEvent } from 'react';
+import { useMemo } from 'react';
 import { DECISION_LIMITS } from '@piko/domain';
 import type { DecisionDraftData, DecisionOptionData } from '@piko/domain';
 
-import Button from '../../components/ui/Button';
 import Chip from '../../components/ui/Chip';
+import Sheet from '../../components/ui/Sheet';
 import { t } from '../../i18n';
 import { useDecisionList } from '../decisions/useDecisionList';
 import { PRESETS } from '../presets/presets';
@@ -68,7 +68,6 @@ export default function ExistingOptionsPanel({
   onClose,
   onEditDraft,
 }: ExistingOptionsPanelProps) {
-  const dialogRef = useRef<HTMLDialogElement>(null);
   const { decisions, status } = useDecisionList();
   const selectedLabels = useMemo(
     () => new Set(draft.options.map((option) => normalizeLabel(option.label)).filter(Boolean)),
@@ -89,85 +88,48 @@ export default function ExistingOptionsPanel({
     );
   };
 
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) {
-      return;
-    }
-
-    if (!dialog.open) {
-      dialog.showModal();
-    }
-  }, []);
-
-  const closeDialog = () => {
-    dialogRef.current?.close();
-  };
-
-  const handleBackdropClick = (event: MouseEvent<HTMLDialogElement>) => {
-    if (event.target === event.currentTarget) {
-      closeDialog();
-    }
-  };
-
   return (
-    <dialog
-      aria-labelledby="existing-options-title"
-      className={styles.panel}
-      ref={dialogRef}
-      onClick={handleBackdropClick}
-      onClose={onClose}
-    >
-      <div className={styles.shell}>
-        <header className={styles.headingRow}>
-          <h2 id="existing-options-title">{t('addFromExisting')}</h2>
-          <Button variant="outline" onClick={closeDialog}>
-            {t('done')}
-          </Button>
-        </header>
-        <div className={styles.body}>
-          {atMax && <p className={styles.hint}>{t('maxOptionsHint')}</p>}
+    <Sheet closeLabel={t('done')} title={t('addFromExisting')} onClose={onClose}>
+      {atMax && <p className={styles.hint}>{t('maxOptionsHint')}</p>}
 
-          {showSavedDecisions && (
-            <section className={styles.section}>
-              <h3>{t('yourDecisions')}</h3>
-              {status === 'loading' && <p className={styles.muted}>{t('loading')}</p>}
-              {status === 'error' && <p className={styles.muted}>{t('listFailed')}</p>}
-              {status === 'loaded' && (
-                <div className={styles.groups}>
-                  {savedDecisions.map((record) => (
-                    <OptionGroup
-                      key={record.decision.id}
-                      options={record.decision.options}
-                      selectedLabels={selectedLabels}
-                      title={record.decision.title}
-                      atMax={atMax}
-                      onAdd={addOption}
-                    />
-                  ))}
-                </div>
-              )}
-            </section>
-          )}
-
-          <section className={styles.section}>
-            <h3>{t('quickPicks')}</h3>
+      {showSavedDecisions && (
+        <section className={styles.section}>
+          <h3>{t('yourDecisions')}</h3>
+          {status === 'loading' && <p className={styles.muted}>{t('loading')}</p>}
+          {status === 'error' && <p className={styles.muted}>{t('listFailed')}</p>}
+          {status === 'loaded' && (
             <div className={styles.groups}>
-              {PRESETS.map((preset) => (
+              {savedDecisions.map((record) => (
                 <OptionGroup
-                  key={preset.slug}
-                  emoji={preset.emoji}
-                  options={preset.decision.options}
+                  key={record.decision.id}
+                  options={record.decision.options}
                   selectedLabels={selectedLabels}
-                  title={preset.decision.title}
+                  title={record.decision.title}
                   atMax={atMax}
                   onAdd={addOption}
                 />
               ))}
             </div>
-          </section>
+          )}
+        </section>
+      )}
+
+      <section className={styles.section}>
+        <h3>{t('quickPicks')}</h3>
+        <div className={styles.groups}>
+          {PRESETS.map((preset) => (
+            <OptionGroup
+              key={preset.slug}
+              emoji={preset.emoji}
+              options={preset.decision.options}
+              selectedLabels={selectedLabels}
+              title={preset.decision.title}
+              atMax={atMax}
+              onAdd={addOption}
+            />
+          ))}
         </div>
-      </div>
-    </dialog>
+      </section>
+    </Sheet>
   );
 }

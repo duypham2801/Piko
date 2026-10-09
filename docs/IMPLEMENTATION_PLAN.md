@@ -1,8 +1,8 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 6 — Result + history (not started)
-- **Integration branch:** none yet
+- **Current phase:** Phase 7 — Responsive pass + navigation shell (next; kickoff with the owner). Phase 6 merged into `main` on 2026-10-09; live viewing moved to the Realtime phase (D-031).
+- **Integration branch:** `feat/phase-6-result-history`
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`); Phase 4 (4-1, 4-2: router, Home, presets, preview, merged into `main`); Phase 5 (5-1…5-4: decisions API, builder, saved decisions, reuse options, merged into `main`)
 
 ## Phases
@@ -27,11 +27,18 @@
 | 5-2 | Builder screen | ✅ done (`5-2-fix-1.md`, `ea973cf`) | `/decisions/new` and `/decisions/:id/edit`: title, options (add/edit/remove), emoji picker, priority dots, shared schema validation, explicit Save, non-blocking save error (D-029) |
 | 5-3 | Saved decisions | ✅ done (`5-3-fix-1.md`, `58e5f14`) | `/decisions/:id` preview (Sửa/Xóa with inline confirm) + `/open` case, Home "Của bạn" (create card + saved cards), a create lands on the preview. Shared `features/preview/` (preview, `?off=` helpers) used by presets too; `useDecisionRecord` shows the state record, then refetches (D-029) |
 | 5-4 | Reuse existing options | ✅ done (`5-4-fix-1.md`, `5-4-fix-2.md`, `aa21530`) | Preset "Tùy chỉnh" (`/decisions/new?from=<slug>`) and builder "Thêm từ có sẵn", which copies options from presets/saved decisions (D-029) |
-| 6 | Result + history | ⬜ | Winner reveal, Let's Go / Spin Again / Not Tonight / Share, history; adds Home "Recent decisions" (D-028) |
-| 7 | Responsive pass | ⬜ | Desktop is not in the mockup and must be designed |
+| 6-1 | History API | ✅ | `6-1-history-api.md`: `decision_sessions` table (snapshot + `SelectionResult`, re-checked on the server), `POST/GET /api/history`, 200 per user, PGlite tests (D-030) |
+| 6-2 | Result actions | ✅ (`6-2-fix-1.md`, `6-2-fix-2.md`) | `6-2-result-actions.md`: "Đi thôi" (save to history, best-effort), "Mở lại", "Không phải hôm nay" (exclude and respin), on every case screen (D-030) |
+| 6-3 | History UI | ✅ (`6-3-fix-1.md`) | `6-3-history-ui.md`: Home "Gần đây" (5 newest) + `/history` (D-028, D-030) |
+| 6-4 | Shares API | ✅ (`6-4-fix-1.md`) | `6-4-shares-api.md`: `shared_cases` table, owner routes (create with lifetime, list, revoke, record a spin), public read route without a session (D-030) |
+| 6-5a | Share UI + public page | ✅ (`6-5a-fix-1.md`) | `6-5a-share-ui.md`: "Chia sẻ" dialog (lifetime, Web Share / copy), later spins recorded, `/s/:id` (options, replay, "Tự quay thử", unavailable page) with no session bootstrap; extracts `Sheet` and `WinnerPanel` (D-030) |
+| 6-5b | Shared links list + revoke | ✅ (`6-5b-fix-1.md`) | `6-5b-shared-links.md`: "Link đã chia sẻ" in `/history` (title → `/s/:id`, winner, expiry) with an inline revoke confirm; `Button variant="danger"` (D-030) |
+| 6-6 | Live viewing + interactions | ⏸ moved | Deferred to the Realtime phase (D-031) |
+| 7 | Responsive pass + navigation shell | ⬜ | Desktop is not in the mockup and must be designed. **First task: a navigation shell** (owner, 2026-10-09):<br>- a desktop sidebar holding "Của bạn" and "Gần đây"<br>- a mobile navigation pattern (top bar, drawer or bottom tabs), chosen at kickoff<br>- the shared screen shell with the back link at the same position on every screen<br>- the public `/s/:id` page stays outside the shell |
 | 8 | Polish | ⬜ | States, micro-interactions, consistency |
 | 9 | First prod release | ⬜ | Deploy `v0.1.0` to VPS, verify backup/rollback |
 | — | Final engineering review | ⬜ | Format per master prompt §47–48 |
+| R | Realtime: live viewing + Couple/Squad | ⬜ | After `v0.1.0` (D-031). One design for rooms, presence, viewer/participant identity, anti-spam and server-ordered spins; live viewing of shared links (from D-030) is its first consumer. Couple/Squad still need their own approval (CLAUDE.md rule 9). |
 
 ## Next tasks (Phase 1a)
 1. Root: `package.json` (workspaces), `pnpm-workspace.yaml`, `tsconfig.base.json`, ESLint, Vitest, `.env.example`, `.dockerignore`.
@@ -479,6 +486,174 @@
   - Architect re-check on `main`: `make check` passes (domain 44, api 17), `/api/healthz` reports ok with the db ok, and the web returns 200.
   - **Phase 5 complete.**
 
+- **Phase 6 kickoff (2026-10-09):** HITL decisions recorded in D-030 (refines D-009; adds an approved exception to CLAUDE.md rule 9).
+  - The owner chose:
+    - history on "Đi thôi" only
+    - Home "Gần đây" + `/history`
+    - "Không phải hôm nay" excludes and respins at once
+    - share as a **public link** with the option list, replay and "Tự quay thử", available as soon as the result is revealed
+    - a lifetime chosen when sharing, plus revoke
+    - **live viewing with viewer interaction**
+  - The owner asked whether LiveKit/WebRTC fits live viewing. The architect advised against it: the spin is deterministic from the seed, so a tiny event is enough and no media needs streaming. The owner chose SSE + POST.
+  - Split into 6-1…6-6, with live viewing last. Integration branch `feat/phase-6-result-history` created from `main` (`36a32ed`). Topology updated (owner approved).
+  - Handoff `6-1-history-api.md` written.
+
+- **6-1 (2026-10-09):** reviewed `feat/6-1-history-api` (4 commits `185ee3f`…`bb52d8c`, 14 files, +1167/−6). `make check` passes (domain 47, api 28). Lockfile and `apps/web` unchanged.
+  - Architect check: `\d decision_sessions` in the dev DB shows the 2 indexes and the FKs (`ON DELETE CASCADE` on user, `ON DELETE SET NULL` on decision). The migration is generated and additive only.
+  - Accepted:
+    - `matchesSelection` re-runs `select` and compares algorithm, winner and candidates in order; returns `false` on a throw
+    - the service rejects mismatches before the transaction, locks the user row, links only owned decisions and prunes in list order
+    - every query filters by `user_id`
+    - the routes are thin, with `invalid_query` / `invalid_json` / `invalid_body` / `invalid_result`
+    - the middleware is renamed to `requiredSession` / `jsonBodyLimit` and shared by `/api/decisions` and `/api/history` (allowed by the handoff)
+  - SHOULD (`6-1-fix-1.md`):
+    - the POST route re-parses its own response with `HistoryEntry.parse`, unlike the decisions routes
+    - the `match.test.ts` "candidates differ" test disables every option, so it only tests the throw path
+  - NICE (same fix):
+    - pruning loads every id and slices; use `offset`
+    - a redundant route test that cannot assert the order
+    - an irrelevant `decisions` assertion in the cascade test
+    - a hand-typed source union in the test helper
+  - DO NOT TOUCH: the `/api/history/*` mount (no sub-routes yet, harmless and consistent with decisions).
+
+- **6-1-fix-1 (2026-10-09):** verified against the diff (`a04582e`, 5 files, +24/−32). `make check` passes (domain 48, api 27).
+  - `POST` returns the typed entry with no re-parse. `HistoryEntry.parse` remains only in the route test.
+  - Pruning selects only the overflow with `offset`; the pruning test still passes.
+  - `match.test.ts` has a real candidate mismatch (two options still enabled) plus a separate test for the throw path.
+  - The redundant route test and the irrelevant assertion are gone; the test helper uses `HistorySourceInputData`.
+  - **6-1 accepted.**
+- **6-2 (2026-10-09):** reviewed the two implementer commits (rebased onto the review docs) (10 files, +252/−50). `make check` passes (domain 48, api 27); lockfile unchanged; literal gate empty.
+  - **Browser (headless Chrome, reduced motion):**
+    - at 360, 390 and 1280 px: "Mở case" → "Không phải hôm nay" down to two candidates (button disabled, hint shown) → "Mở lại" keeps the exclusions → "Đi thôi" → `201`
+    - with `?off=0` the snapshot has option 0 `enabled: false`
+    - no horizontal scroll
+    - a blocked `/api/history` request shows the error with every action still enabled; a new spin clears it; a retry saves
+  - **SHOULD:** the spin options live in a separate `spinOptionsRef` that each `open` caller must set. They should travel with `plan`/`result` in the state machine.
+  - **NICE:**
+    - the exclusion mapping is written twice
+    - the status line has `min-height: --tap-target-min` plus an `:empty` reset
+    - `spinAgain` also handles "Mở case"
+  - **For the owner's visual review (copy, not fixed):**
+    - the hint "Cần ít nhất 2 lựa chọn." when two remain
+    - after saving, both "Đã lưu" (button) and "Đã lưu vào lịch sử." (line) show
+  - **DO NOT TOUCH:** `withSession` moved to `session.ts`; the save is not blocked by other actions; stale responses are ignored via a request counter.
+  - → `6-2-fix-1.md`.
+- **6-2-fix-1 (2026-10-09):** verified (`a99f7a9`, 4 files).
+  - The spin options now travel in the case-opening state with `plan`/`result`; `spinOptionsRef` is gone; one `excludeOptions` helper.
+  - `make check` passes (domain 48, api 27). The browser re-run at 360/390/1280 px and the blocked-save flow give the same results as 6-2.
+  - **Owner visual review:** two copy changes.
+    - The hint with two left reads "Chỉ còn 2 lựa chọn cuối." (new key; the preview keeps `minOptionsHint`).
+    - The success line is visually hidden but kept in the live region, so the "Đã lưu" button is the only visible confirmation.
+  - → `6-2-fix-2.md`.
+- **6-2-fix-2 (2026-10-09):** verified (`2d79d07`, 3 files).
+  - The hint reads "Chỉ còn 2 lựa chọn cuối."; the preview keeps `minOptionsHint`.
+  - After saving, the live region has `visually-hidden` and only "Đã lưu" shows; a failed save still shows the error line.
+  - `make check` passes (domain 48, api 27).
+  - NICE, not fixed: the hint's DOM id is still `case-min-options-hint`.
+  - **6-2 accepted.**
+- **6-3 (2026-10-09):** reviewed the two implementer commits (11 files, +358/−3). `make check` passes (domain 48, api 27); lockfile unchanged; literal gate empty.
+  - **Browser (headless Chrome, 360 and 1280 px):**
+    - Home sends `GET /api/history?limit=5` and `/history` sends `GET /api/history`, each after the single `/api/me`
+    - Home shows 5 rows, `/history` shows all, with no horizontal scroll
+    - preset entries link to `/presets/<slug>`; a saved-decision entry links to `/decisions/<id>` and stops being a link once that decision is deleted; a draft entry is not a link
+  - **NICE:**
+    - `formatHistoryTime` builds day keys from `formatToParts`, where comparing the local year, month and day is enough
+    - `.recent` repeats the grid rules of `.yourDecisions`/`.quickPicks`
+  - **For the owner's visual review:** the `--border-width-thin` (2 px) dividers look heavy; where "Gần đây" sits on Home.
+  - **DO NOT TOUCH:** the shared `HistoryList` (one `Card`, rows as `Link` or `div`); `useHistoryList` with `retry`.
+  - **Owner visual review:**
+    - make the dividers thinner → `6-3-fix-1.md`, with a hairline width and a `--color-divider` token, plus the two NICE items
+    - the owner asked for a sidebar holding "Của bạn" and "Gần đây". **Deferred to the start of Phase 7** (owner, HITL): the app has no navigation shell yet, and Phase 6 still adds `/history` "Link đã chia sẻ" and the public `/s/:id`, so the shell is designed once, after Phase 6
+- **6-3-fix-1 (2026-10-09):** verified (`3dd3470`, 5 files).
+  - Dividers use `--border-width-hairline` (1 px) and `--color-divider` (navy 15 %); both are listed in `/design`.
+  - `formatHistoryTime` compares local calendar days; the Home section rules are merged.
+  - `make check` passes (domain 48, api 27).
+  - The literal gate flagged existing `style=`/`px` samples in the dev-only `DesignPage.tsx`. That is a false positive of the gate, which should exclude `pages/design/` in future handoffs.
+  - **NICE (Phase 8 polish):** rows whose winner has no emoji start further left than rows with one.
+  - **6-3 accepted.**
+- **6-4 (2026-10-09):** reviewed the four implementer commits (12 files, +1464). `make check` passes (domain 48, api 41); lockfile unchanged.
+  - The migration `0003` is additive: `CREATE TABLE shared_cases`, one FK (cascade), one index.
+  - **Dev:**
+    - the public route returns 404 with `cache-control: no-store` and no `set-cookie`, for both a valid-looking and a malformed id
+    - `/api/shares` without a cookie returns 401
+  - Every owner query filters by `user_id`. The spin check compares ids, order, label, emoji and weight. Expired rows are pruned on create.
+  - **SHOULD:**
+    - `notFoundError` is defined three times and the uuid check twice
+    - the "read JSON → `invalid_json`, `safeParse` → `invalid_body`" block is written four times across the decisions, history and shares routers
+    - These are now a real reuse boundary → `lib/http.ts`.
+  - **NICE:** the public handler catches the service's `HttpError(404)` and rebuilds the body only to add `Cache-Control`. A `null` return plus `c.header` is simpler.
+  - **DO NOT TOUCH:** one `SharedCase` shape for owner and public responses (it has no user field); revoke deletes the row.
+  - → `6-4-fix-1.md`.
+- **6-4-fix-1 (2026-10-09):** verified (`9f82567`, 6 files, +68/−138). `make check` passes with the same counts (domain 48, api 41); route tests are unchanged.
+  - `lib/http.ts` (`notFoundError`, `parseUuidParam`, `readJsonBody`) is used by the decisions, history and shares routers.
+  - `getPublicShare` returns `null`; the public handler sets `Cache-Control` once and has no `try`/`catch`. Dev: 404 with `no-store`, no cookie.
+  - The public route keeps an inline `z.uuid()` check, because it must answer 404 itself instead of throwing. Accepted.
+  - **6-4 accepted.**
+
+- **6-5 kickoff (2026-10-09):** split into 6-5a (share dialog, recording later spins, public `/s/:id`) and 6-5b (shared links list + revoke), owner approved. Handoff `6-5a-share-ui.md`.
+  - Architect defaults: the app-wide `ensureSession()` effect moves into a `SessionLayout` route so `/s/:id` never bootstraps a session; spins after sharing are recorded at spin start (best-effort, silent); the public page lists enabled options only, keeps the real shared result visible next to local "Tự quay thử" spins, and sets `noindex`.
+  - Reuse boundary reached: a second modal, so `ExistingOptionsPanel`'s dialog shell becomes `components/ui/Sheet`; the winner card becomes `WinnerPanel` for the case screen and the public page.
+- **6-5a review (2026-10-09):** verified on `feat/6-5a-share-ui` (3 commits, 21 files). `make check` passes (domain 48, api 41); no dependency change; the session grep shows only `SessionLayout.tsx`; the literal grep is empty.
+  - Browser (headless Chrome, 360/390/1280, reduced motion and normal motion):
+    - "Chia sẻ" → 7 days preselected → one `POST /api/shares` with the spin options and result.
+    - Reopening shows the same link with no new request. `Esc`, a backdrop click and "Đóng" close the dialog and focus returns to "Chia sẻ".
+    - The copy-failure fallback selects the link.
+    - "Mở lại" and "Không phải hôm nay" each make one `POST …/spins`.
+    - `/s/:id` in a fresh browser context: only `GET /api/public/shares/:id`, no cookie, `users` count unchanged (47 → 47), `noindex`, enabled options only, no weights.
+    - Replay lands on the shared winner (normal and reduced motion); three "Tự quay thử" spins sent nothing and the shared result line did not change.
+    - A malformed id and an unknown UUID show "Link này không còn khả dụng".
+  - SHOULD (`6-5a-fix-1.md`):
+    - three states for one share snapshot in `CaseOpening`
+    - `ShareDialog`: a local copy of the lifetime type, a redundant `activeRef`, and a `data-` attribute queried twice
+    - the public stage stays at `--content-max-width` on desktop, unlike the case screen
+    - the option list uses a bordered box per option, heavier than the history list the owner approved
+  - NICE (same fix):
+    - an empty status band in dialog step 2
+    - the verbose seed block in `open`
+    - the import order in `CaseOpening`
+    - the wrapper around the latest-result line
+    - an empty emoji span when an option has none
+  - Note for the Realtime phase (was 6-6): spin records are fire-and-forget, so two quick spins could reach the server out of order and leave the older one as "latest". Live viewing must order spins (e.g. by start time) when it adds the broadcast.
+  - DO NOT TOUCH: the focus return by element id (same pattern as `DecisionForm`), the `NotFoundPage` `title`/`message` props, and the duplicated `screen` layout CSS (the Phase 7 shell will own it).
+- **6-5a-fix-1 (2026-10-09):** verified against the diff (`b8e076e`, 6 web files). `make check` passes (domain 48, api 41); the handoff greps and the literal grep are empty.
+  - `CaseOpening` keeps one `shareSnapshot`. `ShareDialog` uses the domain lifetime type, one `requestRef` guard and the link field id; the status line renders only with a message.
+  - Browser:
+    - Step 2 of the dialog has no empty band at 1280.
+    - The copy fallback still selects the link. `Esc` returns focus to "Chia sẻ", and "Mở lại" records one spin.
+    - On `/s/:id` the stage is 960 px wide at 1280 while the actions stay at 480. The option list is one card with hairline dividers. No horizontal scroll at 360. No cookie.
+  - 6-5a accepted.
+- **6-5b handoff (2026-10-09):** `6-5b-shared-links.md`.
+  - Architect defaults:
+    - "Link đã chia sẻ" sits above the history list and is hidden when empty (D-028); the history list gets an "Đã chọn" heading.
+    - Each row's title opens `/s/:id`; the meta line shows the latest winner and the expiry.
+    - Revoke uses an inline confirm like the decision delete; a `404` counts as revoked.
+    - No copy/re-share action in the list.
+  - Reuse boundary reached: a second red confirm button, so `Button` gets `variant="danger"` and the decision delete stops hand-styling its button.
+- **6-5b review (2026-10-09):** verified on `feat/6-5b-shared-links` (2 commits, 12 files). `make check` passes (domain 48, api 41); no dependency change; the `confirmDelete` and literal greps are empty.
+  - Browser (360/1280):
+    - A new guest sees only "Đã chọn".
+    - With two links:
+      - `/history` makes `/api/me`, `GET /api/history` and `GET /api/shares`.
+      - The rows show the title (→ `/s/:id`), the winner and "Hết hạn …" or "Không hết hạn", with no horizontal scroll at 360.
+    - The confirm focuses "Hủy", and cancel returns focus to "Thu hồi".
+    - A revoke makes one `DELETE`; focus lands on "Link đã chia sẻ" and then, after the last link, on "Đã chọn".
+    - `/s/:id` shows "Link này không còn khả dụng" afterwards.
+    - With the api stopped:
+      - the revoke shows `revokeFailed`
+      - on load, both sections show their errors
+    - It works after a restart.
+    - The decision delete uses `Button variant="danger"` and looks unchanged.
+  - SHOULD (`6-5b-fix-1.md`):
+    - `SharedLinkList` keeps a `mountedRef` (not needed in React 19, already removed from `ShareDialog`) and duplicates the success path for `404`
+    - `HistoryPage` moves focus after a revoke through a flag ref and an effect instead of directly in the handler
+  - DO NOT TOUCH: the `confirmDelete` → `handleDelete` rename in `DecisionPreviewPage` (needed by the handoff grep); the nested label ternary in the dev-only `ComponentsSection`.
+- **6-5b-fix-1 (2026-10-09):** verified against the diff (`7e6b629`, 2 files, +15/−47). `make check` passes (domain 48, api 41); the handoff grep is empty.
+  - `SharedLinkList` has one success path with no mounted guard. `HistoryPage` focuses the right heading directly in `handleRevoked`.
+  - Browser rerun: cancel and revoke focus are unchanged ("Link đã chia sẻ", then "Đã chọn"). A link already deleted elsewhere (`404`) disappears with no error.
+  - 6-5b accepted. The implementer reported one transient PGlite setup timeout in `shares.test.ts` that passed on rerun; not reproduced in this review.
+- **6-6 decision (2026-10-09):** the owner asked whether live viewing should wait, since Couple/Squad will also need live spins. Owner chose to defer (D-031): Phase 6 closes at 6-5b, and live viewing moves to a Realtime phase after `v0.1.0`, designed once with Couple/Squad. Nothing built in 6-1…6-5b is wasted: `shared_cases` keeps the latest spin and `POST /api/shares/:id/spins` is recorded at spin start.
+- **Phase 6 closed (2026-10-09):** the owner did the browser review on phone and desktop and approved it. `feat/phase-6-result-history` was merged into `main` with `--no-ff`. `TOPOLOGY.md` was updated (owner approved).
+
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
 - `migrate` resolves `../../drizzle` relative to `dist/db/migrate.js`, so the prod api image must ship `apps/api/drizzle/` next to `dist/`.
@@ -486,7 +661,8 @@
 - **The prod build stage must set `NODE_ENV=production` explicitly** and must not load `.env.dev`/`.env.prod` at build time. Otherwise Vite bundles development React (+60 kB gz). Any `vite build` run inside the dev container produces a dev build and is not representative.
 
 ## Pending decisions
-- Share format (Phase 6).
+- Phase 7 navigation shell: desktop sidebar layout, mobile pattern (top bar / drawer / bottom tabs), what moves off Home.
+- Realtime phase (D-031): room model, presence, viewer/participant identity, interaction kinds, anti-spam (decide at its kickoff).
 - Inactive guest cleanup policy (e.g. delete after N months of inactivity).
 - Hosting target: VPS provider + domain (needed before Phase 9).
 - Off-site backup destination (before Phase 9).

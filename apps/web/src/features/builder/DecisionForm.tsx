@@ -212,7 +212,15 @@ export default function DecisionForm({ backTo, decisionId, initial }: DecisionFo
     status === 'limitError' || status === 'saveError' || (submitted && !parsed.success);
 
   if (isCaseView && parsed.success) {
-    return <CaseOpening backTo={caseBackTo} options={caseOptions} title={parsed.data.title} />;
+    return (
+      <CaseOpening
+        backTo={caseBackTo}
+        category={parsed.data.category}
+        options={caseOptions}
+        source={{ kind: 'draft' }}
+        title={parsed.data.title}
+      />
+    );
   }
 
   return (

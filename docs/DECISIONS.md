@@ -54,6 +54,7 @@ Format: Decision · Reason · Alternatives · Tradeoffs · Phase/Date
 - **Spin Again:** same pool, new seed.
 - **Not Tonight / Reject:** temporarily exclude the winner from this session, then respin.
 - **Let's Go / Accept:** record the session as accepted in history.
+- **Status:** refined by D-030 (Phase 6).
 - **Phase:** 0 · default (revisit in Phase 6)
 
 ## D-010 — Not-casino guardrails
@@ -358,3 +359,99 @@ Format: Decision · Reason · Alternatives · Tradeoffs · Phase/Date
   - It is never part of the prod image. Because PGlite is an optional peer of drizzle-orm, `pnpm deploy --prod` would still install it, so the Dockerfile deletes the `@electric-sql` entries after `deploy`, and the build fails if any `@electric-sql` directory or `pglite.wasm` remains (5-1-fix-1, simplified in 5-1-fix-2).
 - **Web routes (default, built in 5-2/5-3):** `/decisions/new` (optionally `?from=<preset slug>`), `/decisions/:id` (preview with switches, like presets), `/decisions/:id/edit`, `/decisions/:id/open`.
 - **Phase:** 5 · 2026-10-08 · approved by user (save flow, weights UI, Home list, emoji, preset customize, PGlite); default (storage, API, category, routes)
+
+## D-030 — Phase 6 result actions, history, share links, live viewing
+- **Result actions (owner, refines D-009):** the revealed result offers four actions.
+  - **"Đi thôi"** saves the result to history (best-effort, rule 5). A failed save shows a non-blocking error and lets the user retry. The decision itself is never blocked.
+  - **"Mở lại"** spins the same pool again with a new seed.
+  - **"Không phải hôm nay"** removes the winner from the pool for this screen only and **spins again at once**.
+    - It is disabled when only two candidates remain, because a case needs at least two.
+    - The exclusions last until the user leaves the case screen. "Mở lại" keeps them (default).
+  - **"Chia sẻ"** creates a share link (see below).
+- **History (owner): only "Đi thôi" records a history entry.** Spins that are not accepted are not stored.
+  - Table **`decision_sessions`**. The name follows the domain's `DecisionSession` and avoids a clash with the auth `sessions` table. Route **`/api/history`**.
+  - Each entry is a snapshot (default):
+    - the source: a saved decision (`decision_id`, FK, `ON DELETE SET NULL`), a preset (`preset_slug`) or an unsaved builder draft
+    - the title
+    - the options **exactly as passed to `select`**, so the `enabled` flags reflect the preview switches and the "Không phải hôm nay" exclusions
+    - the `SelectionResult`
+  - The server re-runs `select(options, seed)` and rejects a result that does not match. A stored winner is therefore always one the shared engine would pick.
+  - A `decision_id` that is missing or belongs to another user is stored as `null`, without an error. The API never reveals another user's decision.
+  - At most **200 entries per user**; the oldest are pruned on insert (default).
+- **History UI (owner):**
+  - Home "Gần đây" shows the 5 newest entries, with "Xem tất cả" linking to `/history`.
+  - `/history` lists every entry.
+  - Tapping an entry opens its source when it still exists: `/decisions/:id` for a saved decision, `/presets/:slug` for a known preset. Draft entries are not links.
+- **Share (owner): a public link** that anyone with the URL can open, without an account.
+  - The link points to a **shared case**: a snapshot of the title and options, plus the latest spin. Table `shared_cases`, owner routes under `/api/shares`, a public read route, and a web page `/s/:id`.
+  - "Chia sẻ" is available **as soon as a result is revealed**. Live viewing (below) also makes it available before the first spin.
+  - The public page shows:
+    - the title and the option list (labels and emoji, never weights or odds, D-010)
+    - "Xem lại lượt quay", which replays the shared spin with the same seed, so it lands on the same winner
+    - "Tự quay thử", a spin with a new seed that runs only in the viewer's browser and is never stored
+  - Opening a shared link never creates a guest user.
+  - **Lifetime (owner): chosen when sharing** — 1 day, 7 days (default), 30 days or no expiry. **The owner can revoke a link** from a "Link đã chia sẻ" list in `/history`. An expired or revoked link shows a "link no longer available" page.
+  - The link id is a random UUID (unguessable). Delivery uses the Web Share API, with a copy-to-clipboard fallback (default).
+  - Replay uses the current `ANIMATION_PLAN_DEFAULTS`. The winner is guaranteed by the seed and the algorithm tag, but the strip can differ slightly if the defaults change between sharing and viewing. Accepted.
+  - Links are deleted with their user (cascade).
+- **Live viewing (owner): viewers of `/s/:id` watch the sharer's spins in real time, and can interact.** _Deferred to the Realtime phase by D-031._
+  - **Exception to CLAUDE.md rule 9, approved by the owner.** Couple/Squad stay locked; this is a solo spin with an audience.
+  - Mechanism: the result is deterministic (D-005), so no video is streamed.
+    - When the sharer spins, the server forwards a small event (seed, candidates, start time) to the viewers.
+    - Each viewer builds the same animation plan locally and joins the timeline at `now − startedAt`, so all screens show the same spin and the same winner.
+    - A late viewer sees the latest result and can replay it.
+  - **Transport (owner): SSE** for server → viewers and **HTTP POST** for viewer → server, with an in-memory pub/sub inside the single api instance. No new dependency; it works through Caddy.
+    - Limitation: one api instance. Scaling out would need Postgres `LISTEN/NOTIFY` or a broker.
+  - **Rejected: LiveKit / WebRTC.** It streams media (camera, microphone, screen), which PIKO does not need:
+    - it needs an extra SFU server, UDP port ranges and often TURN
+    - its SDK would roughly double the bundle
+    - it requires screen capture on the sharer's device (not available on iOS Safari)
+    - it delivers compressed video instead of a native 60 fps animation
+
+    Revisit it only for voice/video calls in a future group mode.
+  - The kinds of interaction (e.g. reactions, votes) and viewer identity and anti-spam are decided when task 6-6 starts.
+- **Shares API defaults (6-4, architect):**
+  - **Table `shared_cases`:**
+    - a snapshot of the title, the optional category and the options
+    - the latest `result` and `spun_at`, both nullable, so a link can exist before the first spin
+    - `created_at`, plus `expires_at` (null = no expiry)
+    - cascade on user delete
+  - **Routes:**
+    - owner routes under `/api/shares` (session required): create with a lifetime, list active, revoke, record a spin
+    - the public read `GET /api/public/shares/:id`: no session middleware, never sets a cookie or creates a guest, `Cache-Control: no-store`
+  - **Revoke deletes the row.** Unknown, revoked and expired ids all answer `404 not_found`, so they cannot be told apart.
+  - **Expired rows** are filtered on read and deleted when the same user creates a new link. At most **50 active links per user**, otherwise `409 share_limit_reached`.
+  - **A recorded spin** may change only the `enabled` flags of the shared options, because "Không phải hôm nay" excludes options. Ids, order, labels, emoji and weights must match, and the result is re-checked with `matchesSelection`.
+  - **The public response includes the option weights.** Replay and "Tự quay thử" must run the shared engine with the same weights (D-005). The UI never displays weights or odds (D-010). A technically curious viewer can still read the sharer's priorities in the response; this is accepted.
+  - **No rate limit on the public route** for now: UUID v4 ids are not enumerable. Revisit before Phase 9.
+- **Task order (owner):**
+  1. 6-1 history API
+  2. 6-2 result actions
+  3. 6-3 history UI
+  4. 6-4 shares API
+  5. 6-5 share UI, public page and revoke
+  6. 6-6 live viewing and interactions
+
+  The data model is designed for live viewing from the start, so nothing is rebuilt.
+- **Phase:** 6 · 2026-10-09 · approved by user (history on accept, history UI, "Không phải hôm nay", share as public link with replay and option list, lifetime and revoke, live viewing with interaction, SSE + POST, task order); default (snapshot shape, server re-check, limits, delivery, `ON DELETE SET NULL`)
+
+## D-031 — Live viewing deferred to a Realtime phase with Couple/Squad
+- **Choice (owner):** task 6-6 (live viewing of shared links with interactions, D-030) is **not** built in Phase 6.
+  - Phase 6 ends at 6-5b: result actions, history, share links with replay and "Tự quay thử", revoke.
+  - Live viewing moves to a **Realtime phase after the first release `v0.1.0`**. That phase designs one realtime model for both live viewing and Couple/Squad:
+    - rooms
+    - presence
+    - viewer and participant identity
+    - interactions and anti-spam
+    - server-ordered, server-authoritative spins (D-017 "future")
+- **Reason:**
+  - Couple/Squad need the same mechanism: every screen replays the same seeded spin from a small event.
+  - Designing it twice, first one-way for an audience and then again for groups, risks rework. Guessing group requirements now would be a premature abstraction.
+  - Shipping Solo + share links first keeps the path to `v0.1.0` short.
+- **Unchanged from D-030:**
+  - **Transport direction:** SSE + POST, no LiveKit/WebRTC. It is revisited at the Realtime kickoff together with the group requirements.
+  - **Rule 9:** the CLAUDE.md exception for live viewing stays approved; Couple/Squad still need their own approval.
+  - **Data model:** `shared_cases.result`/`spun_at` and `POST /api/shares/:id/spins` (recorded at spin start) stay as they are.
+- **Known gap until then:** spin records are fire-and-forget, so two quick spins can reach the server out of order. That is harmless without live viewing, but the Realtime phase must order spins.
+- **Phase:** 6 · 2026-10-09 · approved by user
+

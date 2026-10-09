@@ -1,0 +1,133 @@
+.screen {
+  display: grid;
+  min-height: 100dvh;
+  place-items: center;
+  padding: var(--space-6) var(--space-4);
+  background: var(--color-bg);
+}
+
+.content {
+  display: grid;
+  width: min(100%, var(--content-max-width));
+  min-width: 0;
+  gap: var(--space-6);
+  justify-items: center;
+  text-align: center;
+}
+
+.content h1 {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  font-size: var(--text-display);
+}
+
+.brand {
+  color: var(--color-text-accent);
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: var(--font-weight-display);
+  line-height: var(--leading-tight);
+}
+
+.muted {
+  color: var(--color-text-muted);
+}
+
+.error {
+  color: var(--color-danger);
+  font-weight: var(--font-weight-bold);
+}
+
+.latestResult {
+  width: min(100%, var(--content-max-width));
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.stage {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+.result {
+  width: min(100%, var(--content-max-width));
+  min-height: calc(var(--space-8) * 2);
+  text-align: start;
+}
+
+.actions {
+  display: grid;
+  width: min(100%, var(--content-max-width));
+  gap: var(--space-3);
+}
+
+.optionsSection {
+  display: grid;
+  width: min(100%, var(--content-max-width));
+  gap: var(--space-3);
+  text-align: start;
+}
+
+.optionsSection h2 {
+  font-size: var(--text-lg);
+}
+
+.optionList {
+  margin: 0;
+  min-width: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.option {
+  display: flex;
+  min-width: 0;
+  min-height: var(--tap-target-min);
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+}
+
+.option + .option {
+  border-top: var(--border-width-hairline) solid var(--color-divider);
+}
+
+.listCard {
+  overflow: hidden;
+  padding: 0;
+}
+
+.optionLabel {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.optionEmoji {
+  flex: 0 0 auto;
+  font-size: var(--text-xl);
+  line-height: var(--leading-tight);
+}
+
+.makeYourOwn {
+  color: var(--color-text-accent);
+  font-weight: var(--font-weight-bold);
+  text-decoration: none;
+}
+
+.makeYourOwn:hover {
+  text-decoration: underline;
+  text-underline-offset: var(--space-1);
+}
+
+@media (min-width: 48rem) {
+  .content {
+    width: min(100%, var(--content-wide-max-width));
+  }
+
+  .screen {
+    padding: var(--space-8) var(--space-6);
+  }
+}

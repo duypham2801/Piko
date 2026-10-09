@@ -4,7 +4,7 @@ Tài liệu cho chủ dự án. Nó cho biết hệ thống **đang** gồm nh�
 - Architect cập nhật file này mỗi khi topology thay đổi, và hỏi chủ dự án (HITL) trước khi cập nhật.
 - Chi tiết vận hành nằm trong `ENVIRONMENTS.md`; lý do của từng lựa chọn nằm trong `DECISIONS.md`.
 
-**Cập nhật lần cuối:** 2026-10-09, Phase 5 đã merge vào `main` (D-029).
+**Cập nhật lần cuối:** 2026-10-09, Phase 6 merge vào `main` (D-030, D-031).
 
 Ký hiệu:
 - ✅ đã có trên `main`
@@ -81,10 +81,10 @@ apps/web  ──HTTP /api──►  apps/api  ──►  PostgreSQL
 
 | Thành phần | Hiện có |
 |---|---|
-| API routes | ✅ `GET /api/healthz`, `GET /api/me` (tạo guest nếu chưa có)<br>✅ Phase 5: `GET/POST /api/decisions`, `GET/PUT/DELETE /api/decisions/:id`. Bắt buộc đã có session (không tạo guest), chỉ thấy và sửa quyết định của chính mình, tối đa 100 quyết định mỗi user |
-| Bảng DB | ✅ `users`, `sessions` (chỉ lưu sha256 của token)<br>✅ Phase 5: `decisions` (thuộc 1 user, xóa user thì xóa theo; danh sách lựa chọn lưu trong cột JSONB `options`) |
+| API routes | ✅ `GET /api/healthz`, `GET /api/me` (tạo guest nếu chưa có)<br>✅ Phase 5: `GET/POST /api/decisions`, `GET/PUT/DELETE /api/decisions/:id`. Bắt buộc đã có session (không tạo guest), chỉ thấy và sửa quyết định của chính mình, tối đa 100 quyết định mỗi user<br>✅ Phase 6: `POST/GET /api/history` (lưu khi bấm "Đi thôi", tối đa 200/user); `GET/POST /api/shares`, `DELETE /api/shares/:id` (thu hồi), `POST /api/shares/:id/spins` (ghi lượt quay), tối đa 50 link còn hiệu lực/user; `GET /api/public/shares/:id` đọc công khai (không cần session, không tạo guest, `Cache-Control: no-store`, chưa giới hạn tần suất — xem lại trước Phase 9)<br>💭 Phase Realtime (D-031): kênh SSE cho người xem trực tiếp + POST tương tác |
+| Bảng DB | ✅ `users`, `sessions` (chỉ lưu sha256 của token)<br>✅ Phase 5: `decisions` (thuộc 1 user, xóa user thì xóa theo; danh sách lựa chọn lưu trong cột JSONB `options`)<br>✅ Phase 6: `decision_sessions` (lịch sử: bản chụp lựa chọn + kết quả, tối đa 200/user), `shared_cases` (link chia sẻ: bản chụp + lượt quay gần nhất + thời hạn; thu hồi = xóa dòng). Cả hai xóa theo user |
 | Web | ✅ Home, preset (xem trước + mở case), màn mở case + hiệu ứng ăn mừng. Chọn ngẫu nhiên chạy ở trình duyệt, chưa lưu gì lên API<br>✅ Phase 5: builder, quyết định đã lưu (mục "Của bạn" trên Home) |
-| Web routes | ✅ `/` Home, `/presets/:slug` xem trước, `/presets/:slug/open` mở case<br>✅ Phase 5: `/decisions/new`, `/decisions/:id` xem trước (Sửa/Xóa), `/decisions/:id/edit` (builder, mở case ngay từ bản nháp bằng `?view=case`), `/decisions/:id/open`, `/decisions/new?from=<preset>` (tùy chỉnh preset)<br>Caddy trả `index.html` cho mọi đường dẫn không phải `/api` |
+| Web routes | ✅ `/` Home, `/presets/:slug` xem trước, `/presets/:slug/open` mở case<br>✅ Phase 5: `/decisions/new`, `/decisions/:id` xem trước (Sửa/Xóa), `/decisions/:id/edit` (builder, mở case ngay từ bản nháp bằng `?view=case`), `/decisions/:id/open`, `/decisions/new?from=<preset>` (tùy chỉnh preset)<br>✅ Phase 6: `/history` (Link đã chia sẻ + thu hồi, Đã chọn), `/s/:id` (trang công khai ngoài lớp session: danh sách lựa chọn, xem lại, tự quay thử, `noindex`)<br>Caddy trả `index.html` cho mọi đường dẫn không phải `/api` |
 | Domain | Schema API, model `Decision`, engine chọn có seed (mulberry32), toán animation plan |
 
 ---
@@ -147,9 +147,11 @@ apps/web  ──HTTP /api──►  apps/api  ──►  PostgreSQL
 | Prod stack (Docker, Caddy, migrate, backup/rollback) | ✅ (chỉ local) | ✅ trên VPS | 1a-2 ✅, VPS ở 9 |
 | Design system + font tiếng Việt tự host | ✅ (token, font, 6 primitive, `/design`) | ✅ | 1b ✅ |
 | Domain engine (selection, animation plan) | ✅ | ✅ | 2 ✅ |
-| UI case opening, home, builder, result, history | ✅ case opening, home, preset, builder, quyết định đã lưu; ⬜ result, history | ✅ | 3–5 ✅, 6 → 8 |
+| UI case opening, home, builder, result, history | ✅ case opening, home, preset, builder, quyết định đã lưu, kết quả, lịch sử, chia sẻ | ✅ | 3–6 ✅, 7–8 hoàn thiện |
 | API + bảng quyết định | ✅ | ✅ | 5 ✅ |
-| API + bảng lịch sử | ⬜ | ✅ | 6 |
+| API + bảng lịch sử | ✅ | ✅ | 6 ✅ |
+| Link chia sẻ công khai | ✅ | ✅ | 6 ✅ |
+| Xem trực tiếp (SSE) | 💭 | ✅ | Realtime, sau 9 (D-031) |
 | VPS + domain + HTTPS thật | ⬜ chưa chọn | ✅ | 9 |
 | Backup ngoài VPS | ⬜ chưa chọn | ✅ | 9 |
 
@@ -158,7 +160,8 @@ apps/web  ──HTTP /api──►  apps/api  ──►  PostgreSQL
 - **Staging:** project thứ ba `piko-staging` trên cùng VPS, cùng pattern.
 - **Registry + CI:** build image một lần rồi pull về VPS, thay cho việc build ngay trên VPS.
 - **Tài khoản thật:** nâng cấp guest bằng email hoặc Google, không mất lịch sử.
-- **Couple/Squad:** cần realtime (WebSocket hoặc SSE), sẽ thêm một thành phần mới vào topology.
+- **Realtime: xem trực tiếp + Couple/Squad (D-031):** thiết kế chung một lần sau `v0.1.0`, hướng hiện tại là SSE + POST; nếu cần tương tác dày thì nâng lên WebSocket. Nếu cần gọi thoại/video nhóm thì mới cân nhắc LiveKit (một server SFU riêng + cổng UDP).
+- **Nhiều instance API:** pub/sub trong bộ nhớ (dự kiến cho Realtime) chỉ chạy với 1 instance; muốn chạy nhiều instance cần Postgres `LISTEN/NOTIFY` hoặc broker.
 - **CDN phía trước Caddy:** khi đó phải cấu hình `trusted_proxies`.
 
 ---
@@ -177,3 +180,5 @@ apps/web  ──HTTP /api──►  apps/api  ──►  PostgreSQL
 | 2026-10-09 | 5-3 xong trên nhánh Phase 5: route web `/decisions/:id` và `/decisions/:id/open`, mục "Của bạn" trên Home chuyển ⬜ → 🔧. Hạ tầng không đổi. |
 | 2026-10-09 | 5-4 xong: `/decisions/new?from=<preset>` và modal "Thêm từ có sẵn". Toàn bộ Phase 5 có code trên nhánh `feat/phase-5-builder` (🔧), chờ merge vào `main`. Hạ tầng không đổi. |
 | 2026-10-09 | Phase 5 merge vào `main` (`1ea2663`): bảng `decisions`, route `/api/decisions`, route web `/decisions/...` và mục "Của bạn" trên Home chuyển 🔧 → ✅. |
+| 2026-10-09 | Bắt đầu Phase 6 (D-030): kế hoạch thêm bảng `decision_sessions` và `shared_cases`, route `/api/history`, `/api/shares` + route đọc công khai, kênh SSE cho xem trực tiếp (pub/sub trong bộ nhớ, 1 instance API, không thêm dịch vụ), route web `/history` và `/s/:id`. Không dùng LiveKit/WebRTC. Container, port và network không đổi. |
+| 2026-10-09 | Phase 6 merge vào `main`: bảng `decision_sessions`, `shared_cases`, route `/api/history`, `/api/shares`, `/api/public/shares/:id`, trang `/history`, `/s/:id` chuyển ⬜ → ✅. Kênh SSE xem trực tiếp hoãn sang phase Realtime sau `v0.1.0` (D-031). Container, port, network, volume không đổi. |

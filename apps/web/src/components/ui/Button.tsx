@@ -3,7 +3,7 @@ import type { ComponentPropsWithoutRef } from 'react';
 import styles from './Button.module.css';
 
 type ButtonProps = ComponentPropsWithoutRef<'button'> & {
-  variant?: 'primary' | 'secondary' | 'outline';
+  variant?: 'primary' | 'secondary' | 'outline' | 'danger';
   size?: 'md' | 'lg';
   fullWidth?: boolean;
 };

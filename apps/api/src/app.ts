@@ -10,6 +10,8 @@ import { createOnError, notFound, HttpError } from './lib/errors.js';
 import { healthHandler, type HealthSql } from './routes/health.js';
 import { meHandler } from './routes/me.js';
 import { createDecisionRoutes } from './routes/decisions.js';
+import { createHistoryRoutes } from './routes/history.js';
+import { createPublicShareRoutes, createShareRoutes } from './routes/shares.js';
 
 export interface AppConfig {
   nodeEnv: 'development' | 'production' | 'test';
@@ -63,22 +65,29 @@ export function createApp(config: AppConfig, dependencies: AppDependencies): Hon
   );
   app.get('/api/me', meHandler);
 
-  const decisionSession = createSessionMiddleware({
+  const requiredSession = createSessionMiddleware({
     db: dependencies.db,
     cookieSecure: config.cookieSecure,
     trustProxy: config.trustProxy,
     limiter,
     allowGuestCreation: false,
   });
-  const decisionBodyLimit = bodyLimit({
+  const jsonBodyLimit = bodyLimit({
     maxSize: 16 * 1024,
     onError: () => {
       throw new HttpError(413, 'payload_too_large', 'The request body is too large.');
     },
   });
-  app.use('/api/decisions', decisionBodyLimit, decisionSession);
-  app.use('/api/decisions/*', decisionBodyLimit, decisionSession);
+  app.use('/api/decisions', jsonBodyLimit, requiredSession);
+  app.use('/api/decisions/*', jsonBodyLimit, requiredSession);
   app.route('/api/decisions', createDecisionRoutes({ db: dependencies.db }));
+  app.use('/api/history', jsonBodyLimit, requiredSession);
+  app.use('/api/history/*', jsonBodyLimit, requiredSession);
+  app.route('/api/history', createHistoryRoutes({ db: dependencies.db }));
+  app.use('/api/shares', jsonBodyLimit, requiredSession);
+  app.use('/api/shares/*', jsonBodyLimit, requiredSession);
+  app.route('/api/shares', createShareRoutes({ db: dependencies.db }));
+  app.route('/api/public/shares', createPublicShareRoutes({ db: dependencies.db }));
 
   app.onError(createOnError(config.nodeEnv));
   app.notFound(notFound);

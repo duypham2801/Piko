@@ -12,7 +12,7 @@ import TextField from '../../components/ui/TextField';
 import pageStyles from './DesignPage.module.css';
 import styles from './ComponentsSection.module.css';
 
-const buttonVariants = ['primary', 'secondary', 'outline'] as const;
+const buttonVariants = ['primary', 'secondary', 'outline', 'danger'] as const;
 const buttonSizes = ['md', 'lg'] as const;
 const modes = ['Solo', 'Couple', 'Squad'] as const;
 
@@ -43,11 +43,13 @@ export default function ComponentsSection() {
                   {variant} · {size}
                 </span>
                 <Button size={size} variant={variant}>
-                  {variant === 'primary' && size === 'lg'
-                    ? 'Xoay kèo ngay'
-                    : variant === 'primary'
-                      ? 'Thêm lựa chọn'
-                      : 'Quay lại'}
+                  {variant === 'danger'
+                    ? 'Xóa'
+                    : variant === 'primary' && size === 'lg'
+                      ? 'Xoay kèo ngay'
+                      : variant === 'primary'
+                        ? 'Thêm lựa chọn'
+                        : 'Quay lại'}
                 </Button>
               </div>
             )),

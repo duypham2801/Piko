@@ -18,6 +18,7 @@
   --color-text-muted: var(--palette-slate-600); /* 7.3:1 on cream */
   --color-text-accent: var(--palette-teal-700); /* 5.3:1 on cream; teal text on light backgrounds */
   --color-border: var(--palette-navy-900);
+  --color-divider: color-mix(in srgb, var(--palette-navy-900) 15%, transparent);
   --color-shadow: var(--palette-navy-900);
   --color-primary: var(--palette-coral-500);
   --color-primary-pressed: var(--palette-coral-700);
@@ -70,6 +71,7 @@
   --radius-pill: 999px;
 
   --border-width: 3px;
+  --border-width-hairline: 1px;
   --border-width-thin: 2px;
   --shadow-offset-sm: 3px;
   --shadow-offset: 5px;

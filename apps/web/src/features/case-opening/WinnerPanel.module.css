@@ -1,0 +1,51 @@
+.winnerPanel {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  animation: winnerPanelIn var(--duration-normal) var(--ease-spring) both;
+  animation-delay: var(--duration-normal);
+}
+
+.winnerEmoji {
+  flex: 0 0 auto;
+  font-size: var(--text-3xl);
+  line-height: var(--leading-tight);
+}
+
+.winnerDetails {
+  display: grid;
+  min-width: 0;
+  text-align: start;
+}
+
+.winnerLabel {
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+.winnerName {
+  overflow-wrap: anywhere;
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: var(--font-weight-display);
+  line-height: var(--leading-tight);
+}
+
+@keyframes winnerPanelIn {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-3)) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (min-width: 48rem) {
+  .winnerName {
+    font-size: var(--text-2xl);
+  }
+}

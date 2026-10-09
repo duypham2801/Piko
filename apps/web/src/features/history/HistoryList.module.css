@@ -1,0 +1,73 @@
+.listCard {
+  overflow: hidden;
+  padding: 0;
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item + .item {
+  border-top: var(--border-width-hairline) solid var(--color-divider);
+}
+
+.row {
+  display: flex;
+  min-width: 0;
+  min-height: var(--tap-target-min);
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-text);
+}
+
+.linkedRow {
+  text-decoration: none;
+}
+
+.linkedRow:focus-visible {
+  outline: var(--border-width) solid var(--color-focus-ring);
+  outline-offset: calc(var(--border-width) * -1);
+}
+
+.linkedRow:active {
+  background: var(--color-selection);
+}
+
+.winnerEmoji {
+  flex: 0 0 auto;
+  font-size: var(--text-xl);
+  line-height: var(--leading-tight);
+}
+
+.details {
+  display: grid;
+  min-width: 0;
+  gap: var(--space-1);
+}
+
+.winnerLabel,
+.meta {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.winnerLabel {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--font-weight-display);
+  line-height: var(--leading-tight);
+}
+
+.meta {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+@media (hover: hover) {
+  .linkedRow:hover {
+    background: var(--color-bg);
+  }
+}

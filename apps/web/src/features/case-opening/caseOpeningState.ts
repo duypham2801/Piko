@@ -1,12 +1,28 @@
-import type { AnimationPlan, SelectionResultData } from '@piko/domain';
+import type { AnimationPlan, DecisionOptionData, SelectionResultData } from '@piko/domain';
 
 export type CaseOpeningState =
   | { status: 'ready' }
-  | { status: 'spinning'; plan: AnimationPlan; result: SelectionResultData }
-  | { status: 'revealed'; plan: AnimationPlan; result: SelectionResultData };
+  | {
+      status: 'spinning';
+      plan: AnimationPlan;
+      result: SelectionResultData;
+      options: DecisionOptionData[];
+    }
+  | {
+      status: 'revealed';
+      plan: AnimationPlan;
+      result: SelectionResultData;
+      options: DecisionOptionData[];
+    };
 
 export type CaseOpeningEvent =
-  { type: 'open'; plan: AnimationPlan; result: SelectionResultData } | { type: 'reveal' };
+  | {
+      type: 'open';
+      plan: AnimationPlan;
+      result: SelectionResultData;
+      options: readonly DecisionOptionData[];
+    }
+  | { type: 'reveal' };
 
 export function caseOpeningReducer(
   state: CaseOpeningState,
@@ -15,7 +31,12 @@ export function caseOpeningReducer(
   if (event.type === 'open') {
     return state.status === 'spinning'
       ? state
-      : { status: 'spinning', plan: event.plan, result: event.result };
+      : {
+          status: 'spinning',
+          plan: event.plan,
+          result: event.result,
+          options: [...event.options],
+        };
   }
 
   return state.status === 'spinning' ? { ...state, status: 'revealed' } : state;

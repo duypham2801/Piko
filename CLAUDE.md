@@ -81,6 +81,7 @@ Run `check` after meaningful changes and before closing a phase, not after every
 7. **Separate interaction state from visual phases.** The state machine covers `idle → ready → spinning → revealed`. Fast/decelerate/final-approach are *derived* from one continuous easing timeline.
 8. **Do not hard-code the domain to restaurants.** Use `Decision`, `DecisionOption`, `DecisionSession`, `DecisionTemplate` (presets) and `DecisionFeedback`, with category as data.
 9. **MVP is Solo only.** Couple/Squad are shown in the UI as locked "Soon" and must not be implemented without approval.
+   - Approved exception (D-030): viewers of a shared link can watch a solo spin live and interact with it. This does not unlock Couple/Squad.
 10. **Animate only transform/opacity.** Carousel math uses item units so a resize mid-spin does not break the stop.
 11. **Reduced motion**: skip the long spin, do a short transition and reveal clearly.
 12. **Session bootstrap is single-flight.** The web calls `ensureSession()` (`apps/web/src/lib/api/session.ts`), which shares one memoized `/api/me` request. Every identity-bound request awaits it first. Parallel cookie-less requests would otherwise create duplicate guest users.
