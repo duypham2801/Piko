@@ -321,6 +321,7 @@ Format: Decision · Reason · Alternatives · Tradeoffs · Phase/Date
   - Labels already in the draft are shown as added, and the limit of 20 still applies.
   - There is no model change.
   - Rejected for now: an option that points to another decision (chained cases), which needs a model change and loop handling. It is a post-MVP idea.
+  - **It opens as a modal (owner, 2026-10-09):** a native `<dialog>`, as a bottom sheet on phones and centred from 48rem, over a dimmed backdrop (`--color-backdrop`). Escape, "Xong" or a backdrop click closes it.
   - Details (5-4, default):
     - the panel lists the saved decisions (fetched when it opens, excluding the one being edited) and the presets, each as a collapsible group of chips
     - a chip whose label (normalized like the schema) is already in the draft shows as selected and cannot be added again
