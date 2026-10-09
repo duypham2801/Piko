@@ -1,7 +1,7 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 7 — Responsive pass + navigation shell (kickoff done, D-032). Next task: 7-3 (case overlay). Phase 6 merged into `main` on 2026-10-09; live viewing moved to the Realtime phase (D-031).
+- **Current phase:** Phase 7 — Responsive pass + navigation shell (kickoff done, D-032). Next task: 7-4 (responsive pass). Phase 6 merged into `main` on 2026-10-09; live viewing moved to the Realtime phase (D-031).
 - **Integration branch:** `feat/phase-7-responsive`
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`); Phase 4 (4-1, 4-2: router, Home, presets, preview, merged into `main`); Phase 5 (5-1…5-4: decisions API, builder, saved decisions, reuse options, merged into `main`)
 
@@ -36,7 +36,7 @@
 | 6-6 | Live viewing + interactions | ⏸ moved | Deferred to the Realtime phase (D-031) |
 | 7-1 | Navigation shell | ✅ (`7-1-fix-1.md`) | `7-1-navigation-shell.md`: layout route + screen shell (back link at one position), mobile top bar, desktop sidebar frame from `64rem`, focus mode on case screens, `/s/:id` outside; replaces the copied screen layouts (D-032) |
 | 7-2 | Sidebar lists + desktop Home | ✅ (`7-2-fix-1.md`) | "Của bạn" and "Gần đây" in the sidebar (reload on route change), Home drops both sections from `64rem` (D-032) |
-| 7-3 | Case overlay | 🔄 fix (`7-3-fix-1.md`, `7-3-fix-2.md`) | The case opens as a modal overlay above the preview/builder (nested `/open` routes, full-screen on phones, × / Esc / Back to close), focus mode removed, plus the 7-2 carry-overs (C0) (D-033) |
+| 7-3 | Case overlay | ✅ (`7-3-fix-1.md`, `7-3-fix-2.md`) | The case opens as a modal overlay above the preview/builder (nested `/open` routes, full-screen on phones, × / Esc / Back to close), focus mode removed, plus the 7-2 carry-overs (C0) (D-033) |
 | 7-4 | Responsive pass | ⬜ | Every screen at 360 / 768 / 1024 / 1280 / 1920 after the overlay: carousel, winner reveal, CTAs, card grids, option layout |
 | 8 | Polish | ⬜ | States, micro-interactions, consistency |
 | 9 | First prod release | ⬜ | Deploy `v0.1.0` to VPS, verify backup/rollback |
@@ -774,6 +774,12 @@
   - **Still open (F3):** the desktop overlay is 736 px tall for 498–622 px of content. `inset: 0` makes `height: auto` stretch. `height: fit-content` was verified in the browser (568 px, centred; clamps and scrolls at 1280×500).
   - The implementer reported one transient PGlite timeout in `history.test.ts` that passed on rerun (known flake, technical debt).
   - → `7-3-fix-2.md`.
+- **7-3-fix-2 (2026-10-09):** verified (`b4d0132`, one line).
+  - **1280×800:** the overlay is 568 px when ready and 692 px when revealed, centred.
+  - **1280×500:** it clamps and scrolls inside.
+  - **360 px:** still full-screen.
+  - **Note for 7-4:** because the overlay is centred and grows when the actions appear, it moves up about 60 px at the reveal. The old centred case screen did the same. Consider anchoring it to the top or reserving the actions' height.
+  - **7-3 accepted.** Fast-forwarded into `feat/phase-7-responsive`.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
