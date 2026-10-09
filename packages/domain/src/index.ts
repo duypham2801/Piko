@@ -16,6 +16,20 @@ export type {
   HistorySourceData,
   HistorySourceInputData,
 } from './api/history.js';
+export {
+  SHARE_LIFETIME_DAYS,
+  ShareLifetime,
+  SharedCase,
+  SharedCaseCreate,
+  SharedCaseListResponse,
+  SharedCaseSpin,
+} from './api/shares.js';
+export type {
+  SharedCaseCreateData,
+  SharedCaseData,
+  SharedCaseListResponseData,
+  SharedCaseSpinData,
+} from './api/shares.js';
 export { HealthResponse } from './api/health.js';
 export type { HealthResponse as HealthResponseData } from './api/health.js';
 export { MeResponse } from './api/me.js';
