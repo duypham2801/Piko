@@ -183,9 +183,7 @@ describe('share service', () => {
     expect(await getPublicShare(testDatabase.db, share.id, firstNow)).toEqual(share);
 
     await expect(revokeShare(testDatabase.db, owner.user.id, share.id)).resolves.toBeUndefined();
-    await expect(getPublicShare(testDatabase.db, share.id, firstNow)).rejects.toMatchObject<
-      Partial<HttpError>
-    >({ status: 404, code: 'not_found' });
+    expect(await getPublicShare(testDatabase.db, share.id, firstNow)).toBeNull();
     await expect(
       revokeShare(testDatabase.db, owner.user.id, '00000000-0000-4000-8000-000000000099'),
     ).rejects.toMatchObject<Partial<HttpError>>({ status: 404, code: 'not_found' });
@@ -315,11 +313,9 @@ describe('share service', () => {
       .update(sharedCases)
       .set({ expiresAt: firstNow })
       .where(eq(sharedCases.id, expired.id));
-    await expect(getPublicShare(testDatabase.db, expired.id, firstNow)).rejects.toMatchObject<
-      Partial<HttpError>
-    >({ status: 404, code: 'not_found' });
-    await expect(
-      getPublicShare(testDatabase.db, '00000000-0000-4000-8000-000000000099', firstNow),
-    ).rejects.toMatchObject<Partial<HttpError>>({ status: 404, code: 'not_found' });
+    expect(await getPublicShare(testDatabase.db, expired.id, firstNow)).toBeNull();
+    expect(
+      await getPublicShare(testDatabase.db, '00000000-0000-4000-8000-000000000099', firstNow),
+    ).toBeNull();
   });
 });

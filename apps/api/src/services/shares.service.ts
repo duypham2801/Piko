@@ -11,10 +11,7 @@ import { and, asc, desc, eq, gt, isNotNull, isNull, lte, or, sql } from 'drizzle
 import type { Database } from '../db/client.js';
 import { sharedCases, type SharedCaseRow, users } from '../db/schema.js';
 import { HttpError } from '../lib/errors.js';
-
-function notFoundError(): HttpError {
-  return new HttpError(404, 'not_found', 'The requested resource was not found.');
-}
+import { notFoundError } from '../lib/http.js';
 
 function toSharedCase(row: SharedCaseRow): SharedCaseData {
   const sharedCase: SharedCaseData = {
@@ -177,7 +174,7 @@ export async function getPublicShare(
   db: Database,
   shareId: string,
   now: Date = new Date(),
-): Promise<SharedCaseData> {
+): Promise<SharedCaseData | null> {
   const rows = await db
     .select()
     .from(sharedCases)
@@ -185,7 +182,7 @@ export async function getPublicShare(
     .limit(1);
   const row = rows[0];
   if (!row) {
-    throw notFoundError();
+    return null;
   }
   return toSharedCase(row);
 }

@@ -1,7 +1,6 @@
 import {
   DECISION_LIMITS,
   HistoryEntryCreate,
-  type HistoryEntryCreateData,
   type HistoryEntryData,
   type HistoryListResponseData,
 } from '@piko/domain';
@@ -11,6 +10,7 @@ import type { Context } from 'hono';
 import type { AppEnv } from '../auth/session.middleware.js';
 import type { Database } from '../db/client.js';
 import { HttpError } from '../lib/errors.js';
+import { readJsonBody } from '../lib/http.js';
 import { createHistoryEntry, listHistory } from '../services/history.service.js';
 
 export interface HistoryRouteDependencies {
@@ -30,21 +30,6 @@ function parseLimit(c: Context<AppEnv>): number {
   return limit;
 }
 
-async function parseHistoryEntry(c: Context<AppEnv>): Promise<HistoryEntryCreateData> {
-  let body: unknown;
-  try {
-    body = await c.req.json();
-  } catch {
-    throw new HttpError(400, 'invalid_json', 'The request body is not valid JSON.');
-  }
-
-  const result = HistoryEntryCreate.safeParse(body);
-  if (!result.success) {
-    throw new HttpError(400, 'invalid_body', 'The history entry is invalid.');
-  }
-  return result.data;
-}
-
 export function createHistoryRoutes(dependencies: HistoryRouteDependencies): Hono<AppEnv> {
   const routes = new Hono<AppEnv>();
 
@@ -55,7 +40,7 @@ export function createHistoryRoutes(dependencies: HistoryRouteDependencies): Hon
   });
 
   routes.post('/', async (c) => {
-    const input = await parseHistoryEntry(c);
+    const input = await readJsonBody(c, HistoryEntryCreate, 'The history entry is invalid.');
     const entry: HistoryEntryData = await createHistoryEntry(dependencies.db, c.var.user.id, input);
     return c.json(entry, 201);
   });
