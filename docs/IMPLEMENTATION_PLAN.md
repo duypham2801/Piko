@@ -1,7 +1,7 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 5 — Decision builder (5-1, 5-2, 5-3 done; 5-4 next)
+- **Current phase:** Phase 5 — Decision builder (5-1, 5-2, 5-3 done; 5-4 handed off)
 - **Integration branch:** `feat/phase-5-builder`
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`); Phase 4 (4-1, 4-2: router, Home, presets, preview, merged into `main`)
 
@@ -26,7 +26,7 @@
 | 5-1 | Decisions API | ✅ done (`5-1-fix-1.md`, `5-1-fix-2.md`, `60387fc`) | `5-1-decisions-api.md`: `decisions` table (options as JSONB), CRUD routes requiring a session, ownership, 100 per user, PGlite service tests (D-029) |
 | 5-2 | Builder screen | ✅ done (`5-2-fix-1.md`, `ea973cf`) | `/decisions/new` and `/decisions/:id/edit`: title, options (add/edit/remove), emoji picker, priority dots, shared schema validation, explicit Save, non-blocking save error (D-029) |
 | 5-3 | Saved decisions | ✅ done (`5-3-fix-1.md`, `58e5f14`) | `/decisions/:id` preview (Sửa/Xóa with inline confirm) + `/open` case, Home "Của bạn" (create card + saved cards), a create lands on the preview. Shared `features/preview/` (preview, `?off=` helpers) used by presets too; `useDecisionRecord` shows the state record, then refetches (D-029) |
-| 5-4 | Reuse existing options | ⬜ | Preset "Tùy chỉnh" (`/decisions/new?from=<slug>`) and builder "Thêm từ có sẵn", which copies options from presets/saved decisions (D-029) |
+| 5-4 | Reuse existing options | 🔧 handed off (`5-4-reuse-options.md`) | Preset "Tùy chỉnh" (`/decisions/new?from=<slug>`) and builder "Thêm từ có sẵn", which copies options from presets/saved decisions (D-029) |
 | 6 | Result + history | ⬜ | Winner reveal, Let's Go / Spin Again / Not Tonight / Share, history; adds Home "Recent decisions" (D-028) |
 | 7 | Responsive pass | ⬜ | Desktop is not in the mockup and must be designed |
 | 8 | Polish | ⬜ | States, micro-interactions, consistency |
@@ -429,6 +429,14 @@
   - `initialStatus` is gone. The Home map passes the record as is. Preview rows without an emoji drop the empty column (`data-no-emoji`).
   - Architect re-check: `make check` passes. The full Chrome flow passes again: create → preview → off → case → Back → edit → Back shows the edited title → delete → Home.
   - **5-3 accepted.** Fast-forwarded into `feat/phase-5-builder`.
+
+- **5-4 handoff (2026-10-09):** architect defaults, recorded in D-029:
+  - "Tùy chỉnh" copies **all** preset options (the preview's `?off=` is not carried over), and an unknown `from` falls back to an empty draft
+  - "Thêm từ có sẵn" is an inline panel with one `<details>` per decision and `Chip`s per option
+    - chips whose label is already in the draft are selected and disabled
+    - a chip first fills an empty row, then appends
+    - saved decisions are fetched only when the panel opens, and the decision being edited is excluded
+  - The validation grep is now scoped to the changed files, after the 5-3 confetti incident.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.

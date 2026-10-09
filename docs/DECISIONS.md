@@ -321,6 +321,11 @@ Format: Decision · Reason · Alternatives · Tradeoffs · Phase/Date
   - Labels already in the draft are shown as added, and the limit of 20 still applies.
   - There is no model change.
   - Rejected for now: an option that points to another decision (chained cases), which needs a model change and loop handling. It is a post-MVP idea.
+  - Details (5-4, default):
+    - the panel lists the saved decisions (fetched when it opens, excluding the one being edited) and the presets, each as a collapsible group of chips
+    - a chip whose label (normalized like the schema) is already in the draft shows as selected and cannot be added again
+    - adding first fills an empty row (no label, no emoji), then appends
+- **Customize a preset, details (5-4, default):** `/decisions/new?from=<slug>` copies the title and **all** options of the preset, with new ids and weight 1. The preview's `?off=` switches are not carried over. An unknown slug opens the empty builder.
 - **Saved decisions UI (5-3, default):**
   - Home "Của bạn" is a grid. Its first card is a dashed "Tạo quyết định" card, followed by the saved decisions, most recently updated first.
     - While loading, or when the list is empty, only the create card shows.
