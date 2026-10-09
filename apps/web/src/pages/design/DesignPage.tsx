@@ -27,6 +27,7 @@ const semanticColors = [
   ['--color-disabled-bg', 'Disabled background'],
   ['--color-disabled-text', 'Disabled text'],
   ['--color-selection', 'Selection'],
+  ['--color-backdrop', 'Backdrop'],
 ] as const;
 
 const onColorPairs = [

@@ -1,4 +1,4 @@
-import { useMemo, type KeyboardEvent } from 'react';
+import { useEffect, useMemo, useRef, type MouseEvent } from 'react';
 import { DECISION_LIMITS } from '@piko/domain';
 import type { DecisionDraftData, DecisionOptionData } from '@piko/domain';
 
@@ -68,6 +68,7 @@ export default function ExistingOptionsPanel({
   onClose,
   onEditDraft,
 }: ExistingOptionsPanelProps) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
   const { decisions, status } = useDecisionList();
   const selectedLabels = useMemo(
     () => new Set(draft.options.map((option) => normalizeLabel(option.label)).filter(Boolean)),
@@ -81,66 +82,90 @@ export default function ExistingOptionsPanel({
     onEditDraft((current) => withCopiedOption(current, option));
   };
 
-  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.key === 'Escape') {
-      event.preventDefault();
-      onClose();
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) {
+      return;
+    }
+
+    if (!dialog.open) {
+      dialog.showModal();
+    }
+  }, []);
+
+  const closeDialog = () => {
+    dialogRef.current?.close();
+  };
+
+  const handleBackdropClick = (event: MouseEvent<HTMLDialogElement>) => {
+    if (event.target === event.currentTarget) {
+      closeDialog();
     }
   };
 
+  const handleClose = () => {
+    onClose();
+  };
+
   return (
-    <div
-      aria-label={t('addFromExisting')}
+    <dialog
+      aria-labelledby="existing-options-title"
       className={styles.panel}
       id={existingOptionsPanelId}
-      onKeyDown={handleKeyDown}
+      ref={dialogRef}
+      onClick={handleBackdropClick}
+      onClose={handleClose}
     >
-      <div className={styles.headingRow}>
-        <h3>{t('addFromExisting')}</h3>
-        <Button variant="outline" onClick={onClose}>
-          {t('done')}
-        </Button>
-      </div>
-      {atMax && <p className={styles.hint}>{t('maxOptionsHint')}</p>}
+      <div className={styles.shell}>
+        <header className={styles.headingRow}>
+          <h2 id="existing-options-title">{t('addFromExisting')}</h2>
+          <Button variant="outline" onClick={closeDialog}>
+            {t('done')}
+          </Button>
+        </header>
+        <div className={styles.body}>
+          {atMax && <p className={styles.hint}>{t('maxOptionsHint')}</p>}
 
-      {showSavedDecisions && (
-        <section className={styles.section}>
-          <h4>{t('yourDecisions')}</h4>
-          {status === 'loading' && <p className={styles.muted}>{t('loading')}</p>}
-          {status === 'error' && <p className={styles.muted}>{t('listFailed')}</p>}
-          {status === 'loaded' && (
+          {showSavedDecisions && (
+            <section className={styles.section}>
+              <h3>{t('yourDecisions')}</h3>
+              {status === 'loading' && <p className={styles.muted}>{t('loading')}</p>}
+              {status === 'error' && <p className={styles.muted}>{t('listFailed')}</p>}
+              {status === 'loaded' && (
+                <div className={styles.groups}>
+                  {savedDecisions.map((record) => (
+                    <OptionGroup
+                      key={record.decision.id}
+                      options={record.decision.options}
+                      selectedLabels={selectedLabels}
+                      title={record.decision.title}
+                      atMax={atMax}
+                      onAdd={addOption}
+                    />
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
+
+          <section className={styles.section}>
+            <h3>{t('quickPicks')}</h3>
             <div className={styles.groups}>
-              {savedDecisions.map((record) => (
+              {PRESETS.map((preset) => (
                 <OptionGroup
-                  key={record.decision.id}
-                  options={record.decision.options}
+                  key={preset.slug}
+                  emoji={preset.emoji}
+                  options={preset.decision.options}
                   selectedLabels={selectedLabels}
-                  title={record.decision.title}
+                  title={preset.decision.title}
                   atMax={atMax}
                   onAdd={addOption}
                 />
               ))}
             </div>
-          )}
-        </section>
-      )}
-
-      <section className={styles.section}>
-        <h4>{t('quickPicks')}</h4>
-        <div className={styles.groups}>
-          {PRESETS.map((preset) => (
-            <OptionGroup
-              key={preset.slug}
-              emoji={preset.emoji}
-              options={preset.decision.options}
-              selectedLabels={selectedLabels}
-              title={preset.decision.title}
-              atMax={atMax}
-              onAdd={addOption}
-            />
-          ))}
+          </section>
         </div>
-      </section>
-    </div>
+      </div>
+    </dialog>
   );
 }

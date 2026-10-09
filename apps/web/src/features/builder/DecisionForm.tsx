@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router';
 import { DECISION_LIMITS, DecisionDraft } from '@piko/domain';
 import type { DecisionDraftData } from '@piko/domain';
@@ -11,10 +11,7 @@ import { ApiClientError } from '../../lib/api/client';
 import { createDecision, updateDecision } from '../../lib/api/decisions';
 import CaseOpening from '../case-opening/CaseOpening';
 import { draftOf, emptyOption, optionInputId } from './draft';
-import ExistingOptionsPanel, {
-  existingOptionsPanelId,
-  existingOptionsToggleId,
-} from './ExistingOptionsPanel';
+import ExistingOptionsPanel, { existingOptionsToggleId } from './ExistingOptionsPanel';
 import { getFormErrors, type FormErrors } from './formErrors';
 import OptionRow from './OptionRow';
 import styles from './DecisionForm.module.css';
@@ -86,10 +83,10 @@ export default function DecisionForm({ backTo, decisionId, initial }: DecisionFo
     );
   };
 
-  const closeExisting = () => {
+  const closeExisting = useCallback(() => {
     setExistingOpen(false);
     document.getElementById(existingOptionsToggleId)?.focus();
-  };
+  }, []);
 
   const focusFirstInvalid = (nextErrors: FormErrors) => {
     if (nextErrors.title) {
@@ -250,7 +247,6 @@ export default function DecisionForm({ backTo, decisionId, initial }: DecisionFo
                   onCloseEmoji={() => setOpenEmojiId(null)}
                   onRemove={() => removeOption(index)}
                   onToggleEmoji={() => {
-                    setExistingOpen(false);
                     setOpenEmojiId((current) => (current === option.id ? null : option.id));
                   }}
                   onUpdate={(update) => updateOption(option.id, update)}
@@ -269,8 +265,7 @@ export default function DecisionForm({ backTo, decisionId, initial }: DecisionFo
             {t('addOption')}
           </Button>
           <Button
-            aria-controls={existingOptionsPanelId}
-            aria-expanded={existingOpen}
+            aria-haspopup="dialog"
             id={existingOptionsToggleId}
             variant="outline"
             onClick={() => {
