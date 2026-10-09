@@ -10,12 +10,16 @@
 .decisionsSection {
   display: flex;
   flex-direction: column;
+  gap: var(--space-2);
   min-width: 0;
   min-height: 0;
-  flex: 1 1 auto;
+  flex: 0 1 auto;
 }
 
 .recentSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
   min-width: 0;
   flex: 0 0 auto;
 }
@@ -33,7 +37,6 @@
   align-items: baseline;
   justify-content: space-between;
   gap: var(--space-2);
-  margin-bottom: var(--space-2);
 }
 
 .seeAll {
@@ -58,10 +61,6 @@
   min-height: 0;
   flex: 1 1 auto;
   overflow-y: auto;
-}
-
-.list > li {
-  min-width: 0;
 }
 
 .row {
