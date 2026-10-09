@@ -37,7 +37,7 @@
 | 7-1 | Navigation shell | ✅ (`7-1-fix-1.md`) | `7-1-navigation-shell.md`: layout route + screen shell (back link at one position), mobile top bar, desktop sidebar frame from `64rem`, focus mode on case screens, `/s/:id` outside; replaces the copied screen layouts (D-032) |
 | 7-2 | Sidebar lists + desktop Home | ✅ (`7-2-fix-1.md`) | "Của bạn" and "Gần đây" in the sidebar (reload on route change), Home drops both sections from `64rem` (D-032) |
 | 7-3 | Case overlay | ✅ (`7-3-fix-1.md`, `7-3-fix-2.md`) | The case opens as a modal overlay above the preview/builder (nested `/open` routes, full-screen on phones, × / Esc / Back to close), focus mode removed, plus the 7-2 carry-overs (C0) (D-033) |
-| 7-4 | Responsive pass | ⬜ | Every screen at 360 / 768 / 1024 / 1280 / 1920 after the overlay: carousel, winner reveal, CTAs, card grids, option layout |
+| 7-4 | Responsive pass | 🔄 handoff `7-4-responsive-pass.md` | Every screen at 360 / 768 / 1024 / 1280 / 1920 after the overlay: carousel, winner reveal, CTAs, card grids, option layout |
 | 8 | Polish | ⬜ | States, micro-interactions, consistency |
 | 9 | First prod release | ⬜ | Deploy `v0.1.0` to VPS, verify backup/rollback |
 | — | Final engineering review | ⬜ | Format per master prompt §47–48 |
@@ -780,6 +780,16 @@
   - **360 px:** still full-screen.
   - **Note for 7-4:** because the overlay is centred and grows when the actions appear, it moves up about 60 px at the reveal. The old centred case screen did the same. Consider anchoring it to the top or reserving the actions' height.
   - **7-3 accepted.** Fast-forwarded into `feat/phase-7-responsive`.
+- **7-4 audit (2026-10-09):** the architect audited Home, History, a preview, the builder, `/s/:id`, not-found and the overlay (ready and revealed).
+  - **Viewports:** 360×740, 740×360, 768×1024, 1024×768, 1280×800, 1920×1080.
+  - **Overflow:** no horizontal overflow anywhere. The landscape phone overlay scrolls inside (accepted).
+  - **Findings:**
+    - the desktop overlay moves up about 60 px at the reveal (centred, `fit-content`)
+    - the overlay title wraps at 360 px (`--text-display` between two 44 px columns)
+    - `/s/:id` reserves 128 px for a 96 px result panel
+  - → `7-4-responsive-pass.md`. The rest goes to Phase 8:
+    - emoji-less row alignment
+    - scrolling the active sidebar row into view
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
