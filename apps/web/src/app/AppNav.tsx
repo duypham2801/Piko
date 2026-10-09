@@ -1,9 +1,13 @@
 import { Link, NavLink } from 'react-router';
 
 import { t } from '../i18n';
+import { DESKTOP_QUERY, useMediaQuery } from '../lib/useMediaQuery';
+import NavLists from './NavLists';
 import styles from './AppNav.module.css';
 
 export default function AppNav() {
+  const isDesktop = useMediaQuery(DESKTOP_QUERY);
+
   return (
     <nav aria-label={t('navLabel')} className={styles.nav}>
       <Link className={styles.logo} to="/">
@@ -18,6 +22,7 @@ export default function AppNav() {
           <span aria-hidden="true">+</span> {t('navCreate')}
         </Link>
       </div>
+      {isDesktop && <NavLists />}
     </nav>
   );
 }

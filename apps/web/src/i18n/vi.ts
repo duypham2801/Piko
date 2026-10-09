@@ -61,6 +61,7 @@ export const vi = {
   loadFailed: 'Không tải được quyết định.',
   retry: 'Thử lại',
   yourDecisions: 'Của bạn',
+  noDecisionsYet: 'Chưa có quyết định nào.',
   listFailed: 'Chưa tải được quyết định của bạn.',
   edit: 'Sửa',
   delete: 'Xóa',
