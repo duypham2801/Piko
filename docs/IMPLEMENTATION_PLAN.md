@@ -32,7 +32,7 @@
 | 6-3 | History UI | ✅ (`6-3-fix-1.md`) | `6-3-history-ui.md`: Home "Gần đây" (5 newest) + `/history` (D-028, D-030) |
 | 6-4 | Shares API | ✅ (`6-4-fix-1.md`) | `6-4-shares-api.md`: `shared_cases` table, owner routes (create with lifetime, list, revoke, record a spin), public read route without a session (D-030) |
 | 6-5a | Share UI + public page | ✅ (`6-5a-fix-1.md`) | `6-5a-share-ui.md`: "Chia sẻ" dialog (lifetime, Web Share / copy), later spins recorded, `/s/:id` (options, replay, "Tự quay thử", unavailable page) with no session bootstrap; extracts `Sheet` and `WinnerPanel` (D-030) |
-| 6-5b | Shared links list + revoke | ⬜ | "Link đã chia sẻ" with revoke in `/history` (D-030) |
+| 6-5b | Shared links list + revoke | ⬜ | `6-5b-shared-links.md`: "Link đã chia sẻ" in `/history` (title → `/s/:id`, winner, expiry) with an inline revoke confirm; `Button variant="danger"` (D-030) |
 | 6-6 | Live viewing + interactions | ⬜ | SSE + POST, in-memory pub/sub; interaction kinds and viewer identity decided at kickoff (D-030) |
 | 7 | Responsive pass + navigation shell | ⬜ | Desktop is not in the mockup and must be designed. **First task: a navigation shell** (owner, 2026-10-09):<br>- a desktop sidebar holding "Của bạn" and "Gần đây"<br>- a mobile navigation pattern (top bar, drawer or bottom tabs), chosen at kickoff<br>- the shared screen shell with the back link at the same position on every screen<br>- the public `/s/:id` page stays outside the shell |
 | 8 | Polish | ⬜ | States, micro-interactions, consistency |
@@ -621,6 +621,13 @@
     - The copy fallback still selects the link. `Esc` returns focus to "Chia sẻ", and "Mở lại" records one spin.
     - On `/s/:id` the stage is 960 px wide at 1280 while the actions stay at 480. The option list is one card with hairline dividers. No horizontal scroll at 360. No cookie.
   - 6-5a accepted.
+- **6-5b handoff (2026-10-09):** `6-5b-shared-links.md`.
+  - Architect defaults:
+    - "Link đã chia sẻ" sits above the history list and is hidden when empty (D-028); the history list gets an "Đã chọn" heading.
+    - Each row's title opens `/s/:id`; the meta line shows the latest winner and the expiry.
+    - Revoke uses an inline confirm like the decision delete; a `404` counts as revoked.
+    - No copy/re-share action in the list.
+  - Reuse boundary reached: a second red confirm button, so `Button` gets `variant="danger"` and the decision delete stops hand-styling its button.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
