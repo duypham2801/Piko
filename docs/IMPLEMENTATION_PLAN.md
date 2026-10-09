@@ -1,9 +1,9 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 5 — Decision builder (5-1…5-4 done; awaiting the owner's review before merging into `main`)
-- **Integration branch:** `feat/phase-5-builder`
-- **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`); Phase 4 (4-1, 4-2: router, Home, presets, preview, merged into `main`)
+- **Current phase:** Phase 6 — Result + history (not started)
+- **Integration branch:** none yet
+- **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`); Phase 4 (4-1, 4-2: router, Home, presets, preview, merged into `main`); Phase 5 (5-1…5-4: decisions API, builder, saved decisions, reuse options, merged into `main`)
 
 ## Phases
 
@@ -473,6 +473,11 @@
   - `handleClose`, `existingOptionsPanelId` and the `useCallback` are gone.
   - Architect screenshot at 390 px: teal `✓ Phở` / `✓ Bún` chips in the bottom sheet.
   - **5-4 accepted. Phase 5 code complete** on `feat/phase-5-builder`.
+
+- **Phase 5 merge (2026-10-09):** the owner reviewed the full Phase 5 flow in the browser and approved it. The owner ran the merge and push, because the architect's merge command was blocked by the auto-mode classifier.
+  - `main` = `1ea2663` (`--no-ff`; parents `21ba825` + `da7672c`) = `origin/main`.
+  - Architect re-check on `main`: `make check` passes (domain 44, api 17), `/api/healthz` reports ok with the db ok, and the web returns 200.
+  - **Phase 5 complete.**
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
