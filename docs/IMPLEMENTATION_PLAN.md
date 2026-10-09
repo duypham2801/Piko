@@ -1,7 +1,7 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 6 — Result, history, share, live viewing (6-1, 6-2, 6-3 done; 6-4 in review → 6-4-fix-1)
+- **Current phase:** Phase 6 — Result, history, share, live viewing (6-1…6-4 done; 6-5 next)
 - **Integration branch:** `feat/phase-6-result-history`
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`); Phase 4 (4-1, 4-2: router, Home, presets, preview, merged into `main`); Phase 5 (5-1…5-4: decisions API, builder, saved decisions, reuse options, merged into `main`)
 
@@ -30,7 +30,7 @@
 | 6-1 | History API | ✅ | `6-1-history-api.md`: `decision_sessions` table (snapshot + `SelectionResult`, re-checked on the server), `POST/GET /api/history`, 200 per user, PGlite tests (D-030) |
 | 6-2 | Result actions | ✅ (`6-2-fix-1.md`, `6-2-fix-2.md`) | `6-2-result-actions.md`: "Đi thôi" (save to history, best-effort), "Mở lại", "Không phải hôm nay" (exclude and respin), on every case screen (D-030) |
 | 6-3 | History UI | ✅ (`6-3-fix-1.md`) | `6-3-history-ui.md`: Home "Gần đây" (5 newest) + `/history` (D-028, D-030) |
-| 6-4 | Shares API | ⬜ | `6-4-shares-api.md`: `shared_cases` table, owner routes (create with lifetime, list, revoke, record a spin), public read route without a session (D-030) |
+| 6-4 | Shares API | ✅ (`6-4-fix-1.md`) | `6-4-shares-api.md`: `shared_cases` table, owner routes (create with lifetime, list, revoke, record a spin), public read route without a session (D-030) |
 | 6-5 | Share UI + public page | ⬜ | "Chia sẻ" dialog (lifetime, Web Share / copy), `/s/:id` (options, replay, "Tự quay thử"), "Link đã chia sẻ" with revoke in `/history` (D-030) |
 | 6-6 | Live viewing + interactions | ⬜ | SSE + POST, in-memory pub/sub; interaction kinds and viewer identity decided at kickoff (D-030) |
 | 7 | Responsive pass + navigation shell | ⬜ | Desktop is not in the mockup and must be designed. **First task: a navigation shell** (owner, 2026-10-09):<br>- a desktop sidebar holding "Của bạn" and "Gần đây"<br>- a mobile navigation pattern (top bar, drawer or bottom tabs), chosen at kickoff<br>- the shared screen shell with the back link at the same position on every screen<br>- the public `/s/:id` page stays outside the shell |
@@ -582,6 +582,11 @@
   - **NICE:** the public handler catches the service's `HttpError(404)` and rebuilds the body only to add `Cache-Control`. A `null` return plus `c.header` is simpler.
   - **DO NOT TOUCH:** one `SharedCase` shape for owner and public responses (it has no user field); revoke deletes the row.
   - → `6-4-fix-1.md`.
+- **6-4-fix-1 (2026-10-09):** verified (`9f82567`, 6 files, +68/−138). `make check` passes with the same counts (domain 48, api 41); route tests are unchanged.
+  - `lib/http.ts` (`notFoundError`, `parseUuidParam`, `readJsonBody`) is used by the decisions, history and shares routers.
+  - `getPublicShare` returns `null`; the public handler sets `Cache-Control` once and has no `try`/`catch`. Dev: 404 with `no-store`, no cookie.
+  - The public route keeps an inline `z.uuid()` check, because it must answer 404 itself instead of throwing. Accepted.
+  - **6-4 accepted.**
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
