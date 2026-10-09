@@ -11,6 +11,7 @@ import { healthHandler, type HealthSql } from './routes/health.js';
 import { meHandler } from './routes/me.js';
 import { createDecisionRoutes } from './routes/decisions.js';
 import { createHistoryRoutes } from './routes/history.js';
+import { createPublicShareRoutes, createShareRoutes } from './routes/shares.js';
 
 export interface AppConfig {
   nodeEnv: 'development' | 'production' | 'test';
@@ -83,6 +84,10 @@ export function createApp(config: AppConfig, dependencies: AppDependencies): Hon
   app.use('/api/history', jsonBodyLimit, requiredSession);
   app.use('/api/history/*', jsonBodyLimit, requiredSession);
   app.route('/api/history', createHistoryRoutes({ db: dependencies.db }));
+  app.use('/api/shares', jsonBodyLimit, requiredSession);
+  app.use('/api/shares/*', jsonBodyLimit, requiredSession);
+  app.route('/api/shares', createShareRoutes({ db: dependencies.db }));
+  app.route('/api/public/shares', createPublicShareRoutes({ db: dependencies.db }));
 
   app.onError(createOnError(config.nodeEnv));
   app.notFound(notFound);
