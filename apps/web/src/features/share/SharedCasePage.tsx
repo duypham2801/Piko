@@ -4,6 +4,7 @@ import type { SharedCaseData } from '@piko/domain';
 
 import NotFoundPage from '../../app/NotFoundPage';
 import Button from '../../components/ui/Button';
+import Card from '../../components/ui/Card';
 import { t } from '../../i18n';
 import CaseCarousel from '../case-opening/CaseCarousel';
 import Confetti from '../case-opening/Confetti';
@@ -72,20 +73,20 @@ function SharedCaseContent({ share }: { share: SharedCaseData }) {
         <p className={styles.brand}>{t('title')}</p>
         <h1>{share.title}</h1>
 
-        <div className={styles.latestResult}>
+        <p className={styles.latestResult}>
           {latestResult && latestWinner && share.spunAt ? (
-            <p>
+            <>
               <span>{t('sharedLatestResult')}</span>{' '}
               <span>
                 <span aria-hidden="true">{latestWinner.emoji}</span> {latestWinner.label}
               </span>
               {' · '}
               <time dateTime={share.spunAt}>{formatHistoryTime(share.spunAt, now)}</time>
-            </p>
+            </>
           ) : (
-            <p>{t('notSpunYet')}</p>
+            t('notSpunYet')
           )}
-        </div>
+        </p>
 
         <div className={styles.stage}>
           <CaseCarousel
@@ -126,16 +127,22 @@ function SharedCaseContent({ share }: { share: SharedCaseData }) {
 
         <section className={styles.optionsSection}>
           <h2>{t('optionsHeading')}</h2>
-          <ul className={styles.optionList}>
-            {share.options
-              .filter((option) => option.enabled)
-              .map((option) => (
-                <li className={styles.option} key={option.id}>
-                  <span aria-hidden="true">{option.emoji}</span>
-                  <span>{option.label}</span>
-                </li>
-              ))}
-          </ul>
+          <Card className={styles.listCard} tone="surface">
+            <ul className={styles.optionList}>
+              {share.options
+                .filter((option) => option.enabled)
+                .map((option) => (
+                  <li className={styles.option} key={option.id}>
+                    {option.emoji && (
+                      <span aria-hidden="true" className={styles.optionEmoji}>
+                        {option.emoji}
+                      </span>
+                    )}
+                    <span className={styles.optionLabel}>{option.label}</span>
+                  </li>
+                ))}
+            </ul>
+          </Card>
         </section>
 
         <Link className={styles.makeYourOwn} to="/">

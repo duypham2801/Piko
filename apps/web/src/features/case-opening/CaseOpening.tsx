@@ -12,13 +12,13 @@ import BackLink from '../../components/ui/BackLink';
 import Button from '../../components/ui/Button';
 import { t } from '../../i18n';
 import { createHistoryEntry } from '../../lib/api/history';
+import { recordShareSpin } from '../../lib/api/shares';
 import CaseCarousel from './CaseCarousel';
 import styles from './CaseOpening.module.css';
 import Confetti from './Confetti';
+import { useCaseOpening } from './useCaseOpening';
 import WinnerPanel from './WinnerPanel';
 import ShareDialog from '../share/ShareDialog';
-import { recordShareSpin } from '../../lib/api/shares';
-import { useCaseOpening } from './useCaseOpening';
 
 type CaseOpeningProps = {
   title: string;
@@ -29,6 +29,10 @@ type CaseOpeningProps = {
 };
 
 type HistorySaveStatus = 'idle' | 'saving' | 'saved' | 'error';
+type ShareSnapshot = {
+  decision: DecisionDraftData;
+  result: SelectionResultData;
+};
 
 const lastTwoOptionsHintId = 'case-min-options-hint';
 const shareToggleId = 'case-share-toggle';
@@ -52,9 +56,7 @@ export default function CaseOpening({
   const [excludedIds, setExcludedIds] = useState<ReadonlySet<string>>(() => new Set());
   const [historySaveStatus, setHistorySaveStatus] = useState<HistorySaveStatus>('idle');
   const [share, setShare] = useState<SharedCaseData | null>(null);
-  const [shareDialogOpen, setShareDialogOpen] = useState(false);
-  const [shareDecision, setShareDecision] = useState<DecisionDraftData | null>(null);
-  const [shareResult, setShareResult] = useState<SelectionResultData | null>(null);
+  const [shareSnapshot, setShareSnapshot] = useState<ShareSnapshot | null>(null);
   const saveRequestRef = useRef(0);
   const pool = useMemo(() => excludeOptions(options, excludedIds), [excludedIds, options]);
   const { state, plan, open, viewportRef, stripRef } = useCaseOpening(pool);
@@ -98,16 +100,17 @@ export default function CaseOpening({
       return;
     }
 
-    setShareDecision({
-      ...(category === undefined ? {} : { category }),
-      options: state.options,
-      title,
+    setShareSnapshot({
+      decision: {
+        ...(category === undefined ? {} : { category }),
+        options: state.options,
+        title,
+      },
+      result: state.result,
     });
-    setShareResult(state.result);
-    setShareDialogOpen(true);
   }, [category, state, title]);
   const closeShareDialog = useCallback(() => {
-    setShareDialogOpen(false);
+    setShareSnapshot(null);
     requestAnimationFrame(() => document.getElementById(shareToggleId)?.focus());
   }, []);
   const saveResult = useCallback(async () => {
@@ -242,10 +245,10 @@ export default function CaseOpening({
           </Button>
         )}
       </div>
-      {shareDialogOpen && shareDecision && shareResult && (
+      {shareSnapshot && (
         <ShareDialog
-          decision={shareDecision}
-          result={shareResult}
+          decision={shareSnapshot.decision}
+          result={shareSnapshot.result}
           share={share}
           onClose={closeShareDialog}
           onShared={setShare}

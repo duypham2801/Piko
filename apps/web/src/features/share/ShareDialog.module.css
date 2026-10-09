@@ -61,7 +61,6 @@
 }
 
 .status {
-  min-height: var(--space-4);
   color: var(--color-success);
 }
 

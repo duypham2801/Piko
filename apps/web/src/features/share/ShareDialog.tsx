@@ -1,5 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
-import type { DecisionDraftData, SelectionResultData, SharedCaseData } from '@piko/domain';
+import { useEffect, useId, useRef, useState } from 'react';
+import type {
+  DecisionDraftData,
+  SelectionResultData,
+  SharedCaseCreateData,
+  SharedCaseData,
+} from '@piko/domain';
 
 import Button from '../../components/ui/Button';
 import Sheet from '../../components/ui/Sheet';
@@ -9,7 +14,6 @@ import { ApiClientError } from '../../lib/api/client';
 import { createShare } from '../../lib/api/shares';
 import styles from './ShareDialog.module.css';
 
-type ShareLifetime = '1d' | '7d' | '30d' | 'never';
 type ShareStatus = 'idle' | 'creating' | 'error' | 'limit' | 'copied' | 'copyFailed';
 
 type ShareDialogProps = {
@@ -20,7 +24,10 @@ type ShareDialogProps = {
   onClose: () => void;
 };
 
-const lifetimeOptions: readonly { value: ShareLifetime; label: string }[] = [
+const lifetimeOptions: readonly {
+  value: SharedCaseCreateData['lifetime'];
+  label: string;
+}[] = [
   { value: '1d', label: t('shareLifetime1d') },
   { value: '7d', label: t('shareLifetime7d') },
   { value: '30d', label: t('shareLifetime30d') },
@@ -34,15 +41,13 @@ export default function ShareDialog({
   onShared,
   onClose,
 }: ShareDialogProps) {
-  const [lifetime, setLifetime] = useState<ShareLifetime>('7d');
+  const [lifetime, setLifetime] = useState<SharedCaseCreateData['lifetime']>('7d');
   const [status, setStatus] = useState<ShareStatus>('idle');
   const requestRef = useRef(0);
-  const activeRef = useRef(true);
+  const linkFieldId = useId();
 
   useEffect(() => {
-    activeRef.current = true;
     return () => {
-      activeRef.current = false;
       requestRef.current += 1;
     };
   }, []);
@@ -54,12 +59,14 @@ export default function ShareDialog({
 
     try {
       const createdShare = await createShare({ decision, result, lifetime });
-      if (activeRef.current && requestRef.current === requestId) {
-        onShared(createdShare);
-        setStatus('idle');
+      if (requestRef.current !== requestId) {
+        return;
       }
+
+      onShared(createdShare);
+      setStatus('idle');
     } catch (error: unknown) {
-      if (!activeRef.current || requestRef.current !== requestId) {
+      if (requestRef.current !== requestId) {
         return;
       }
 
@@ -94,21 +101,18 @@ export default function ShareDialog({
 
     try {
       await navigator.clipboard.writeText(url);
-      if (activeRef.current) {
-        setStatus('copied');
-      }
+      setStatus('copied');
     } catch {
-      if (activeRef.current) {
-        setStatus('copyFailed');
-        requestAnimationFrame(() => {
-          document.querySelector<HTMLInputElement>('[data-share-link]')?.focus();
-          document.querySelector<HTMLInputElement>('[data-share-link]')?.select();
-        });
-      }
+      setStatus('copyFailed');
+      const linkField = document.getElementById(linkFieldId) as HTMLInputElement | null;
+      linkField?.focus();
+      linkField?.select();
     }
   };
 
   const createErrorMessage = status === 'limit' ? t('shareLimitReached') : t('shareFailed');
+  const statusMessage =
+    status === 'copied' ? t('linkCopied') : status === 'copyFailed' ? t('copyFailed') : '';
 
   return (
     <Sheet closeLabel={t('close')} title={t('shareTitle')} onClose={onClose}>
@@ -146,7 +150,7 @@ export default function ShareDialog({
         ) : (
           <>
             <TextField
-              data-share-link
+              id={linkFieldId}
               label={t('shareLinkLabel')}
               readOnly
               value={url}
@@ -155,13 +159,11 @@ export default function ShareDialog({
             <Button fullWidth onClick={() => void handleShare()}>
               {typeof navigator.share === 'function' ? t('sendLink') : t('copyLink')}
             </Button>
-            <p className={styles.status} role="status">
-              {status === 'copied'
-                ? t('linkCopied')
-                : status === 'copyFailed'
-                  ? t('copyFailed')
-                  : ''}
-            </p>
+            {statusMessage && (
+              <p className={styles.status} role="status">
+                {statusMessage}
+              </p>
+            )}
           </>
         )}
       </div>

@@ -220,13 +220,9 @@ export function useCaseOpening(pool: readonly DecisionOptionData[]) {
         return undefined;
       }
 
-      let spinSeed = seed;
+      const spinSeed = seed ?? crypto.getRandomValues(new Uint32Array(1))[0];
       if (spinSeed === undefined) {
-        const values = crypto.getRandomValues(new Uint32Array(1));
-        spinSeed = values[0];
-        if (spinSeed === undefined) {
-          return undefined;
-        }
+        return undefined;
       }
 
       cancelAnimation();
