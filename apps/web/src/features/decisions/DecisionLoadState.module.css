@@ -1,14 +1,4 @@
-.screen {
-  display: grid;
-  min-height: 100dvh;
-  place-items: center;
-  padding: var(--space-6) var(--space-4);
-  background: var(--color-bg);
-}
-
 .content {
-  display: grid;
-  width: min(100%, var(--content-max-width));
   justify-items: center;
   gap: var(--space-5);
   text-align: center;

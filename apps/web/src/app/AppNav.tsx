@@ -10,11 +10,7 @@ export default function AppNav() {
         {t('title')}
       </Link>
       <div className={styles.links}>
-        <Link
-          aria-label={t('builderNewTitle')}
-          className={styles.create}
-          to="/decisions/new"
-        >
+        <Link aria-label={t('builderNewTitle')} className={styles.create} to="/decisions/new">
           <span aria-hidden="true">+</span> {t('navCreate')}
         </Link>
         <NavLink className={styles.history} to="/history">

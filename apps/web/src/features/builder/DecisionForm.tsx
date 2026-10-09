@@ -3,9 +3,9 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router';
 import { DECISION_LIMITS, DecisionDraft } from '@piko/domain';
 import type { DecisionDraftData } from '@piko/domain';
 
-import BackLink from '../../components/ui/BackLink';
 import Button from '../../components/ui/Button';
 import TextField from '../../components/ui/TextField';
+import Screen from '../../app/Screen';
 import { t } from '../../i18n';
 import { ApiClientError } from '../../lib/api/client';
 import { createDecision, updateDecision } from '../../lib/api/decisions';
@@ -224,11 +224,8 @@ export default function DecisionForm({ backTo, decisionId, initial }: DecisionFo
   }
 
   return (
-    <main className={styles.screen}>
-      <form className={styles.content} onSubmit={handleSave}>
-        <BackLink to={backTo ?? (decisionId ? `/decisions/${decisionId}` : '/')}>
-          {t('back')}
-        </BackLink>
+    <Screen backTo={backTo ?? (decisionId ? `/decisions/${decisionId}` : '/')}>
+      <form className={styles.form} onSubmit={handleSave}>
         <h1>{decisionId ? t('builderEditTitle') : t('builderNewTitle')}</h1>
 
         <TextField
@@ -314,6 +311,6 @@ export default function DecisionForm({ backTo, decisionId, initial }: DecisionFo
           </div>
         </div>
       </form>
-    </main>
+    </Screen>
   );
 }

@@ -1,14 +1,4 @@
-.screen {
-  display: grid;
-  min-height: 100dvh;
-  place-items: center;
-  padding: var(--space-4);
-  background: var(--color-bg);
-}
-
 .content {
-  display: grid;
-  width: min(100%, var(--content-max-width));
   gap: var(--space-6);
   justify-items: center;
 }
@@ -65,14 +55,4 @@
   font-size: var(--text-sm);
   font-weight: var(--font-weight-bold);
   text-align: center;
-}
-
-@media (min-width: 48rem) {
-  .screen {
-    padding: var(--space-6);
-  }
-
-  .content {
-    width: min(100%, var(--content-wide-max-width));
-  }
 }

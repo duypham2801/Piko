@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router';
 import type { SharedCaseData } from '@piko/domain';
 
 import NotFoundPage from '../../app/NotFoundPage';
+import Screen from '../../app/Screen';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import { t } from '../../i18n';
@@ -18,22 +19,18 @@ type RevealLabel = 'winner' | 'try';
 
 function LoadingPage() {
   return (
-    <main className={styles.screen}>
-      <div className={styles.content}>
-        <p className={styles.muted}>{t('loading')}</p>
-      </div>
-    </main>
+    <Screen align="center" className={styles.content}>
+      <p className={styles.muted}>{t('loading')}</p>
+    </Screen>
   );
 }
 
 function ErrorPage({ onRetry }: { onRetry: () => void }) {
   return (
-    <main className={styles.screen}>
-      <div className={styles.content}>
-        <p className={styles.error}>{t('shareLoadFailed')}</p>
-        <Button onClick={onRetry}>{t('retry')}</Button>
-      </div>
-    </main>
+    <Screen align="center" className={styles.content}>
+      <p className={styles.error}>{t('shareLoadFailed')}</p>
+      <Button onClick={onRetry}>{t('retry')}</Button>
+    </Screen>
   );
 }
 
@@ -68,88 +65,86 @@ function SharedCaseContent({ share }: { share: SharedCaseData }) {
   };
 
   return (
-    <main className={styles.screen}>
-      <div className={styles.content}>
-        <p className={styles.brand}>{t('title')}</p>
-        <h1>{share.title}</h1>
+    <Screen className={styles.content} width="wide">
+      <p className={styles.brand}>{t('title')}</p>
+      <h1>{share.title}</h1>
 
-        <p className={styles.latestResult}>
-          {latestResult && latestWinner && share.spunAt ? (
-            <>
-              <span>{t('sharedLatestResult')}</span>{' '}
-              <span>
-                <span aria-hidden="true">{latestWinner.emoji}</span> {latestWinner.label}
-              </span>
-              {' · '}
-              <time dateTime={share.spunAt}>{formatHistoryTime(share.spunAt, now)}</time>
-            </>
-          ) : (
-            t('notSpunYet')
-          )}
-        </p>
+      <p className={styles.latestResult}>
+        {latestResult && latestWinner && share.spunAt ? (
+          <>
+            <span>{t('sharedLatestResult')}</span>{' '}
+            <span>
+              <span aria-hidden="true">{latestWinner.emoji}</span> {latestWinner.label}
+            </span>
+            {' · '}
+            <time dateTime={share.spunAt}>{formatHistoryTime(share.spunAt, now)}</time>
+          </>
+        ) : (
+          t('notSpunYet')
+        )}
+      </p>
 
-        <div className={styles.stage}>
-          <CaseCarousel
-            optionsById={optionsById}
-            plan={plan}
-            revealed={revealed}
-            stripRef={stripRef}
-            viewportRef={viewportRef}
-          />
-          {revealed && <Confetti />}
-        </div>
-
-        <div aria-live="polite" className={styles.result} role="status">
-          {winner && (
-            <WinnerPanel
-              label={revealLabel === 'winner' ? t('winnerIs') : t('tryResult')}
-              option={winner}
-            />
-          )}
-        </div>
-
-        <div className={styles.actions}>
-          {share.result && (
-            <Button disabled={spinning} fullWidth size="lg" onClick={replay}>
-              {t('replaySpin')}
-            </Button>
-          )}
-          <Button
-            disabled={spinning}
-            fullWidth
-            size={share.result ? 'md' : 'lg'}
-            variant={share.result ? 'outline' : 'primary'}
-            onClick={trySpin}
-          >
-            {t('trySpin')}
-          </Button>
-        </div>
-
-        <section className={styles.optionsSection}>
-          <h2>{t('optionsHeading')}</h2>
-          <Card className={styles.listCard} tone="surface">
-            <ul className={styles.optionList}>
-              {share.options
-                .filter((option) => option.enabled)
-                .map((option) => (
-                  <li className={styles.option} key={option.id}>
-                    {option.emoji && (
-                      <span aria-hidden="true" className={styles.optionEmoji}>
-                        {option.emoji}
-                      </span>
-                    )}
-                    <span className={styles.optionLabel}>{option.label}</span>
-                  </li>
-                ))}
-            </ul>
-          </Card>
-        </section>
-
-        <Link className={styles.makeYourOwn} to="/">
-          {t('makeYourOwn')}
-        </Link>
+      <div className={styles.stage}>
+        <CaseCarousel
+          optionsById={optionsById}
+          plan={plan}
+          revealed={revealed}
+          stripRef={stripRef}
+          viewportRef={viewportRef}
+        />
+        {revealed && <Confetti />}
       </div>
-    </main>
+
+      <div aria-live="polite" className={styles.result} role="status">
+        {winner && (
+          <WinnerPanel
+            label={revealLabel === 'winner' ? t('winnerIs') : t('tryResult')}
+            option={winner}
+          />
+        )}
+      </div>
+
+      <div className={styles.actions}>
+        {share.result && (
+          <Button disabled={spinning} fullWidth size="lg" onClick={replay}>
+            {t('replaySpin')}
+          </Button>
+        )}
+        <Button
+          disabled={spinning}
+          fullWidth
+          size={share.result ? 'md' : 'lg'}
+          variant={share.result ? 'outline' : 'primary'}
+          onClick={trySpin}
+        >
+          {t('trySpin')}
+        </Button>
+      </div>
+
+      <section className={styles.optionsSection}>
+        <h2>{t('optionsHeading')}</h2>
+        <Card className={styles.listCard} tone="surface">
+          <ul className={styles.optionList}>
+            {share.options
+              .filter((option) => option.enabled)
+              .map((option) => (
+                <li className={styles.option} key={option.id}>
+                  {option.emoji && (
+                    <span aria-hidden="true" className={styles.optionEmoji}>
+                      {option.emoji}
+                    </span>
+                  )}
+                  <span className={styles.optionLabel}>{option.label}</span>
+                </li>
+              ))}
+          </ul>
+        </Card>
+      </section>
+
+      <Link className={styles.makeYourOwn} to="/">
+        {t('makeYourOwn')}
+      </Link>
+    </Screen>
   );
 }
 

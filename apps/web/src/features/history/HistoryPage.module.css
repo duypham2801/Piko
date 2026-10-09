@@ -1,14 +1,5 @@
-.screen {
-  min-height: 100dvh;
-  padding: var(--space-6) var(--space-4) var(--space-8);
-  background: var(--color-bg);
-}
-
 .content {
-  display: grid;
-  width: min(100%, var(--content-max-width));
   gap: var(--space-5);
-  margin: 0 auto;
 }
 
 .content h1 {
@@ -43,10 +34,4 @@
 .sharesError {
   color: var(--color-text-muted);
   font-size: var(--text-sm);
-}
-
-@media (min-width: 48rem) {
-  .screen {
-    padding: var(--space-6);
-  }
 }
