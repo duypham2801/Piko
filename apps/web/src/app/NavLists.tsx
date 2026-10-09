@@ -2,7 +2,7 @@ import { Link, NavLink, useLocation } from 'react-router';
 
 import { t } from '../i18n';
 import { useDecisionList } from '../features/decisions/useDecisionList';
-import HistoryList, { historyEntryHref } from '../features/history/HistoryList';
+import { historyEntryHref } from '../features/history/HistoryList';
 import { useHistoryList } from '../features/history/useHistoryList';
 import styles from './NavLists.module.css';
 
