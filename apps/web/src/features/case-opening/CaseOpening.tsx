@@ -24,6 +24,15 @@ type HistorySaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
 const minOptionsHintId = 'case-min-options-hint';
 
+function excludeOptions(
+  options: readonly DecisionOptionData[],
+  excludedIds: ReadonlySet<string>,
+): DecisionOptionData[] {
+  return options.map((option) =>
+    excludedIds.has(option.id) ? { ...option, enabled: false } : option,
+  );
+}
+
 export default function CaseOpening({
   title,
   options,
@@ -34,24 +43,16 @@ export default function CaseOpening({
   const [excludedIds, setExcludedIds] = useState<ReadonlySet<string>>(() => new Set());
   const [historySaveStatus, setHistorySaveStatus] = useState<HistorySaveStatus>('idle');
   const saveRequestRef = useRef(0);
-  const spinOptionsRef = useRef<DecisionOptionData[]>([]);
-  const pool = useMemo(
-    () =>
-      options.map((option) =>
-        excludedIds.has(option.id) ? { ...option, enabled: false } : option,
-      ),
-    [excludedIds, options],
-  );
+  const pool = useMemo(() => excludeOptions(options, excludedIds), [excludedIds, options]);
   const { state, plan, open, viewportRef, stripRef } = useCaseOpening(pool);
   const resetSaveStatus = useCallback(() => {
     saveRequestRef.current += 1;
     setHistorySaveStatus('idle');
   }, []);
-  const spinAgain = useCallback(() => {
+  const spin = useCallback(() => {
     resetSaveStatus();
-    spinOptionsRef.current = pool;
     open();
-  }, [open, pool, resetSaveStatus]);
+  }, [open, resetSaveStatus]);
   const rejectWinner = useCallback(() => {
     if (state.status !== 'revealed') {
       return;
@@ -59,9 +60,7 @@ export default function CaseOpening({
 
     const nextExcludedIds = new Set(excludedIds);
     nextExcludedIds.add(state.result.winnerId);
-    const nextPool = options.map((option) =>
-      nextExcludedIds.has(option.id) ? { ...option, enabled: false } : option,
-    );
+    const nextPool = excludeOptions(options, nextExcludedIds);
     const enabledCount = nextPool.filter((option) => option.enabled).length;
     if (enabledCount < DECISION_LIMITS.minEnabledOptions) {
       return;
@@ -69,7 +68,6 @@ export default function CaseOpening({
 
     resetSaveStatus();
     setExcludedIds(nextExcludedIds);
-    spinOptionsRef.current = nextPool;
     open(nextPool);
   }, [excludedIds, open, options, resetSaveStatus, state]);
   const saveResult = useCallback(async () => {
@@ -90,7 +88,7 @@ export default function CaseOpening({
         source,
         decision: {
           ...(category === undefined ? {} : { category }),
-          options: spinOptionsRef.current,
+          options: state.options,
           title,
         },
         result: state.result,
@@ -168,7 +166,7 @@ export default function CaseOpening({
                   : t('goNow')}
             </Button>
             <div className={styles.secondaryActions}>
-              <Button fullWidth variant="outline" onClick={spinAgain}>
+              <Button fullWidth variant="outline" onClick={spin}>
                 {t('spinAgain')}
               </Button>
               <Button
@@ -196,7 +194,7 @@ export default function CaseOpening({
             </p>
           </div>
         ) : (
-          <Button disabled={state.status === 'spinning'} size="lg" onClick={spinAgain}>
+          <Button disabled={state.status === 'spinning'} size="lg" onClick={spin}>
             {state.status === 'ready' ? t('openCase') : t('opening')}
           </Button>
         )}

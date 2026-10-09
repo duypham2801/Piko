@@ -230,7 +230,7 @@ export function useCaseOpening(pool: readonly DecisionOptionData[]) {
       reducedMotionRef.current = window.matchMedia(REDUCED_MOTION_QUERY).matches;
       const result = select(spinOptions, seed);
       const plan = buildAnimationPlan(result, spinOptions);
-      dispatch({ type: 'open', plan, result });
+      dispatch({ type: 'open', plan, result, options: spinOptions });
     },
     [cancelAnimation, pool, state.status],
   );

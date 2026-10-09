@@ -95,15 +95,10 @@
 }
 
 .historyStatus {
-  min-height: var(--tap-target-min);
   color: var(--color-success);
   font-size: var(--text-sm);
   font-weight: var(--font-weight-bold);
   text-align: center;
-}
-
-.historyStatus:empty {
-  min-height: 0;
 }
 
 .historyStatusError {
