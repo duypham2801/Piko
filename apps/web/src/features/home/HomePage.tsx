@@ -1,6 +1,8 @@
 import { Link } from 'react-router';
 
 import Card from '../../components/ui/Card';
+import HistoryList from '../history/HistoryList';
+import { useHistoryList } from '../history/useHistoryList';
 import { t } from '../../i18n';
 import ModeSelector from './ModeSelector';
 import styles from './HomePage.module.css';
@@ -11,6 +13,8 @@ const tones = ['primary', 'secondary', 'accent'] as const;
 
 export default function HomePage() {
   const { decisions, status } = useDecisionList();
+  const { entries: historyEntries, status: historyStatus } = useHistoryList(5);
+  const now = new Date();
 
   return (
     <>
@@ -78,6 +82,23 @@ export default function HomePage() {
             </ul>
             {status === 'error' && <p className={styles.listFailed}>{t('listFailed')}</p>}
           </section>
+
+          {(historyStatus === 'error' ||
+            (historyStatus === 'loaded' && historyEntries.length > 0)) && (
+            <section className={styles.recent}>
+              <header className={styles.sectionHeader}>
+                <h2>{t('recent')}</h2>
+                <Link className={styles.seeAll} to="/history">
+                  {t('seeAll')}
+                </Link>
+              </header>
+              {historyStatus === 'error' ? (
+                <p className={styles.listFailed}>{t('historyLoadFailed')}</p>
+              ) : (
+                <HistoryList entries={historyEntries} now={now} />
+              )}
+            </section>
+          )}
 
           <section className={styles.quickPicks}>
             <h2>{t('quickPicks')}</h2>

@@ -48,14 +48,39 @@
   gap: var(--space-3);
 }
 
+.recent {
+  display: grid;
+  gap: var(--space-3);
+}
+
 .yourDecisions {
   display: grid;
   gap: var(--space-3);
 }
 
+.sectionHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
 .yourDecisions h2,
-.quickPicks h2 {
+.quickPicks h2,
+.recent h2 {
   font-size: var(--text-2xl);
+}
+
+.seeAll {
+  flex: 0 0 auto;
+  color: var(--color-text-accent);
+  font-weight: var(--font-weight-bold);
+  text-decoration: none;
+}
+
+.seeAll:hover {
+  text-decoration: underline;
+  text-underline-offset: var(--space-1);
 }
 
 .createCard {

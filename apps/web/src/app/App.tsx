@@ -5,6 +5,7 @@ import NotFoundPage from './NotFoundPage';
 import DecisionBuilderPage from '../features/builder/DecisionBuilderPage';
 import DecisionCasePage from '../features/decisions/DecisionCasePage';
 import DecisionPreviewPage from '../features/decisions/DecisionPreviewPage';
+import HistoryPage from '../features/history/HistoryPage';
 import HomePage from '../features/home/HomePage';
 import PresetPreviewPage from '../features/presets/PresetPreviewPage';
 import PresetCasePage from '../features/presets/PresetCasePage';
@@ -18,6 +19,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
+      <Route path="/history" element={<HistoryPage />} />
       <Route path="/decisions/new" element={<DecisionBuilderPage />} />
       <Route path="/decisions/:id" element={<DecisionPreviewPage />} />
       <Route path="/decisions/:id/edit" element={<DecisionBuilderPage />} />
