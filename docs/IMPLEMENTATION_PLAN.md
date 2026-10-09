@@ -1,7 +1,7 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 6 — Result, history, share, live viewing (6-1…6-5a done; 6-5b next)
+- **Current phase:** Phase 6 — Result, history, share, live viewing (6-1…6-5b done; 6-6 next)
 - **Integration branch:** `feat/phase-6-result-history`
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`); Phase 4 (4-1, 4-2: router, Home, presets, preview, merged into `main`); Phase 5 (5-1…5-4: decisions API, builder, saved decisions, reuse options, merged into `main`)
 
@@ -32,7 +32,7 @@
 | 6-3 | History UI | ✅ (`6-3-fix-1.md`) | `6-3-history-ui.md`: Home "Gần đây" (5 newest) + `/history` (D-028, D-030) |
 | 6-4 | Shares API | ✅ (`6-4-fix-1.md`) | `6-4-shares-api.md`: `shared_cases` table, owner routes (create with lifetime, list, revoke, record a spin), public read route without a session (D-030) |
 | 6-5a | Share UI + public page | ✅ (`6-5a-fix-1.md`) | `6-5a-share-ui.md`: "Chia sẻ" dialog (lifetime, Web Share / copy), later spins recorded, `/s/:id` (options, replay, "Tự quay thử", unavailable page) with no session bootstrap; extracts `Sheet` and `WinnerPanel` (D-030) |
-| 6-5b | Shared links list + revoke | 🔄 (`6-5b-fix-1.md`) | `6-5b-shared-links.md`: "Link đã chia sẻ" in `/history` (title → `/s/:id`, winner, expiry) with an inline revoke confirm; `Button variant="danger"` (D-030) |
+| 6-5b | Shared links list + revoke | ✅ (`6-5b-fix-1.md`) | `6-5b-shared-links.md`: "Link đã chia sẻ" in `/history` (title → `/s/:id`, winner, expiry) with an inline revoke confirm; `Button variant="danger"` (D-030) |
 | 6-6 | Live viewing + interactions | ⬜ | SSE + POST, in-memory pub/sub; interaction kinds and viewer identity decided at kickoff (D-030) |
 | 7 | Responsive pass + navigation shell | ⬜ | Desktop is not in the mockup and must be designed. **First task: a navigation shell** (owner, 2026-10-09):<br>- a desktop sidebar holding "Của bạn" and "Gần đây"<br>- a mobile navigation pattern (top bar, drawer or bottom tabs), chosen at kickoff<br>- the shared screen shell with the back link at the same position on every screen<br>- the public `/s/:id` page stays outside the shell |
 | 8 | Polish | ⬜ | States, micro-interactions, consistency |
@@ -646,6 +646,10 @@
     - `SharedLinkList` keeps a `mountedRef` (not needed in React 19, already removed from `ShareDialog`) and duplicates the success path for `404`
     - `HistoryPage` moves focus after a revoke through a flag ref and an effect instead of directly in the handler
   - DO NOT TOUCH: the `confirmDelete` → `handleDelete` rename in `DecisionPreviewPage` (needed by the handoff grep); the nested label ternary in the dev-only `ComponentsSection`.
+- **6-5b-fix-1 (2026-10-09):** verified against the diff (`7e6b629`, 2 files, +15/−47). `make check` passes (domain 48, api 41); the handoff grep is empty.
+  - `SharedLinkList` has one success path with no mounted guard. `HistoryPage` focuses the right heading directly in `handleRevoked`.
+  - Browser rerun: cancel and revoke focus are unchanged ("Link đã chia sẻ", then "Đã chọn"). A link already deleted elsewhere (`404`) disappears with no error.
+  - 6-5b accepted. The implementer reported one transient PGlite setup timeout in `shares.test.ts` that passed on rerun; not reproduced in this review.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
