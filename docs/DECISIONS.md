@@ -471,7 +471,7 @@ Format: Decision · Reason · Alternatives · Tradeoffs · Phase/Date
   - tablet from `48rem` to `64rem`: mobile navigation, wider content
   - desktop from `64rem`: sidebar
 - **Home on desktop (owner):** Home drops its "Của bạn" and "Gần đây" sections, because the sidebar shows them. It keeps the question, the mode selector, the "Tạo mới" card and the presets. Home on mobile and tablet is unchanged.
-- **Focus mode (owner):** the case-opening screens (`/presets/:slug/open`, `/decisions/:id/open`) show no sidebar, so the stage gets the full width.
+- **Focus mode (owner) — superseded by D-033 (case overlay):** the case-opening screens (`/presets/:slug/open`, `/decisions/:id/open`) show no sidebar, so the stage gets the full width.
   - A 60rem stage plus a ~16rem sidebar does not fit at 1024 px.
   - Architect default: these screens also hide the mobile top bar. The rule is "case screens are focus screens at every width", and the back link is the only way out.
 - **Shell rules (architect):**
@@ -480,4 +480,27 @@ Format: Decision · Reason · Alternatives · Tradeoffs · Phase/Date
   - The sidebar lists reuse the existing hooks (`useDecisionList`, `useHistoryList`) and reload when the route changes, so a save, delete or "Đi thôi" shows up after the next navigation. There is no global store.
 - **Brand (owner, 7-1 review):** Home drops its large PIKO wordmark. The tagline "Pick. Open. Go." moves under the nav logo, so the brand shows once, on every shell screen.
 - **Topology:** unchanged (no routes, tables or services).
+- **Phase:** 7 · 2026-10-09 · approved by user
+
+## D-033 — Case opening as an overlay
+- **Choice (owner, 7-3 kickoff):** the case opens as a **modal overlay** above the page it was opened from (the preview or the builder), with a dimmed, blurred backdrop. It no longer navigates to a separate full screen.
+- **Owner:**
+  - **URLs stay:**
+    - `/presets/:slug/open` and `/decisions/:id/open` become nested routes rendered above the still-mounted preview.
+    - The builder's `?view=case` renders the overlay above the form.
+    - Browser Back closes the overlay, and a deep link shows the preview with the overlay.
+  - **Closing:** a "×" button or `Esc`, also mid-spin. A backdrop click does **not** close it, to avoid losing a spin by accident.
+- **Architect defaults:**
+  - **Phone:** below `48rem` the overlay is full-screen.
+  - **Desktop:** from `48rem` it is a centred dialog up to `--case-dialog-max-width` (72rem).
+  - **Closing replaces the history entry,** so Back does not reopen it. Focus returns to the page's "Mở case".
+  - **The backdrop blur is dropped** under `prefers-reduced-transparency: reduce`.
+  - **`DecisionCasePage` reads the preview's record** through the outlet context, so there is no second fetch.
+  - **`/s/:id` stays a normal page.** It is a landing page with nothing behind it.
+- **Reason:**
+  - Opening a case is a moment above the user's context, not a new place. The page stays visible behind it.
+  - On large screens the case no longer sits in a mostly empty page.
+  - Focus mode (D-032) is no longer needed and is removed.
+- **Supersedes:** D-032 "Focus mode".
+- **Topology:** unchanged (same URLs).
 - **Phase:** 7 · 2026-10-09 · approved by user
