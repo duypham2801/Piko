@@ -1,11 +1,12 @@
 import {
   SharedCase,
+  SharedCaseListResponse,
   type SharedCaseCreateData,
   type SharedCaseData,
   type SharedCaseSpinData,
 } from '@piko/domain';
 
-import { apiGet, apiSend } from './client';
+import { apiDelete, apiGet, apiSend } from './client';
 import { ensureSession, withSession } from './session';
 
 export async function createShare(input: SharedCaseCreateData): Promise<SharedCaseData> {
@@ -28,4 +29,17 @@ export function fetchPublicShare(
   options?: { signal?: AbortSignal },
 ): Promise<SharedCaseData> {
   return apiGet(`/api/public/shares/${encodeURIComponent(id)}`, SharedCase, options);
+}
+
+export async function listShares(options?: { signal?: AbortSignal }): Promise<SharedCaseData[]> {
+  await ensureSession();
+  return withSession(async () => {
+    const response = await apiGet('/api/shares', SharedCaseListResponse, options);
+    return response.shares;
+  });
+}
+
+export async function revokeShare(id: string): Promise<void> {
+  await ensureSession();
+  return withSession(() => apiDelete(`/api/shares/${encodeURIComponent(id)}`));
 }

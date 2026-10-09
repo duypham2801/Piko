@@ -15,6 +15,15 @@
   font-size: var(--text-display);
 }
 
+.section {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.section h2 {
+  font-size: var(--text-2xl);
+}
+
 .muted {
   color: var(--color-text-muted);
 }
@@ -29,6 +38,11 @@
 .error {
   color: var(--color-danger);
   font-weight: var(--font-weight-bold);
+}
+
+.sharesError {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
 }
 
 @media (min-width: 48rem) {
