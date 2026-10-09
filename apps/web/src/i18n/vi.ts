@@ -87,6 +87,15 @@ export const vi = {
   linkCopied: 'Đã sao chép link.',
   copyFailed: 'Chưa sao chép được. Hãy chọn link rồi tự sao chép.',
   close: 'Đóng',
+  sharedLatestResult: 'Kết quả đã chia sẻ:',
+  notSpunYet: 'Chưa quay lần nào.',
+  replaySpin: 'Xem lại lượt quay',
+  trySpin: 'Tự quay thử',
+  tryResult: 'Bạn quay thử ra',
+  shareLoadFailed: 'Chưa tải được case này.',
+  shareUnavailableTitle: 'Link này không còn khả dụng',
+  shareUnavailableLead: 'Link có thể đã hết hạn hoặc đã bị thu hồi.',
+  makeYourOwn: 'Tự tạo case trên PIKO',
 } as const;
 
 export type TranslationKey = keyof typeof vi;

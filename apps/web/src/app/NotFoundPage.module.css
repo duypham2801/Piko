@@ -17,6 +17,11 @@
   font-size: var(--text-display);
 }
 
+.message {
+  max-width: var(--content-max-width);
+  color: var(--color-text-muted);
+}
+
 .backHome {
   display: inline-flex;
   min-height: var(--tap-target-min);
