@@ -1,7 +1,7 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 7 — Responsive pass + navigation shell (kickoff done, D-032). Next task: 7-1. Phase 6 merged into `main` on 2026-10-09; live viewing moved to the Realtime phase (D-031).
+- **Current phase:** Phase 7 — Responsive pass + navigation shell (kickoff done, D-032). Next task: 7-2. Phase 6 merged into `main` on 2026-10-09; live viewing moved to the Realtime phase (D-031).
 - **Integration branch:** `feat/phase-7-responsive`
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`); Phase 4 (4-1, 4-2: router, Home, presets, preview, merged into `main`); Phase 5 (5-1…5-4: decisions API, builder, saved decisions, reuse options, merged into `main`)
 
@@ -34,7 +34,7 @@
 | 6-5a | Share UI + public page | ✅ (`6-5a-fix-1.md`) | `6-5a-share-ui.md`: "Chia sẻ" dialog (lifetime, Web Share / copy), later spins recorded, `/s/:id` (options, replay, "Tự quay thử", unavailable page) with no session bootstrap; extracts `Sheet` and `WinnerPanel` (D-030) |
 | 6-5b | Shared links list + revoke | ✅ (`6-5b-fix-1.md`) | `6-5b-shared-links.md`: "Link đã chia sẻ" in `/history` (title → `/s/:id`, winner, expiry) with an inline revoke confirm; `Button variant="danger"` (D-030) |
 | 6-6 | Live viewing + interactions | ⏸ moved | Deferred to the Realtime phase (D-031) |
-| 7-1 | Navigation shell | 🔄 fix (`7-1-fix-1.md`) | `7-1-navigation-shell.md`: layout route + screen shell (back link at one position), mobile top bar, desktop sidebar frame from `64rem`, focus mode on case screens, `/s/:id` outside; replaces the copied screen layouts (D-032) |
+| 7-1 | Navigation shell | ✅ (`7-1-fix-1.md`) | `7-1-navigation-shell.md`: layout route + screen shell (back link at one position), mobile top bar, desktop sidebar frame from `64rem`, focus mode on case screens, `/s/:id` outside; replaces the copied screen layouts (D-032) |
 | 7-2 | Sidebar lists + desktop Home | ⬜ | "Của bạn" and "Gần đây" in the sidebar (reload on route change), Home drops both sections from `64rem` (D-032) |
 | 7-3 | Responsive pass | ⬜ | Every screen at 360 / 768 / 1024 / 1280 / 1920: carousel, winner reveal, CTAs, card grids, option layout |
 | 8 | Polish | ⬜ | States, micro-interactions, consistency |
@@ -680,6 +680,16 @@
     - page `className` overrides of `Screen`'s `.content` rely on CSS order (each page imports `Screen` before its own module), the same as the `className` props on UI primitives
     - the dev double public GET comes from StrictMode
   - → `7-1-fix-1.md`.
+- **7-1-fix-1 (2026-10-09):** verified (`fadfdaa`, 9 files, +25/−39). Lockfile unchanged.
+  - **Browser at 360/1280:**
+    - `/history` keeps its normal gaps; "Về trang chủ" is 44 px tall.
+    - `/nope` and `/s/<unknown>` are centred vertically.
+    - The case screen is unchanged.
+    - Tab order: "PIKO Pick. Open. Go." → "Lịch sử" → "+ Tạo" → "← Trở về" (the accessible name keeps the space).
+    - Home has no large wordmark; the nav shows the tagline under the logo; no horizontal scroll.
+  - **NICE, not requested:** `.logo` keeps the redundant `gap: 0` and `align-items: start`, and `.wordmark` repeats the logo's `line-height`.
+  - **`make check`:** the first run failed with PGlite `beforeAll` hook timeouts (10 s) in up to 5 api test files while the host load average was about 12. The api tests alone, and the next `make check`, passed (domain 48, api 41). This branch touches no api code. It is the same flake as in 6-5b → technical debt.
+  - **7-1 accepted.** Fast-forwarded into `feat/phase-7-responsive`.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
@@ -700,6 +710,7 @@
 - Docker bind mounts + pnpm workspace `node_modules` can be fiddly (handled with container-owned volumes).
 
 ## Technical debt
+- **API tests flake under host load:** each PGlite test file creates its own database in `beforeAll` under the default 10 s `hookTimeout`, which times out when the machine is busy (seen in 6-5b and the 7-1 review). Fix before Phase 9, either by raising `hookTimeout` for the api project or by sharing one PGlite per worker.
 - `prod-deploy` skips the backup when the prod stack is stopped (e.g. after `make prod-down`) but `piko-prod_pgdata` holds data, so migrations would run without a backup. Fix before Phase 9: if the volume exists, start `db` (`up -d --wait db`) and back up before `up`.
 - `prod-restore` does not take a safety backup of the current data before `--clean`. Add one before Phase 9.
 - Restoring an old dump into a newer schema is not guarded. The runbook must say: restore only with the image version that created the dump.
