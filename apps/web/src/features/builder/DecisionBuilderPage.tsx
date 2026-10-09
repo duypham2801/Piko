@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useLocation, useParams } from 'react-router';
-import { DECISION_LIMITS, DecisionRecord } from '@piko/domain';
-import type { DecisionDraftData, DecisionRecordData } from '@piko/domain';
+import { DecisionRecord } from '@piko/domain';
+import type { DecisionRecordData } from '@piko/domain';
 
 import Button from '../../components/ui/Button';
 import NotFoundPage from '../../app/NotFoundPage';
@@ -9,6 +9,7 @@ import { t } from '../../i18n';
 import { ApiClientError } from '../../lib/api/client';
 import { fetchDecision } from '../../lib/api/decisions';
 import DecisionForm from './DecisionForm';
+import { draftOf, emptyDraft } from './draft';
 import styles from './DecisionBuilderPage.module.css';
 
 type LoadState =
@@ -16,30 +17,6 @@ type LoadState =
   | { status: 'loaded'; id: string; record: DecisionRecordData }
   | { status: 'notFound'; id: string }
   | { status: 'error'; id: string };
-
-function emptyDraft(): DecisionDraftData {
-  return {
-    title: '',
-    options: [emptyOption(), emptyOption()],
-  };
-}
-
-function emptyOption() {
-  return {
-    id: crypto.randomUUID(),
-    label: '',
-    weight: DECISION_LIMITS.weightDefault,
-    enabled: true,
-  };
-}
-
-function draftOf(record: DecisionRecordData): DecisionDraftData {
-  return {
-    category: record.decision.category,
-    options: record.decision.options.map((option) => ({ ...option })),
-    title: record.decision.title,
-  };
-}
 
 export default function DecisionBuilderPage() {
   const location = useLocation();
@@ -85,39 +62,26 @@ export default function DecisionBuilderPage() {
   }, [id, isNew, passedRecord, retryCount]);
 
   const pageTitle = isNew ? t('builderNewTitle') : t('builderEditTitle');
+  let pageContent: ReactNode;
 
   if (isNew) {
-    return (
-      <>
-        <title>{`${pageTitle} · ${t('title')}`}</title>
-        <DecisionForm initial={newInitial} key="new" />
-      </>
+    pageContent = <DecisionForm initial={newInitial} key="new" />;
+  } else if (passedRecord) {
+    pageContent = (
+      <DecisionForm
+        decisionId={id}
+        initial={draftOf(passedRecord)}
+        initialStatus="saved"
+        key={id}
+      />
     );
-  }
+  } else {
+    const currentLoad = loadState?.id === id ? loadState : undefined;
 
-  if (passedRecord) {
-    return (
-      <>
-        <title>{`${pageTitle} · ${t('title')}`}</title>
-        <DecisionForm
-          decisionId={id}
-          initial={draftOf(passedRecord)}
-          initialStatus="saved"
-          key={id}
-        />
-      </>
-    );
-  }
-
-  const currentLoad = loadState?.id === id ? loadState : undefined;
-  if (currentLoad?.status === 'notFound') {
-    return <NotFoundPage />;
-  }
-
-  if (currentLoad?.status === 'error') {
-    return (
-      <>
-        <title>{`${pageTitle} · ${t('title')}`}</title>
+    if (currentLoad?.status === 'notFound') {
+      pageContent = <NotFoundPage />;
+    } else if (currentLoad?.status === 'error') {
+      pageContent = (
         <main className={styles.screen}>
           <div className={styles.content}>
             <p className={styles.error}>{t('loadFailed')}</p>
@@ -131,27 +95,24 @@ export default function DecisionBuilderPage() {
             </Button>
           </div>
         </main>
-      </>
-    );
-  }
-
-  if (currentLoad?.status === 'loaded') {
-    return (
-      <>
-        <title>{`${pageTitle} · ${t('title')}`}</title>
-        <DecisionForm decisionId={id} initial={draftOf(currentLoad.record)} key={id} />
-      </>
-    );
+      );
+    } else if (currentLoad?.status === 'loaded') {
+      pageContent = <DecisionForm decisionId={id} initial={draftOf(currentLoad.record)} key={id} />;
+    } else {
+      pageContent = (
+        <main className={styles.screen}>
+          <div className={styles.content}>
+            <p className={styles.muted}>{t('loading')}</p>
+          </div>
+        </main>
+      );
+    }
   }
 
   return (
     <>
       <title>{`${pageTitle} · ${t('title')}`}</title>
-      <main className={styles.screen}>
-        <div className={styles.content}>
-          <p className={styles.muted}>{t('loading')}</p>
-        </div>
-      </main>
+      {pageContent}
     </>
   );
 }

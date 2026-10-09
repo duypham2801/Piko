@@ -1,12 +1,14 @@
 import { DECISION_LIMITS } from '@piko/domain';
+import { useRef } from 'react';
 import type { DecisionDraftData } from '@piko/domain';
 
 import Card from '../../components/ui/Card';
 import TextField from '../../components/ui/TextField';
 import { t } from '../../i18n';
+import { optionInputId } from './draft';
 import EmojiPicker from './EmojiPicker';
 import PriorityDots from './PriorityDots';
-import styles from './DecisionForm.module.css';
+import styles from './OptionRow.module.css';
 
 type Option = DecisionDraftData['options'][number];
 
@@ -33,22 +35,31 @@ export default function OptionRow({
   onToggleEmoji,
   onUpdate,
 }: OptionRowProps) {
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const emojiLabel = `${t('chooseEmoji')} ${index + 1}`;
+  const closeEmoji = () => {
+    onCloseEmoji();
+    triggerRef.current?.focus();
+  };
+
   return (
     <Card className={styles.optionCard} tone="surface">
       <div className={styles.optionMain}>
-        <EmojiPicker
-          emoji={option.emoji}
-          index={index}
-          open={open}
-          onChange={(emoji) => onUpdate((current) => ({ ...current, emoji }))}
-          onClose={onCloseEmoji}
-          onToggle={onToggleEmoji}
-        />
+        <button
+          aria-expanded={open}
+          aria-label={emojiLabel}
+          className={`${styles.trigger} ${option.emoji ? styles.hasEmoji : styles.empty}`}
+          ref={triggerRef}
+          type="button"
+          onClick={onToggleEmoji}
+        >
+          <span aria-hidden="true">{option.emoji ?? '+'}</span>
+        </button>
         <TextField
           className={styles.optionInput}
           error={error}
           hideLabel
-          id={`decision-option-${option.id}`}
+          id={optionInputId(option.id)}
           label={`${t('optionLabel')} ${index + 1}`}
           maxLength={DECISION_LIMITS.labelMaxLength}
           placeholder={t('optionPlaceholder')}
@@ -70,6 +81,14 @@ export default function OptionRow({
           <span aria-hidden="true">×</span>
         </button>
       </div>
+      {open && (
+        <EmojiPicker
+          emoji={option.emoji}
+          label={emojiLabel}
+          onChange={(emoji) => onUpdate((current) => ({ ...current, emoji }))}
+          onClose={closeEmoji}
+        />
+      )}
       <div className={styles.optionMeta}>
         <span>{t('priority')}</span>
         <PriorityDots

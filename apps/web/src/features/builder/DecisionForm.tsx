@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router';
 import { DECISION_LIMITS, DecisionDraft } from '@piko/domain';
-import type { DecisionDraftData, DecisionRecordData } from '@piko/domain';
+import type { DecisionDraftData } from '@piko/domain';
 
 import BackLink from '../../components/ui/BackLink';
 import Button from '../../components/ui/Button';
@@ -10,6 +10,7 @@ import { t } from '../../i18n';
 import { ApiClientError } from '../../lib/api/client';
 import { createDecision, updateDecision } from '../../lib/api/decisions';
 import CaseOpening from '../case-opening/CaseOpening';
+import { draftOf, emptyOption, optionInputId } from './draft';
 import { getFormErrors, type FormErrors } from './formErrors';
 import OptionRow from './OptionRow';
 import styles from './DecisionForm.module.css';
@@ -23,40 +24,6 @@ type DecisionFormProps = {
 };
 
 const emptyErrors: FormErrors = { options: {} };
-
-function draftOf(record: DecisionRecordData): DecisionDraftData {
-  return {
-    category: record.decision.category,
-    options: record.decision.options.map((option) => ({
-      enabled: option.enabled,
-      emoji: option.emoji,
-      id: option.id,
-      label: option.label,
-      weight: option.weight,
-    })),
-    title: record.decision.title,
-  };
-}
-
-function createEmptyOption() {
-  return {
-    id: crypto.randomUUID(),
-    label: '',
-    weight: DECISION_LIMITS.weightDefault,
-    enabled: true,
-  };
-}
-
-function errorMessages() {
-  return {
-    formInvalid: t('formInvalid'),
-    optionDuplicate: t('optionDuplicate'),
-    optionRequired: t('optionRequired'),
-    optionTooLong: t('optionTooLong'),
-    titleRequired: t('titleRequired'),
-    titleTooLong: t('titleTooLong'),
-  };
-}
 
 export default function DecisionForm({
   decisionId,
@@ -79,7 +46,7 @@ export default function DecisionForm({
       return emptyErrors;
     }
 
-    return getFormErrors(parsed.error.issues, draft, errorMessages());
+    return getFormErrors(parsed.error.issues, draft);
   }, [draft, parsed, submitted]);
 
   useEffect(() => {
@@ -130,7 +97,7 @@ export default function DecisionForm({
   const validateDraft = () => {
     setSubmitted(true);
     if (!parsed.success) {
-      const nextErrors = getFormErrors(parsed.error.issues, draft, errorMessages());
+      const nextErrors = getFormErrors(parsed.error.issues, draft);
       focusFirstInvalid(nextErrors);
       return null;
     }
@@ -199,7 +166,7 @@ export default function DecisionForm({
       return;
     }
 
-    const option = createEmptyOption();
+    const option = emptyOption();
     pendingFocusId.current = option.id;
     editDraft((current) => ({ ...current, options: [...current.options, option] }));
   };
@@ -309,8 +276,4 @@ export default function DecisionForm({
       </form>
     </main>
   );
-}
-
-function optionInputId(optionId: string) {
-  return `decision-option-${optionId}`;
 }

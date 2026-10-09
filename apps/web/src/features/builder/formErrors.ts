@@ -1,5 +1,7 @@
 import type { DecisionDraftData } from '@piko/domain';
 
+import { t } from '../../i18n';
+
 export type FormErrors = {
   title?: string;
   options: Record<string, string>;
@@ -15,14 +17,6 @@ type ValidationIssue = {
 export function getFormErrors(
   issues: readonly ValidationIssue[],
   state: DecisionDraftData,
-  messages: {
-    formInvalid: string;
-    optionDuplicate: string;
-    optionRequired: string;
-    optionTooLong: string;
-    titleRequired: string;
-    titleTooLong: string;
-  },
 ): FormErrors {
   let title: string | undefined;
   let form: string | undefined;
@@ -33,11 +27,11 @@ export function getFormErrors(
 
     if (first === 'title' && issue.path.length === 1) {
       if (issue.code === 'too_small') {
-        title = messages.titleRequired;
+        title = t('titleRequired');
       } else if (issue.code === 'too_big') {
-        title = messages.titleTooLong;
+        title = t('titleTooLong');
       } else {
-        form = messages.formInvalid;
+        form = t('formInvalid');
       }
       continue;
     }
@@ -50,19 +44,19 @@ export function getFormErrors(
     ) {
       const option = state.options[second];
       if (!option) {
-        form = messages.formInvalid;
+        form = t('formInvalid');
       } else if (issue.code === 'too_small') {
-        options[option.id] = messages.optionRequired;
+        options[option.id] = t('optionRequired');
       } else if (issue.code === 'too_big') {
-        options[option.id] = messages.optionTooLong;
+        options[option.id] = t('optionTooLong');
       } else {
-        form = messages.formInvalid;
+        form = t('formInvalid');
       }
       continue;
     }
 
     if (issue.message !== 'duplicate_option_label') {
-      form = messages.formInvalid;
+      form = t('formInvalid');
     }
   }
 
@@ -85,7 +79,7 @@ export function getFormErrors(
 
     for (const optionId of group) {
       if (!options[optionId]) {
-        options[optionId] = messages.optionDuplicate;
+        options[optionId] = t('optionDuplicate');
       }
     }
   }
