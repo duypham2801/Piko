@@ -36,7 +36,7 @@
 | 6-6 | Live viewing + interactions | ⏸ moved | Deferred to the Realtime phase (D-031) |
 | 7-1 | Navigation shell | ✅ (`7-1-fix-1.md`) | `7-1-navigation-shell.md`: layout route + screen shell (back link at one position), mobile top bar, desktop sidebar frame from `64rem`, focus mode on case screens, `/s/:id` outside; replaces the copied screen layouts (D-032) |
 | 7-2 | Sidebar lists + desktop Home | ✅ (`7-2-fix-1.md`) | "Của bạn" and "Gần đây" in the sidebar (reload on route change), Home drops both sections from `64rem` (D-032) |
-| 7-3 | Case overlay | 🔄 handoff `7-3-case-overlay.md` | The case opens as a modal overlay above the preview/builder (nested `/open` routes, full-screen on phones, × / Esc / Back to close), focus mode removed, plus the 7-2 carry-overs (C0) (D-033) |
+| 7-3 | Case overlay | 🔄 fix (`7-3-fix-1.md`) | The case opens as a modal overlay above the preview/builder (nested `/open` routes, full-screen on phones, × / Esc / Back to close), focus mode removed, plus the 7-2 carry-overs (C0) (D-033) |
 | 7-4 | Responsive pass | ⬜ | Every screen at 360 / 768 / 1024 / 1280 / 1920 after the overlay: carousel, winner reveal, CTAs, card grids, option layout |
 | 8 | Polish | ⬜ | States, micro-interactions, consistency |
 | 9 | First prod release | ⬜ | Deploy `v0.1.0` to VPS, verify backup/rollback |
@@ -738,6 +738,32 @@
     - At 1920 px the case stage (60rem) leaves half the screen empty.
   - **Owner:** instead of widening the stage, open the case as an overlay above the page (D-033), closed by × or `Esc` but not by a backdrop click.
   - Phase 7 becomes 7-3 (overlay + C0 fixes) and 7-4 (responsive pass after the overlay).
+- **7-3 review (2026-10-09):** reviewed `6f71ee3`, `13df3f0`, `68f2fe9` (13 files, +330/−248). `make check` passes (domain 48, api 41, 0 lint warnings); lockfile unchanged.
+  - **Browser:**
+    - **Opening:**
+      - Nested `/open` routes keep the preview mounted, and opening makes no second record GET.
+      - A deep link to `/decisions/<id>/open` shows the preview with the overlay; `/presets/nope/open` shows not-found.
+    - **Closing:**
+      - A backdrop click does nothing.
+      - `Esc` (also mid-spin), "×" and Back close the overlay.
+      - After "×", Back does not reopen it, and focus returns to "Mở case".
+    - **Builder:** the overlay opens above the form, and the draft survives.
+    - **Case behaviour:**
+      - "Đi thôi" makes one `POST /api/history`.
+      - Reduced motion reveals quickly.
+      - The revealed case fits 360×740.
+    - **C0:** the sidebar heading gap and the short-list placement are fixed. The panel is 86.6 / 95.8 px against a 96 px reserve.
+  - **MUST:**
+    - Closing the nested share `Sheet` (`Esc` or "Đóng") also closes the case overlay. React propagates the synthetic `close` event to the parent dialog's `onClose`, which navigates back, and the revealed result is lost.
+    - At 360 px the "×" overlaps a long title (`1fr auto 1fr` header).
+  - **SHOULD:**
+    - From `48rem` the dialog always takes its full `max-height`, because the phone's `height: 100dvh` is not reset.
+    - Initial focus lands on "×", because `showModal()` runs after React's `autoFocus`.
+    - The "×" glyph is tiny.
+  - **DO NOT TOUCH:**
+    - `if (!id) return null` / `if (!preset) return null` in the case pages (unreachable guards for the type checker)
+    - the case pages no longer set `<title>` (the preview's title is the same)
+  - → `7-3-fix-1.md`.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
