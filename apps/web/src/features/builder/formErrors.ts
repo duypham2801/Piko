@@ -1,6 +1,7 @@
 import type { DecisionDraftData } from '@piko/domain';
 
 import { t } from '../../i18n';
+import { normalizeLabel } from './draft';
 
 export type FormErrors = {
   title?: string;
@@ -54,7 +55,7 @@ export function getFormErrors(
 
   const duplicateGroups = new Map<string, string[]>();
   for (const option of state.options) {
-    const normalized = option.label.normalize('NFC').trim().toLocaleLowerCase('vi');
+    const normalized = normalizeLabel(option.label);
     if (!normalized) {
       continue;
     }

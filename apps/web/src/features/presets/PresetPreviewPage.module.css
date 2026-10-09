@@ -1,0 +1,14 @@
+.customize {
+  display: inline-flex;
+  min-height: var(--tap-target-min);
+  align-items: center;
+  justify-self: center;
+  padding: var(--space-2) var(--space-3);
+  color: var(--color-text-accent);
+  font-weight: var(--font-weight-bold);
+  text-decoration: none;
+}
+
+.customize:hover {
+  text-decoration: underline;
+}

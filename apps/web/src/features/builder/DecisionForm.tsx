@@ -11,6 +11,10 @@ import { ApiClientError } from '../../lib/api/client';
 import { createDecision, updateDecision } from '../../lib/api/decisions';
 import CaseOpening from '../case-opening/CaseOpening';
 import { draftOf, emptyOption, optionInputId } from './draft';
+import ExistingOptionsPanel, {
+  existingOptionsPanelId,
+  existingOptionsToggleId,
+} from './ExistingOptionsPanel';
 import { getFormErrors, type FormErrors } from './formErrors';
 import OptionRow from './OptionRow';
 import styles from './DecisionForm.module.css';
@@ -18,13 +22,14 @@ import styles from './DecisionForm.module.css';
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'limitError' | 'saveError';
 
 type DecisionFormProps = {
+  backTo?: string;
   decisionId?: string;
   initial: DecisionDraftData;
 };
 
 const emptyErrors: FormErrors = { options: {} };
 
-export default function DecisionForm({ decisionId, initial }: DecisionFormProps) {
+export default function DecisionForm({ backTo, decisionId, initial }: DecisionFormProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -32,8 +37,14 @@ export default function DecisionForm({ decisionId, initial }: DecisionFormProps)
   const [submitted, setSubmitted] = useState(false);
   const [status, setStatus] = useState<SaveStatus>('idle');
   const [openEmojiId, setOpenEmojiId] = useState<string | null>(null);
+  const [existingOpen, setExistingOpen] = useState(false);
   const pendingFocusId = useRef<string | null>(null);
   const isCaseView = searchParams.get('view') === 'case';
+  const caseBackSearchParams = new URLSearchParams(searchParams);
+  caseBackSearchParams.delete('view');
+  const caseBackTo = `${location.pathname}${
+    caseBackSearchParams.toString() ? `?${caseBackSearchParams.toString()}` : ''
+  }`;
   const parsed = useMemo(() => DecisionDraft.safeParse(draft), [draft]);
   const caseOptions = useMemo(() => (parsed.success ? parsed.data.options : []), [parsed]);
   const errors = useMemo(() => {
@@ -73,6 +84,11 @@ export default function DecisionForm({ decisionId, initial }: DecisionFormProps)
     setStatus((current) =>
       current === 'saved' || current === 'limitError' || current === 'saveError' ? 'idle' : current,
     );
+  };
+
+  const closeExisting = () => {
+    setExistingOpen(false);
+    document.getElementById(existingOptionsToggleId)?.focus();
   };
 
   const focusFirstInvalid = (nextErrors: FormErrors) => {
@@ -199,15 +215,15 @@ export default function DecisionForm({ decisionId, initial }: DecisionFormProps)
     status === 'limitError' || status === 'saveError' || (submitted && !parsed.success);
 
   if (isCaseView && parsed.success) {
-    return (
-      <CaseOpening backTo={location.pathname} options={caseOptions} title={parsed.data.title} />
-    );
+    return <CaseOpening backTo={caseBackTo} options={caseOptions} title={parsed.data.title} />;
   }
 
   return (
     <main className={styles.screen}>
       <form className={styles.content} onSubmit={handleSave}>
-        <BackLink to={decisionId ? `/decisions/${decisionId}` : '/'}>{t('back')}</BackLink>
+        <BackLink to={backTo ?? (decisionId ? `/decisions/${decisionId}` : '/')}>
+          {t('back')}
+        </BackLink>
         <h1>{decisionId ? t('builderEditTitle') : t('builderNewTitle')}</h1>
 
         <TextField
@@ -233,9 +249,10 @@ export default function DecisionForm({ decisionId, initial }: DecisionFormProps)
                   optionCount={draft.options.length}
                   onCloseEmoji={() => setOpenEmojiId(null)}
                   onRemove={() => removeOption(index)}
-                  onToggleEmoji={() =>
-                    setOpenEmojiId((current) => (current === option.id ? null : option.id))
-                  }
+                  onToggleEmoji={() => {
+                    setExistingOpen(false);
+                    setOpenEmojiId((current) => (current === option.id ? null : option.id));
+                  }}
                   onUpdate={(update) => updateOption(option.id, update)}
                 />
               </li>
@@ -243,15 +260,37 @@ export default function DecisionForm({ decisionId, initial }: DecisionFormProps)
           </ul>
         </section>
 
-        <Button
-          disabled={draft.options.length >= DECISION_LIMITS.maxOptions}
-          variant="outline"
-          onClick={addOption}
-        >
-          {t('addOption')}
-        </Button>
+        <div className={styles.optionActions}>
+          <Button
+            disabled={draft.options.length >= DECISION_LIMITS.maxOptions}
+            variant="outline"
+            onClick={addOption}
+          >
+            {t('addOption')}
+          </Button>
+          <Button
+            aria-controls={existingOptionsPanelId}
+            aria-expanded={existingOpen}
+            id={existingOptionsToggleId}
+            variant="outline"
+            onClick={() => {
+              setOpenEmojiId(null);
+              setExistingOpen((current) => !current);
+            }}
+          >
+            {t('addFromExisting')}
+          </Button>
+        </div>
         {draft.options.length >= DECISION_LIMITS.maxOptions && (
           <p className={styles.hint}>{t('maxOptionsHint')}</p>
+        )}
+        {existingOpen && (
+          <ExistingOptionsPanel
+            decisionId={decisionId}
+            draft={draft}
+            onClose={closeExisting}
+            onEditDraft={editDraft}
+          />
         )}
 
         <div className={styles.actionBar}>

@@ -1,23 +1,36 @@
 import { useMemo, type ReactNode } from 'react';
-import { useLocation, useParams } from 'react-router';
+import { useLocation, useParams, useSearchParams } from 'react-router';
 
 import { t } from '../../i18n';
 import DecisionLoadState from '../decisions/DecisionLoadState';
 import { useDecisionRecord } from '../decisions/useDecisionRecord';
+import { findPreset } from '../presets/presets';
 import DecisionForm from './DecisionForm';
-import { draftOf, emptyDraft } from './draft';
+import { draftFromPreset, draftOf, emptyDraft } from './draft';
 
 export default function DecisionBuilderPage() {
   const location = useLocation();
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
   const isNew = location.pathname === '/decisions/new';
   const recordState = useDecisionRecord(isNew ? undefined : id);
-  const newInitial = useMemo(() => emptyDraft(), []);
+  const presetSlug = searchParams.get('from') ?? undefined;
+  const preset = findPreset(presetSlug);
+  const newInitial = useMemo(() => {
+    const fromPreset = findPreset(presetSlug);
+    return fromPreset ? draftFromPreset(fromPreset) : emptyDraft();
+  }, [presetSlug]);
   const pageTitle = isNew ? t('builderNewTitle') : t('builderEditTitle');
   let pageContent: ReactNode;
 
   if (isNew) {
-    pageContent = <DecisionForm initial={newInitial} key="new" />;
+    pageContent = (
+      <DecisionForm
+        backTo={preset ? `/presets/${preset.slug}` : '/'}
+        initial={newInitial}
+        key={preset ? `new:${preset.slug}` : 'new'}
+      />
+    );
   } else if (recordState.status === 'loaded') {
     pageContent = <DecisionForm decisionId={id} initial={draftOf(recordState.record)} key={id} />;
   } else {

@@ -54,6 +54,9 @@ export const vi = {
   cancel: 'Hủy',
   deleting: 'Đang xóa…',
   deleteFailed: 'Chưa xóa được. Thử lại sau.',
+  customize: 'Tùy chỉnh',
+  addFromExisting: 'Thêm từ có sẵn',
+  done: 'Xong',
 } as const;
 
 export type TranslationKey = keyof typeof vi;

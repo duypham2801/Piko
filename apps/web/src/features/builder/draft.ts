@@ -1,5 +1,7 @@
 import { DECISION_LIMITS } from '@piko/domain';
-import type { DecisionDraftData, DecisionRecordData } from '@piko/domain';
+import type { DecisionDraftData, DecisionOptionData, DecisionRecordData } from '@piko/domain';
+
+import type { Preset } from '../presets/presets';
 
 export function emptyOption(): DecisionDraftData['options'][number] {
   return {
@@ -14,6 +16,52 @@ export function emptyDraft(): DecisionDraftData {
   return {
     title: '',
     options: [emptyOption(), emptyOption()],
+  };
+}
+
+export function normalizeLabel(label: string): string {
+  return label.normalize('NFC').trim().toLocaleLowerCase('vi');
+}
+
+export function draftFromPreset(preset: Preset): DecisionDraftData {
+  return {
+    options: preset.decision.options.map((option) => ({
+      enabled: true,
+      emoji: option.emoji,
+      id: crypto.randomUUID(),
+      label: option.label,
+      weight: DECISION_LIMITS.weightDefault,
+    })),
+    title: preset.decision.title,
+  };
+}
+
+export function withCopiedOption(
+  draft: DecisionDraftData,
+  source: Pick<DecisionOptionData, 'label' | 'emoji'>,
+): DecisionDraftData {
+  const emptyIndex = draft.options.findIndex((option) => !option.label.trim() && !option.emoji);
+  if (emptyIndex >= 0) {
+    return {
+      ...draft,
+      options: draft.options.map((option, index) =>
+        index === emptyIndex ? { ...option, emoji: source.emoji, label: source.label } : option,
+      ),
+    };
+  }
+
+  return {
+    ...draft,
+    options: [
+      ...draft.options,
+      {
+        enabled: true,
+        emoji: source.emoji,
+        id: crypto.randomUUID(),
+        label: source.label,
+        weight: DECISION_LIMITS.weightDefault,
+      },
+    ],
   };
 }
 
