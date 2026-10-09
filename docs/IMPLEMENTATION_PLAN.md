@@ -1,7 +1,7 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 7 — Responsive pass + navigation shell (kickoff done, D-032). Next task: 7-2. Phase 6 merged into `main` on 2026-10-09; live viewing moved to the Realtime phase (D-031).
+- **Current phase:** Phase 7 — Responsive pass + navigation shell (kickoff done, D-032). Next task: 7-3. Phase 6 merged into `main` on 2026-10-09; live viewing moved to the Realtime phase (D-031).
 - **Integration branch:** `feat/phase-7-responsive`
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`); Phase 4 (4-1, 4-2: router, Home, presets, preview, merged into `main`); Phase 5 (5-1…5-4: decisions API, builder, saved decisions, reuse options, merged into `main`)
 
@@ -35,7 +35,7 @@
 | 6-5b | Shared links list + revoke | ✅ (`6-5b-fix-1.md`) | `6-5b-shared-links.md`: "Link đã chia sẻ" in `/history` (title → `/s/:id`, winner, expiry) with an inline revoke confirm; `Button variant="danger"` (D-030) |
 | 6-6 | Live viewing + interactions | ⏸ moved | Deferred to the Realtime phase (D-031) |
 | 7-1 | Navigation shell | ✅ (`7-1-fix-1.md`) | `7-1-navigation-shell.md`: layout route + screen shell (back link at one position), mobile top bar, desktop sidebar frame from `64rem`, focus mode on case screens, `/s/:id` outside; replaces the copied screen layouts (D-032) |
-| 7-2 | Sidebar lists + desktop Home | 🔄 fix (`7-2-fix-1.md`) | "Của bạn" and "Gần đây" in the sidebar (reload on route change), Home drops both sections from `64rem` (D-032) |
+| 7-2 | Sidebar lists + desktop Home | ✅ (`7-2-fix-1.md`) | "Của bạn" and "Gần đây" in the sidebar (reload on route change), Home drops both sections from `64rem` (D-032) |
 | 7-3 | Responsive pass | ⬜ | Every screen at 360 / 768 / 1024 / 1280 / 1920: carousel, winner reveal, CTAs, card grids, option layout |
 | 8 | Polish | ⬜ | States, micro-interactions, consistency |
 | 9 | First prod release | ⬜ | Deploy `v0.1.0` to VPS, verify backup/rollback |
@@ -721,6 +721,14 @@
     - "Xem tất cả" next to the nav's "Lịch sử" (D-032)
     - `RecentSection` returning `null` before its first load
   - → `7-2-fix-1.md`.
+- **7-2-fix-1 (2026-10-09):** verified (`18451c7`, 5 files, +33/−32). `make check` passes (domain 48, api 41) with **0 lint warnings**; lockfile unchanged.
+  - **Browser:**
+    - With 20 saved decisions at 1280×800 and 1024×700, only the "Của bạn" `<ul>` scrolls (956/433 px); the heading stays put and "Gần đây" stays visible.
+    - Every nav element has `scrollWidth === clientWidth`, and the long title ends in "…".
+  - `historyEntryHref` lives in its own module; the redundant `aria-label` and server snapshot are gone.
+  - **SHOULD (carried into 7-3 as C0):** the "Của bạn" `<h2>` lost its bottom spacing, because only the "Gần đây" header got `margin-bottom`. The heading now touches the list and the empty line.
+  - **NICE (carried into 7-3 as C0):** `.list > li { min-width: 0 }` is redundant with `minmax(0, 1fr)`.
+  - **7-2 accepted.** Fast-forwarded into `feat/phase-7-responsive`.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
