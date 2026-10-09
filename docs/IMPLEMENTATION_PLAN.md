@@ -1,7 +1,7 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 6 — Result, history, share, live viewing (6-1 done; 6-2 in review → 6-2-fix-1)
+- **Current phase:** Phase 6 — Result, history, share, live viewing (6-1 done; 6-2 in review → 6-2-fix-2)
 - **Integration branch:** `feat/phase-6-result-history`
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`); Phase 4 (4-1, 4-2: router, Home, presets, preview, merged into `main`); Phase 5 (5-1…5-4: decisions API, builder, saved decisions, reuse options, merged into `main`)
 
@@ -536,6 +536,13 @@
     - after saving, both "Đã lưu" (button) and "Đã lưu vào lịch sử." (line) show
   - **DO NOT TOUCH:** `withSession` moved to `session.ts`; the save is not blocked by other actions; stale responses are ignored via a request counter.
   - → `6-2-fix-1.md`.
+- **6-2-fix-1 (2026-10-09):** verified (`a99f7a9`, 4 files).
+  - The spin options now travel in the case-opening state with `plan`/`result`; `spinOptionsRef` is gone; one `excludeOptions` helper.
+  - `make check` passes (domain 48, api 27). The browser re-run at 360/390/1280 px and the blocked-save flow give the same results as 6-2.
+  - **Owner visual review:** two copy changes.
+    - The hint with two left reads "Chỉ còn 2 lựa chọn cuối." (new key; the preview keeps `minOptionsHint`).
+    - The success line is visually hidden but kept in the live region, so the "Đã lưu" button is the only visible confirmation.
+  - → `6-2-fix-2.md`.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
