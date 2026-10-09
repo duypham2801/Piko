@@ -394,7 +394,7 @@ Format: Decision · Reason · Alternatives · Tradeoffs · Phase/Date
   - The link id is a random UUID (unguessable). Delivery uses the Web Share API, with a copy-to-clipboard fallback (default).
   - Replay uses the current `ANIMATION_PLAN_DEFAULTS`. The winner is guaranteed by the seed and the algorithm tag, but the strip can differ slightly if the defaults change between sharing and viewing. Accepted.
   - Links are deleted with their user (cascade).
-- **Live viewing (owner): viewers of `/s/:id` watch the sharer's spins in real time, and can interact.**
+- **Live viewing (owner): viewers of `/s/:id` watch the sharer's spins in real time, and can interact.** _Deferred to the Realtime phase by D-031._
   - **Exception to CLAUDE.md rule 9, approved by the owner.** Couple/Squad stay locked; this is a solo spin with an audience.
   - Mechanism: the result is deterministic (D-005), so no video is streamed.
     - When the sharer spins, the server forwards a small event (seed, candidates, start time) to the viewers.
@@ -434,3 +434,24 @@ Format: Decision · Reason · Alternatives · Tradeoffs · Phase/Date
 
   The data model is designed for live viewing from the start, so nothing is rebuilt.
 - **Phase:** 6 · 2026-10-09 · approved by user (history on accept, history UI, "Không phải hôm nay", share as public link with replay and option list, lifetime and revoke, live viewing with interaction, SSE + POST, task order); default (snapshot shape, server re-check, limits, delivery, `ON DELETE SET NULL`)
+
+## D-031 — Live viewing deferred to a Realtime phase with Couple/Squad
+- **Choice (owner):** task 6-6 (live viewing of shared links with interactions, D-030) is **not** built in Phase 6.
+  - Phase 6 ends at 6-5b: result actions, history, share links with replay and "Tự quay thử", revoke.
+  - Live viewing moves to a **Realtime phase after the first release `v0.1.0`**. That phase designs one realtime model for both live viewing and Couple/Squad:
+    - rooms
+    - presence
+    - viewer and participant identity
+    - interactions and anti-spam
+    - server-ordered, server-authoritative spins (D-017 "future")
+- **Reason:**
+  - Couple/Squad need the same mechanism: every screen replays the same seeded spin from a small event.
+  - Designing it twice, first one-way for an audience and then again for groups, risks rework. Guessing group requirements now would be a premature abstraction.
+  - Shipping Solo + share links first keeps the path to `v0.1.0` short.
+- **Unchanged from D-030:**
+  - **Transport direction:** SSE + POST, no LiveKit/WebRTC. It is revisited at the Realtime kickoff together with the group requirements.
+  - **Rule 9:** the CLAUDE.md exception for live viewing stays approved; Couple/Squad still need their own approval.
+  - **Data model:** `shared_cases.result`/`spun_at` and `POST /api/shares/:id/spins` (recorded at spin start) stay as they are.
+- **Known gap until then:** spin records are fire-and-forget, so two quick spins can reach the server out of order. That is harmless without live viewing, but the Realtime phase must order spins.
+- **Phase:** 6 · 2026-10-09 · approved by user
+
