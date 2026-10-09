@@ -1,7 +1,7 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 5 — Decision builder (5-1, 5-2 done; 5-3 handed off)
+- **Current phase:** Phase 5 — Decision builder (5-1, 5-2, 5-3 done; 5-4 next)
 - **Integration branch:** `feat/phase-5-builder`
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`); Phase 4 (4-1, 4-2: router, Home, presets, preview, merged into `main`)
 
@@ -25,7 +25,7 @@
 | 4-2 | Preset preview | ✅ done (`4-2-fix-1.md`, `89fe5cc`) | `4-2-preset-preview.md`: includes the 4-1 clean-up (C0) and a `BackLink` primitive. Preview screen with option switches, `?off=` in the URL, case moves to `/presets/:slug/open` (D-028) |
 | 5-1 | Decisions API | ✅ done (`5-1-fix-1.md`, `5-1-fix-2.md`, `60387fc`) | `5-1-decisions-api.md`: `decisions` table (options as JSONB), CRUD routes requiring a session, ownership, 100 per user, PGlite service tests (D-029) |
 | 5-2 | Builder screen | ✅ done (`5-2-fix-1.md`, `ea973cf`) | `/decisions/new` and `/decisions/:id/edit`: title, options (add/edit/remove), emoji picker, priority dots, shared schema validation, explicit Save, non-blocking save error (D-029) |
-| 5-3 | Saved decisions | 🔧 fix-1 handed off (`5-3-saved-decisions.md`, `5-3-fix-1.md`) | `/decisions/:id` preview (Sửa/Xóa with inline confirm) + `/open` case, Home "Của bạn" (create card + saved cards), a create lands on the preview. Shared `features/preview/` (preview, `?off=` helpers) used by presets too; `useDecisionRecord` shows the state record, then refetches (D-029) |
+| 5-3 | Saved decisions | ✅ done (`5-3-fix-1.md`, `58e5f14`) | `/decisions/:id` preview (Sửa/Xóa with inline confirm) + `/open` case, Home "Của bạn" (create card + saved cards), a create lands on the preview. Shared `features/preview/` (preview, `?off=` helpers) used by presets too; `useDecisionRecord` shows the state record, then refetches (D-029) |
 | 5-4 | Reuse existing options | ⬜ | Preset "Tùy chỉnh" (`/decisions/new?from=<slug>`) and builder "Thêm từ có sẵn", which copies options from presets/saved decisions (D-029) |
 | 6 | Result + history | ⬜ | Winner reveal, Let's Go / Spin Again / Not Tonight / Share, history; adds Home "Recent decisions" (D-028) |
 | 7 | Responsive pass | ⬜ | Desktop is not in the mockup and must be designed |
@@ -419,6 +419,16 @@
     - F3: `initialStatus` in `DecisionForm` is dead
     - F4: the Home map destructures the record and then rebuilds it
     - F5: preview rows without an emoji keep an empty grid column, so the labels are indented by one gap
+
+- **5-3-fix-1 (2026-10-09):** verified against the diff (`82df9a8` revert, `58e5f14`).
+  - `features/case-opening` is identical to `feat/phase-5-builder`.
+  - `useDecisionRecord`:
+    - errors are stored without a closure
+    - the fetch effect depends on `id` + retry only, and the state record is read through a ref
+    - the report shows 1 `GET` before and after a builder save
+  - `initialStatus` is gone. The Home map passes the record as is. Preview rows without an emoji drop the empty column (`data-no-emoji`).
+  - Architect re-check: `make check` passes. The full Chrome flow passes again: create → preview → off → case → Back → edit → Back shows the edited title → delete → Home.
+  - **5-3 accepted.** Fast-forwarded into `feat/phase-5-builder`.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
