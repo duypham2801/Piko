@@ -38,34 +38,6 @@
   align-items: center;
 }
 
-.confirmDelete {
-  display: inline-flex;
-  min-height: var(--tap-target-min);
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-2) var(--space-4);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-danger);
-  box-shadow: var(--shadow-chunky-sm);
-  color: var(--color-on-primary);
-  cursor: pointer;
-  font-weight: var(--font-weight-bold);
-  transition: transform var(--duration-fast) var(--ease-standard);
-}
-
-.confirmDelete:active:not(:disabled) {
-  transform: translateY(var(--shadow-offset-sm));
-  box-shadow: none;
-}
-
-.confirmDelete:disabled {
-  background: var(--color-disabled-bg);
-  color: var(--color-disabled-text);
-  box-shadow: none;
-  cursor: not-allowed;
-}
-
 .deleteError {
   color: var(--color-danger);
   font-size: var(--text-sm);

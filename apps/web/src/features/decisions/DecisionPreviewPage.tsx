@@ -40,7 +40,7 @@ export default function DecisionPreviewPage() {
   const { record } = recordState;
   const { decision } = record;
 
-  const confirmDelete = async () => {
+  const handleDelete = async () => {
     setDeleting(true);
     setDeleteError(false);
     try {
@@ -68,15 +68,14 @@ export default function DecisionPreviewPage() {
         >
           {t('cancel')}
         </Button>
-        <button
-          className={styles.confirmDelete}
+        <Button
           disabled={deleting}
           id={deleteButtonId}
-          type="button"
-          onClick={() => void confirmDelete()}
+          variant="danger"
+          onClick={() => void handleDelete()}
         >
           {deleting ? t('deleting') : t('delete')}
-        </button>
+        </Button>
       </div>
       {deleteError && (
         <p className={styles.deleteError} role="alert">
