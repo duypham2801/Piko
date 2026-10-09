@@ -1,7 +1,7 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 6 — Result, history, share, live viewing (6-1…6-4 done; 6-5 next)
+- **Current phase:** Phase 6 — Result, history, share, live viewing (6-1…6-4 done; 6-5a next)
 - **Integration branch:** `feat/phase-6-result-history`
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`); Phase 4 (4-1, 4-2: router, Home, presets, preview, merged into `main`); Phase 5 (5-1…5-4: decisions API, builder, saved decisions, reuse options, merged into `main`)
 
@@ -31,7 +31,8 @@
 | 6-2 | Result actions | ✅ (`6-2-fix-1.md`, `6-2-fix-2.md`) | `6-2-result-actions.md`: "Đi thôi" (save to history, best-effort), "Mở lại", "Không phải hôm nay" (exclude and respin), on every case screen (D-030) |
 | 6-3 | History UI | ✅ (`6-3-fix-1.md`) | `6-3-history-ui.md`: Home "Gần đây" (5 newest) + `/history` (D-028, D-030) |
 | 6-4 | Shares API | ✅ (`6-4-fix-1.md`) | `6-4-shares-api.md`: `shared_cases` table, owner routes (create with lifetime, list, revoke, record a spin), public read route without a session (D-030) |
-| 6-5 | Share UI + public page | ⬜ | "Chia sẻ" dialog (lifetime, Web Share / copy), `/s/:id` (options, replay, "Tự quay thử"), "Link đã chia sẻ" with revoke in `/history` (D-030) |
+| 6-5a | Share UI + public page | ⬜ | `6-5a-share-ui.md`: "Chia sẻ" dialog (lifetime, Web Share / copy), later spins recorded, `/s/:id` (options, replay, "Tự quay thử", unavailable page) with no session bootstrap; extracts `Sheet` and `WinnerPanel` (D-030) |
+| 6-5b | Shared links list + revoke | ⬜ | "Link đã chia sẻ" with revoke in `/history` (D-030) |
 | 6-6 | Live viewing + interactions | ⬜ | SSE + POST, in-memory pub/sub; interaction kinds and viewer identity decided at kickoff (D-030) |
 | 7 | Responsive pass + navigation shell | ⬜ | Desktop is not in the mockup and must be designed. **First task: a navigation shell** (owner, 2026-10-09):<br>- a desktop sidebar holding "Của bạn" and "Gần đây"<br>- a mobile navigation pattern (top bar, drawer or bottom tabs), chosen at kickoff<br>- the shared screen shell with the back link at the same position on every screen<br>- the public `/s/:id` page stays outside the shell |
 | 8 | Polish | ⬜ | States, micro-interactions, consistency |
@@ -587,6 +588,10 @@
   - `getPublicShare` returns `null`; the public handler sets `Cache-Control` once and has no `try`/`catch`. Dev: 404 with `no-store`, no cookie.
   - The public route keeps an inline `z.uuid()` check, because it must answer 404 itself instead of throwing. Accepted.
   - **6-4 accepted.**
+
+- **6-5 kickoff (2026-10-09):** split into 6-5a (share dialog, recording later spins, public `/s/:id`) and 6-5b (shared links list + revoke), owner approved. Handoff `6-5a-share-ui.md`.
+  - Architect defaults: the app-wide `ensureSession()` effect moves into a `SessionLayout` route so `/s/:id` never bootstraps a session; spins after sharing are recorded at spin start (best-effort, silent); the public page lists enabled options only, keeps the real shared result visible next to local "Tự quay thử" spins, and sets `noindex`.
+  - Reuse boundary reached: a second modal, so `ExistingOptionsPanel`'s dialog shell becomes `components/ui/Sheet`; the winner card becomes `WinnerPanel` for the case screen and the public page.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
