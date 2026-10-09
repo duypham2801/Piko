@@ -1,7 +1,7 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 6 — Result, history, share, live viewing (6-1 done; 6-2 next)
+- **Current phase:** Phase 6 — Result, history, share, live viewing (6-1 done; 6-2 in review → 6-2-fix-1)
 - **Integration branch:** `feat/phase-6-result-history`
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`); Phase 4 (4-1, 4-2: router, Home, presets, preview, merged into `main`); Phase 5 (5-1…5-4: decisions API, builder, saved decisions, reuse options, merged into `main`)
 
@@ -520,6 +520,22 @@
   - `match.test.ts` has a real candidate mismatch (two options still enabled) plus a separate test for the throw path.
   - The redundant route test and the irrelevant assertion are gone; the test helper uses `HistorySourceInputData`.
   - **6-1 accepted.**
+- **6-2 (2026-10-09):** reviewed the two implementer commits (rebased onto the review docs) (10 files, +252/−50). `make check` passes (domain 48, api 27); lockfile unchanged; literal gate empty.
+  - **Browser (headless Chrome, reduced motion):**
+    - at 360, 390 and 1280 px: "Mở case" → "Không phải hôm nay" down to two candidates (button disabled, hint shown) → "Mở lại" keeps the exclusions → "Đi thôi" → `201`
+    - with `?off=0` the snapshot has option 0 `enabled: false`
+    - no horizontal scroll
+    - a blocked `/api/history` request shows the error with every action still enabled; a new spin clears it; a retry saves
+  - **SHOULD:** the spin options live in a separate `spinOptionsRef` that each `open` caller must set. They should travel with `plan`/`result` in the state machine.
+  - **NICE:**
+    - the exclusion mapping is written twice
+    - the status line has `min-height: --tap-target-min` plus an `:empty` reset
+    - `spinAgain` also handles "Mở case"
+  - **For the owner's visual review (copy, not fixed):**
+    - the hint "Cần ít nhất 2 lựa chọn." when two remain
+    - after saving, both "Đã lưu" (button) and "Đã lưu vào lịch sử." (line) show
+  - **DO NOT TOUCH:** `withSession` moved to `session.ts`; the save is not blocked by other actions; stale responses are ignored via a request counter.
+  - → `6-2-fix-1.md`.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
