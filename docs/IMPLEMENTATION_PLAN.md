@@ -1,7 +1,7 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 5 — Decision builder (5-1, 5-2 done; 5-3 next)
+- **Current phase:** Phase 5 — Decision builder (5-1, 5-2 done; 5-3 handed off)
 - **Integration branch:** `feat/phase-5-builder`
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`); Phase 4 (4-1, 4-2: router, Home, presets, preview, merged into `main`)
 
@@ -25,7 +25,8 @@
 | 4-2 | Preset preview | ✅ done (`4-2-fix-1.md`, `89fe5cc`) | `4-2-preset-preview.md`: includes the 4-1 clean-up (C0) and a `BackLink` primitive. Preview screen with option switches, `?off=` in the URL, case moves to `/presets/:slug/open` (D-028) |
 | 5-1 | Decisions API | ✅ done (`5-1-fix-1.md`, `5-1-fix-2.md`, `60387fc`) | `5-1-decisions-api.md`: `decisions` table (options as JSONB), CRUD routes requiring a session, ownership, 100 per user, PGlite service tests (D-029) |
 | 5-2 | Builder screen | ✅ done (`5-2-fix-1.md`, `ea973cf`) | `/decisions/new` and `/decisions/:id/edit`: title, options (add/edit/remove), emoji picker, priority dots, shared schema validation, explicit Save, non-blocking save error (D-029) |
-| 5-3 | Saved decisions | ⬜ | `/decisions/:id` preview + `/open` case, Home "Của bạn" section + "Tạo quyết định", delete with confirm, preset "Tùy chỉnh", builder "Thêm từ có sẵn" (copy options from presets/saved decisions); the post-create target moves from `/edit` to the preview; `DELETE` client (D-028, D-029) |
+| 5-3 | Saved decisions | 🔧 handed off (`5-3-saved-decisions.md`) | `/decisions/:id` preview (Sửa/Xóa with inline confirm) + `/open` case, Home "Của bạn" (create card + saved cards), a create lands on the preview. Shared `features/preview/` (preview, `?off=` helpers) used by presets too; `useDecisionRecord` shows the state record, then refetches (D-029) |
+| 5-4 | Reuse existing options | ⬜ | Preset "Tùy chỉnh" (`/decisions/new?from=<slug>`) and builder "Thêm từ có sẵn", which copies options from presets/saved decisions (D-029) |
 | 6 | Result + history | ⬜ | Winner reveal, Let's Go / Spin Again / Not Tonight / Share, history; adds Home "Recent decisions" (D-028) |
 | 7 | Responsive pass | ⬜ | Desktop is not in the mockup and must be designed |
 | 8 | Polish | ⬜ | States, micro-interactions, consistency |
@@ -390,6 +391,13 @@
   - The report gives a prod main JS of 100.60 kB gz.
   - NICE, folded into 5-3: `FormErrors.form` is computed but never read, because the status line derives "form invalid" from `parsed.success`. Remove the field and its branches.
   - **5-2 accepted.** Fast-forwarded into `feat/phase-5-builder`.
+
+- **5-3 handoff (2026-10-09):** the owner agreed to split the end of Phase 5 into 5-3 (saved decisions) and 5-4 (preset "Tùy chỉnh" + "Thêm từ có sẵn").
+  - Architect defaults:
+    - the preset preview/case UI is extracted once (`features/preview/`) and reused, not copied
+    - saved-decision pages show the router-state record at once and always refetch, so they are never stale after Back and still work offline (rule 5)
+    - delete uses an inline confirm row, not a dialog
+    - Home "Của bạn" starts with a dashed "Tạo quyết định" card in the same grid
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.

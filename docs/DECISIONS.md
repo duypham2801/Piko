@@ -321,6 +321,13 @@ Format: Decision · Reason · Alternatives · Tradeoffs · Phase/Date
   - Labels already in the draft are shown as added, and the limit of 20 still applies.
   - There is no model change.
   - Rejected for now: an option that points to another decision (chained cases), which needs a model change and loop handling. It is a post-MVP idea.
+- **Saved decisions UI (5-3, default):**
+  - Home "Của bạn" is a grid. Its first card is a dashed "Tạo quyết định" card, followed by the saved decisions, most recently updated first.
+    - While loading, or when the list is empty, only the create card shows.
+    - A load error shows a muted message and never blocks Home.
+  - `/decisions/:id` reuses the preset preview (switches, `?off=`), plus "Sửa" and "Xóa".
+    - Delete asks for confirmation in an inline row ("Xóa quyết định này?" Hủy / Xóa), then returns to Home.
+  - A saved-decision page renders the record passed in the router state at once, then always refetches it. A 404 means Not found. Other errors keep the state record, so the page works offline.
 - **Storage (default):**
   - One new table `decisions`: `id`, `user_id` (FK → `users`, cascade delete), `title`, `category` (nullable), `options` (**JSONB**, the validated option array in order), `created_at`, `updated_at`; index on `(user_id, updated_at)`.
   - Options are a JSONB column, not a separate table: they are always read and written together with their decision, there are at most 20, and a PUT replaces them atomically. History (Phase 6) will store a snapshot of the labels, so it does not need a foreign key to each option.
