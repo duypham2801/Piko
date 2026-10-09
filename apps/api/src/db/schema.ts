@@ -69,10 +69,29 @@ export const decisionSessions = pgTable(
   ],
 );
 
+export const sharedCases = pgTable(
+  'shared_cases',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    title: text('title').notNull(),
+    category: text('category'),
+    options: jsonb('options').$type<DecisionOptionData[]>().notNull(),
+    result: jsonb('result').$type<SelectionResultData>(),
+    spunAt: timestamp('spun_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }),
+  },
+  (table) => [index('shared_cases_user_id_created_at_idx').on(table.userId, table.createdAt)],
+);
+
 export const usersRelations = relations(users, ({ many }) => ({
   sessions: many(sessions),
   decisions: many(decisions),
   decisionSessions: many(decisionSessions),
+  sharedCases: many(sharedCases),
 }));
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({
@@ -101,7 +120,15 @@ export const decisionSessionsRelations = relations(decisionSessions, ({ one }) =
   }),
 }));
 
+export const sharedCasesRelations = relations(sharedCases, ({ one }) => ({
+  user: one(users, {
+    fields: [sharedCases.userId],
+    references: [users.id],
+  }),
+}));
+
 export type UserRow = typeof users.$inferSelect;
 export type SessionRow = typeof sessions.$inferSelect;
 export type DecisionRow = typeof decisions.$inferSelect;
 export type DecisionSessionRow = typeof decisionSessions.$inferSelect;
+export type SharedCaseRow = typeof sharedCases.$inferSelect;
