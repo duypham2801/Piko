@@ -118,7 +118,10 @@ export default function DecisionForm({
         ? await updateDecision(decisionId, validDraft)
         : await createDecision(validDraft);
 
-      navigate(`/decisions/${record.decision.id}/edit${location.search}`, {
+      const destination = decisionId
+        ? `/decisions/${record.decision.id}/edit${location.search}`
+        : `/decisions/${record.decision.id}${location.search}`;
+      navigate(destination, {
         replace: true,
         state: { record },
       });
@@ -209,7 +212,7 @@ export default function DecisionForm({
   return (
     <main className={styles.screen}>
       <form className={styles.content} onSubmit={handleSave}>
-        <BackLink to="/">{t('back')}</BackLink>
+        <BackLink to={decisionId ? `/decisions/${decisionId}` : '/'}>{t('back')}</BackLink>
         <h1>{decisionId ? t('builderEditTitle') : t('builderNewTitle')}</h1>
 
         <TextField
