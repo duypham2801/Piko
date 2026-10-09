@@ -84,7 +84,7 @@ apps/web  ──HTTP /api──►  apps/api  ──►  PostgreSQL
 | API routes | ✅ `GET /api/healthz`, `GET /api/me` (tạo guest nếu chưa có)<br>🔧 Phase 5 (5-1, trên nhánh `feat/phase-5-builder`, chưa vào `main`): `GET/POST /api/decisions`, `GET/PUT/DELETE /api/decisions/:id`. Bắt buộc đã có session (không tạo guest), chỉ thấy và sửa quyết định của chính mình, tối đa 100 quyết định mỗi user |
 | Bảng DB | ✅ `users`, `sessions` (chỉ lưu sha256 của token)<br>🔧 Phase 5 (5-1, chưa vào `main`): `decisions` (thuộc 1 user, xóa user thì xóa theo; danh sách lựa chọn lưu trong cột JSONB `options`) |
 | Web | ✅ Home, preset (xem trước + mở case), màn mở case + hiệu ứng ăn mừng. Chọn ngẫu nhiên chạy ở trình duyệt, chưa lưu gì lên API<br>⬜ Phase 5: builder, quyết định đã lưu (mục "Của bạn" trên Home) |
-| Web routes | ✅ `/` Home, `/presets/:slug` xem trước, `/presets/:slug/open` mở case<br>⬜ Phase 5: `/decisions/new` (`?from=<preset>`), `/decisions/:id` xem trước, `/decisions/:id/edit`, `/decisions/:id/open`<br>Caddy trả `index.html` cho mọi đường dẫn không phải `/api` |
+| Web routes | ✅ `/` Home, `/presets/:slug` xem trước, `/presets/:slug/open` mở case<br>🔧 Phase 5 (5-2, chưa vào `main`): `/decisions/new`, `/decisions/:id/edit` (builder, mở case ngay từ bản nháp bằng `?view=case`)<br>⬜ 5-3: `/decisions/new?from=<preset>`, `/decisions/:id` xem trước, `/decisions/:id/open`<br>Caddy trả `index.html` cho mọi đường dẫn không phải `/api` |
 | Domain | Schema API, model `Decision`, engine chọn có seed (mulberry32), toán animation plan |
 
 ---
@@ -173,3 +173,4 @@ apps/web  ──HTTP /api──►  apps/api  ──►  PostgreSQL
 | 2026-10-08 | Phase 3 merge vào `main`. Phase 4: web có router (React Router 8, D-028), thêm dòng "Web routes"; sửa dòng Web/Domain cho đúng hiện trạng. Hạ tầng không đổi. |
 | 2026-10-08 | Phase 4 merge vào `main`. Bắt đầu Phase 5 (D-029): kế hoạch thêm bảng `decisions` (JSONB `options`), route `/api/decisions` (bắt buộc session, chỉ dữ liệu của chính user) và route web `/decisions/...`. PGlite chỉ dùng khi test, không vào prod. Sửa bảng khoảng cách cho đúng hiện trạng. |
 | 2026-10-08 | 5-1 xong trên nhánh Phase 5: bảng `decisions` và route `/api/decisions` chuyển ⬜ → 🔧. Image API prod giữ 186 MB (PGlite bị loại khỏi image). |
+| 2026-10-09 | 5-2 xong trên nhánh Phase 5: route web `/decisions/new` và `/decisions/:id/edit` chuyển ⬜ → 🔧. Hạ tầng không đổi. |
