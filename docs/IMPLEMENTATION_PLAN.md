@@ -32,7 +32,7 @@
 | 6-3 | History UI | ✅ (`6-3-fix-1.md`) | `6-3-history-ui.md`: Home "Gần đây" (5 newest) + `/history` (D-028, D-030) |
 | 6-4 | Shares API | ✅ (`6-4-fix-1.md`) | `6-4-shares-api.md`: `shared_cases` table, owner routes (create with lifetime, list, revoke, record a spin), public read route without a session (D-030) |
 | 6-5a | Share UI + public page | ✅ (`6-5a-fix-1.md`) | `6-5a-share-ui.md`: "Chia sẻ" dialog (lifetime, Web Share / copy), later spins recorded, `/s/:id` (options, replay, "Tự quay thử", unavailable page) with no session bootstrap; extracts `Sheet` and `WinnerPanel` (D-030) |
-| 6-5b | Shared links list + revoke | ⬜ | `6-5b-shared-links.md`: "Link đã chia sẻ" in `/history` (title → `/s/:id`, winner, expiry) with an inline revoke confirm; `Button variant="danger"` (D-030) |
+| 6-5b | Shared links list + revoke | 🔄 (`6-5b-fix-1.md`) | `6-5b-shared-links.md`: "Link đã chia sẻ" in `/history` (title → `/s/:id`, winner, expiry) with an inline revoke confirm; `Button variant="danger"` (D-030) |
 | 6-6 | Live viewing + interactions | ⬜ | SSE + POST, in-memory pub/sub; interaction kinds and viewer identity decided at kickoff (D-030) |
 | 7 | Responsive pass + navigation shell | ⬜ | Desktop is not in the mockup and must be designed. **First task: a navigation shell** (owner, 2026-10-09):<br>- a desktop sidebar holding "Của bạn" and "Gần đây"<br>- a mobile navigation pattern (top bar, drawer or bottom tabs), chosen at kickoff<br>- the shared screen shell with the back link at the same position on every screen<br>- the public `/s/:id` page stays outside the shell |
 | 8 | Polish | ⬜ | States, micro-interactions, consistency |
@@ -628,6 +628,24 @@
     - Revoke uses an inline confirm like the decision delete; a `404` counts as revoked.
     - No copy/re-share action in the list.
   - Reuse boundary reached: a second red confirm button, so `Button` gets `variant="danger"` and the decision delete stops hand-styling its button.
+- **6-5b review (2026-10-09):** verified on `feat/6-5b-shared-links` (2 commits, 12 files). `make check` passes (domain 48, api 41); no dependency change; the `confirmDelete` and literal greps are empty.
+  - Browser (360/1280):
+    - A new guest sees only "Đã chọn".
+    - With two links:
+      - `/history` makes `/api/me`, `GET /api/history` and `GET /api/shares`.
+      - The rows show the title (→ `/s/:id`), the winner and "Hết hạn …" or "Không hết hạn", with no horizontal scroll at 360.
+    - The confirm focuses "Hủy", and cancel returns focus to "Thu hồi".
+    - A revoke makes one `DELETE`; focus lands on "Link đã chia sẻ" and then, after the last link, on "Đã chọn".
+    - `/s/:id` shows "Link này không còn khả dụng" afterwards.
+    - With the api stopped:
+      - the revoke shows `revokeFailed`
+      - on load, both sections show their errors
+    - It works after a restart.
+    - The decision delete uses `Button variant="danger"` and looks unchanged.
+  - SHOULD (`6-5b-fix-1.md`):
+    - `SharedLinkList` keeps a `mountedRef` (not needed in React 19, already removed from `ShareDialog`) and duplicates the success path for `404`
+    - `HistoryPage` moves focus after a revoke through a flag ref and an effect instead of directly in the handler
+  - DO NOT TOUCH: the `confirmDelete` → `handleDelete` rename in `DecisionPreviewPage` (needed by the handoff grep); the nested label ternary in the dev-only `ComponentsSection`.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
