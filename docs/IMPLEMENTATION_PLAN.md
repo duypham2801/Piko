@@ -1,7 +1,7 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 6 — Result, history, share (6-1…6-5b done; ready to merge into `main`). Live viewing moved to the post-release Realtime phase (D-031).
+- **Current phase:** Phase 7 — Responsive pass + navigation shell (next; kickoff with the owner). Phase 6 merged into `main` on 2026-10-09; live viewing moved to the Realtime phase (D-031).
 - **Integration branch:** `feat/phase-6-result-history`
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`); Phase 4 (4-1, 4-2: router, Home, presets, preview, merged into `main`); Phase 5 (5-1…5-4: decisions API, builder, saved decisions, reuse options, merged into `main`)
 
@@ -652,6 +652,7 @@
   - Browser rerun: cancel and revoke focus are unchanged ("Link đã chia sẻ", then "Đã chọn"). A link already deleted elsewhere (`404`) disappears with no error.
   - 6-5b accepted. The implementer reported one transient PGlite setup timeout in `shares.test.ts` that passed on rerun; not reproduced in this review.
 - **6-6 decision (2026-10-09):** the owner asked whether live viewing should wait, since Couple/Squad will also need live spins. Owner chose to defer (D-031): Phase 6 closes at 6-5b, and live viewing moves to a Realtime phase after `v0.1.0`, designed once with Couple/Squad. Nothing built in 6-1…6-5b is wasted: `shared_cases` keeps the latest spin and `POST /api/shares/:id/spins` is recorded at spin start.
+- **Phase 6 closed (2026-10-09):** the owner did the browser review on phone and desktop and approved it. `feat/phase-6-result-history` was merged into `main` with `--no-ff`. `TOPOLOGY.md` was updated (owner approved).
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
