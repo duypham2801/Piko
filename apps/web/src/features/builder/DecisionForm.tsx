@@ -14,7 +14,7 @@ import { getFormErrors, type FormErrors } from './formErrors';
 import OptionRow from './OptionRow';
 import styles from './DecisionForm.module.css';
 
-type SaveStatus = 'idle' | 'saving' | 'saved' | 'validationError' | 'limitError' | 'saveError';
+type SaveStatus = 'idle' | 'saving' | 'saved' | 'limitError' | 'saveError';
 
 type DecisionFormProps = {
   decisionId?: string;
@@ -108,7 +108,9 @@ export default function DecisionForm({
 
   const editDraft = (update: (current: DecisionDraftData) => DecisionDraftData) => {
     setDraft(update);
-    setStatus((current) => (current === 'saved' ? 'idle' : current));
+    setStatus((current) =>
+      current === 'saved' || current === 'limitError' || current === 'saveError' ? 'idle' : current,
+    );
   };
 
   const focusFirstInvalid = (nextErrors: FormErrors) => {
@@ -129,7 +131,6 @@ export default function DecisionForm({
     setSubmitted(true);
     if (!parsed.success) {
       const nextErrors = getFormErrors(parsed.error.issues, draft, errorMessages());
-      setStatus('validationError');
       focusFirstInvalid(nextErrors);
       return null;
     }
@@ -150,11 +151,12 @@ export default function DecisionForm({
         ? await updateDecision(decisionId, validDraft)
         : await createDecision(validDraft);
 
+      navigate(`/decisions/${record.decision.id}/edit${location.search}`, {
+        replace: true,
+        state: { record },
+      });
+
       if (!decisionId) {
-        navigate(`/decisions/${record.decision.id}/edit`, {
-          replace: true,
-          state: { record },
-        });
         return;
       }
 
@@ -219,16 +221,17 @@ export default function DecisionForm({
   const statusMessage =
     status === 'saving'
       ? t('saving')
-      : status === 'saved'
-        ? t('saved')
-        : status === 'validationError'
-          ? t('formInvalid')
-          : status === 'limitError'
-            ? t('saveLimit')
-            : status === 'saveError'
-              ? t('saveFailed')
+      : status === 'limitError'
+        ? t('saveLimit')
+        : status === 'saveError'
+          ? t('saveFailed')
+          : submitted && !parsed.success
+            ? t('formInvalid')
+            : status === 'saved'
+              ? t('saved')
               : '';
-  const statusIsError = ['validationError', 'limitError', 'saveError'].includes(status);
+  const statusIsError =
+    status === 'limitError' || status === 'saveError' || (submitted && !parsed.success);
 
   if (isCaseView && parsed.success) {
     return (

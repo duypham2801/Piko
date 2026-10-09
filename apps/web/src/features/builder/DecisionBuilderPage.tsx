@@ -90,7 +90,7 @@ export default function DecisionBuilderPage() {
     return (
       <>
         <title>{`${pageTitle} · ${t('title')}`}</title>
-        <DecisionForm initial={newInitial} />
+        <DecisionForm initial={newInitial} key="new" />
       </>
     );
   }
@@ -99,7 +99,12 @@ export default function DecisionBuilderPage() {
     return (
       <>
         <title>{`${pageTitle} · ${t('title')}`}</title>
-        <DecisionForm decisionId={id} initial={draftOf(passedRecord)} initialStatus="saved" />
+        <DecisionForm
+          decisionId={id}
+          initial={draftOf(passedRecord)}
+          initialStatus="saved"
+          key={id}
+        />
       </>
     );
   }
@@ -134,7 +139,7 @@ export default function DecisionBuilderPage() {
     return (
       <>
         <title>{`${pageTitle} · ${t('title')}`}</title>
-        <DecisionForm decisionId={id} initial={draftOf(currentLoad.record)} />
+        <DecisionForm decisionId={id} initial={draftOf(currentLoad.record)} key={id} />
       </>
     );
   }
