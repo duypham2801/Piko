@@ -478,5 +478,6 @@ Format: Decision · Reason · Alternatives · Tradeoffs · Phase/Date
   - One layout route renders the navigation. One screen-shell component places the back link at the same position on every screen. It replaces the copied `.screen`/`.content` + `48rem` blocks.
   - `/s/:id` stays outside the shell and outside `SessionLayout`, with no navigation and no session.
   - The sidebar lists reuse the existing hooks (`useDecisionList`, `useHistoryList`) and reload when the route changes, so a save, delete or "Đi thôi" shows up after the next navigation. There is no global store.
+- **Brand (owner, 7-1 review):** Home drops its large PIKO wordmark. The tagline "Pick. Open. Go." moves under the nav logo, so the brand shows once, on every shell screen.
 - **Topology:** unchanged (no routes, tables or services).
 - **Phase:** 7 · 2026-10-09 · approved by user

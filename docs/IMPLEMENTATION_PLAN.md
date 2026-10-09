@@ -34,7 +34,7 @@
 | 6-5a | Share UI + public page | ✅ (`6-5a-fix-1.md`) | `6-5a-share-ui.md`: "Chia sẻ" dialog (lifetime, Web Share / copy), later spins recorded, `/s/:id` (options, replay, "Tự quay thử", unavailable page) with no session bootstrap; extracts `Sheet` and `WinnerPanel` (D-030) |
 | 6-5b | Shared links list + revoke | ✅ (`6-5b-fix-1.md`) | `6-5b-shared-links.md`: "Link đã chia sẻ" in `/history` (title → `/s/:id`, winner, expiry) with an inline revoke confirm; `Button variant="danger"` (D-030) |
 | 6-6 | Live viewing + interactions | ⏸ moved | Deferred to the Realtime phase (D-031) |
-| 7-1 | Navigation shell | 🔄 handoff | `7-1-navigation-shell.md`: layout route + screen shell (back link at one position), mobile top bar, desktop sidebar frame from `64rem`, focus mode on case screens, `/s/:id` outside; replaces the copied screen layouts (D-032) |
+| 7-1 | Navigation shell | 🔄 fix (`7-1-fix-1.md`) | `7-1-navigation-shell.md`: layout route + screen shell (back link at one position), mobile top bar, desktop sidebar frame from `64rem`, focus mode on case screens, `/s/:id` outside; replaces the copied screen layouts (D-032) |
 | 7-2 | Sidebar lists + desktop Home | ⬜ | "Của bạn" and "Gần đây" in the sidebar (reload on route change), Home drops both sections from `64rem` (D-032) |
 | 7-3 | Responsive pass | ⬜ | Every screen at 360 / 768 / 1024 / 1280 / 1920: carousel, winner reveal, CTAs, card grids, option layout |
 | 8 | Polish | ⬜ | States, micro-interactions, consistency |
@@ -659,6 +659,27 @@
   - Owner: mobile top bar (logo, "Lịch sử", "+ Tạo"); desktop sidebar from `64rem` with "Của bạn" and "Gần đây"; Home drops both sections on desktop; case screens are focus screens with no sidebar.
   - Architect defaults: case screens also hide the mobile top bar; one layout route + one screen-shell component; sidebar lists reload on route change, no global store; `/s/:id` stays outside the shell.
   - Split into 7-1 (shell), 7-2 (sidebar lists + desktop Home), 7-3 (responsive pass per screen). No topology change.
+- **7-1 review (2026-10-09):** reviewed `d0dd31a`, `0488519` (26 files, +626/−517). `make check` passes (domain 48, api 41); no dependency change; `ensureSession` only in `SessionLayout`.
+  - **Browser (headless Chrome, 360/768/1024/1280):**
+    - The top bar shows below `64rem` and the sticky sidebar from `64rem`.
+    - `aria-current` is set on `/history`.
+    - Focus mode hides the nav on the preset case, the decision case and the builder's `?view=case`.
+    - Sharing still works: dialog, `Esc`, focus back on "Chia sẻ".
+    - `/s/:id` has no nav, only the public GET, no cookie.
+    - The back link is at one position on every shell screen.
+  - **MUST:**
+    - `Screen` `.content` stretches in the `1fr` row, which spreads `/history` and the public page over the full height ("Về trang chủ" about 100 px tall).
+    - `align="center"` does not centre without a back link, because the content lands in the `auto` row. This affects NotFound, the load state and the public states.
+  - **SHOULD:**
+    - The nav's DOM order ("+ Tạo", "Lịch sử") differs from its mobile visual order (CSS `order`), so tab order runs right-to-left.
+    - `overflow-x: hidden` and a repeated `display: flex` in `AppNav`.
+    - Page `.content` rules repeat `Screen` defaults.
+  - **Owner (HITL):** remove Home's large PIKO wordmark and move the tagline under the nav logo (D-032 note).
+  - **NICE, not requested:** `data-focus={focus || undefined}`; `import type { To }`.
+  - **DO NOT TOUCH:**
+    - page `className` overrides of `Screen`'s `.content` rely on CSS order (each page imports `Screen` before its own module), the same as the `className` props on UI primitives
+    - the dev double public GET comes from StrictMode
+  - → `7-1-fix-1.md`.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
