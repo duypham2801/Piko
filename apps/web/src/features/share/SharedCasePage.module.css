@@ -42,7 +42,7 @@
 
 .result {
   width: min(100%, var(--content-max-width));
-  min-height: calc(var(--space-8) * 2);
+  min-height: calc(var(--space-8) * 1.5);
   text-align: start;
 }
 

@@ -46,7 +46,7 @@
   min-width: 0;
   overflow-wrap: anywhere;
   color: var(--color-text);
-  font-size: var(--text-display);
+  font-size: var(--text-2xl);
   line-height: var(--leading-tight);
 }
 
@@ -125,11 +125,15 @@
   .dialog {
     width: min(calc(100% - (var(--space-6) * 2)), var(--case-dialog-max-width));
     height: fit-content;
-    max-height: calc(100dvh - (var(--space-6) * 2));
-    margin: auto;
+    max-height: calc(100dvh - var(--space-8) - var(--space-6));
+    margin: var(--space-8) auto auto;
     padding: var(--space-6);
     border: var(--border-width) solid var(--color-border);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-chunky);
+  }
+
+  .header h2 {
+    font-size: var(--text-display);
   }
 }
