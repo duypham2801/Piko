@@ -1,7 +1,7 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 6 — Result, history, share, live viewing (6-1, 6-2 done; 6-3 next)
+- **Current phase:** Phase 6 — Result, history, share, live viewing (6-1, 6-2 done; 6-3 in review)
 - **Integration branch:** `feat/phase-6-result-history`
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`); Phase 4 (4-1, 4-2: router, Home, presets, preview, merged into `main`); Phase 5 (5-1…5-4: decisions API, builder, saved decisions, reuse options, merged into `main`)
 
@@ -549,6 +549,17 @@
   - `make check` passes (domain 48, api 27).
   - NICE, not fixed: the hint's DOM id is still `case-min-options-hint`.
   - **6-2 accepted.**
+- **6-3 (2026-10-09):** reviewed the two implementer commits (11 files, +358/−3). `make check` passes (domain 48, api 27); lockfile unchanged; literal gate empty.
+  - **Browser (headless Chrome, 360 and 1280 px):**
+    - Home sends `GET /api/history?limit=5` and `/history` sends `GET /api/history`, each after the single `/api/me`
+    - Home shows 5 rows, `/history` shows all, with no horizontal scroll
+    - preset entries link to `/presets/<slug>`; a saved-decision entry links to `/decisions/<id>` and stops being a link once that decision is deleted; a draft entry is not a link
+  - **NICE:**
+    - `formatHistoryTime` builds day keys from `formatToParts`, where comparing the local year, month and day is enough
+    - `.recent` repeats the grid rules of `.yourDecisions`/`.quickPicks`
+  - **For the owner's visual review:** the `--border-width-thin` (2 px) dividers look heavy; where "Gần đây" sits on Home.
+  - **DO NOT TOUCH:** the shared `HistoryList` (one `Card`, rows as `Link` or `div`); `useHistoryList` with `retry`.
+  - Waiting for the owner's visual review before one bundled fix.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
