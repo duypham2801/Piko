@@ -6,7 +6,7 @@ import { findPreset } from '../presets/presets';
 import { formatHistoryTime } from './historyTime';
 import styles from './HistoryList.module.css';
 
-function historyEntryHref(entry: HistoryEntryData): string | undefined {
+export function historyEntryHref(entry: HistoryEntryData): string | undefined {
   if (entry.source.kind === 'decision') {
     return entry.source.decisionId ? `/decisions/${entry.source.decisionId}` : undefined;
   }

@@ -8,7 +8,7 @@ type DecisionListState =
   | { status: 'loaded'; decisions: readonly DecisionRecordData[] }
   | { status: 'error'; decisions: readonly DecisionRecordData[] };
 
-export function useDecisionList(): DecisionListState {
+export function useDecisionList(reloadKey?: string): DecisionListState {
   const [state, setState] = useState<DecisionListState>({ decisions: [], status: 'loading' });
 
   useEffect(() => {
@@ -26,7 +26,7 @@ export function useDecisionList(): DecisionListState {
       });
 
     return () => controller.abort();
-  }, []);
+  }, [reloadKey]);
 
   return state;
 }
