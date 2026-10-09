@@ -25,7 +25,7 @@
 | 4-2 | Preset preview | ✅ done (`4-2-fix-1.md`, `89fe5cc`) | `4-2-preset-preview.md`: includes the 4-1 clean-up (C0) and a `BackLink` primitive. Preview screen with option switches, `?off=` in the URL, case moves to `/presets/:slug/open` (D-028) |
 | 5-1 | Decisions API | ✅ done (`5-1-fix-1.md`, `5-1-fix-2.md`, `60387fc`) | `5-1-decisions-api.md`: `decisions` table (options as JSONB), CRUD routes requiring a session, ownership, 100 per user, PGlite service tests (D-029) |
 | 5-2 | Builder screen | 🔧 fix-1 handed off (`5-2-decision-builder.md`, `5-2-fix-1.md`) | `/decisions/new` and `/decisions/:id/edit`: title, options (add/edit/remove), emoji picker, priority dots, shared schema validation, explicit Save, non-blocking save error (D-029) |
-| 5-3 | Saved decisions | ⬜ | `/decisions/:id` preview + `/open` case, Home "Của bạn" section + "Tạo quyết định", delete with confirm, preset "Tùy chỉnh"; the post-create target moves from `/edit` to the preview; `DELETE` client (D-028, D-029) |
+| 5-3 | Saved decisions | ⬜ | `/decisions/:id` preview + `/open` case, Home "Của bạn" section + "Tạo quyết định", delete with confirm, preset "Tùy chỉnh", builder "Thêm từ có sẵn" (copy options from presets/saved decisions); the post-create target moves from `/edit` to the preview; `DELETE` client (D-028, D-029) |
 | 6 | Result + history | ⬜ | Winner reveal, Let's Go / Spin Again / Not Tonight / Share, history; adds Home "Recent decisions" (D-028) |
 | 7 | Responsive pass | ⬜ | Desktop is not in the mockup and must be designed |
 | 8 | Polish | ⬜ | States, micro-interactions, consistency |
@@ -294,7 +294,13 @@
   - NICE (in fix-1):
     - F2: memoize the case `options`, because `applyOff` returns a new array on every render
     - F3: one row modifier instead of two computed class strings
-  - Deferred to Phase 7: the screen shell (`.screen`/`.content` plus the `48rem` wide-column query) is now copied in Home, Preview, CaseOpening and NotFound. Extract a shared layout when the responsive pass designs desktop. Four copies make this a real reuse boundary, but its shape belongs to Phase 7.
+  - **Owner feedback (2026-10-09), back link position:** the back link moves between screens.
+  - Measured:
+    - at 390 px, the case screen puts it at y=130 instead of 32, because its content is centred vertically
+    - at 1280 px, it sits at x=153 (preview), 160 (case) and 393 (builder), following each screen's column width
+  - The architect proposed a shared screen shell with a fixed top bar right after 5-2-fix-1.
+  - **The owner chose to keep it for Phase 7**, together with the screen-shell extraction below. Phase 7 must place the back link at the same position on every screen.
+- Deferred to Phase 7: the screen shell (`.screen`/`.content` plus the `48rem` wide-column query) is now copied in Home, Preview, CaseOpening and NotFound. Extract a shared layout when the responsive pass designs desktop. Four copies make this a real reuse boundary, but its shape belongs to Phase 7.
   - DO NOT TOUCH: the defensive minimum guard in `updateOption`, kept even though the switch is disabled.
 - **4-2-fix-1 (2026-10-08):** verified against the diff (`89fe5cc`, 4 files, +31/−21). `make check` passes and the grep is clean.
   - F1: the `:active` rules now come after the hover media block. The architect re-measured in Chrome: hover `-4px`, active `+5px`, hover + active `+5px`.

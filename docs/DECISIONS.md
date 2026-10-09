@@ -315,6 +315,12 @@ Format: Decision · Reason · Alternatives · Tradeoffs · Phase/Date
   - The builder offers a small built-in set (about 40 emoji: food, drinks, places, activities) plus "no emoji". No dependency, no SVG set.
   - This settles the pending "emoji strategy" decision: native emoji.
 - **Customize a preset (owner):** the preset preview gets a secondary "Tùy chỉnh" button. It opens the builder pre-filled with the preset's title and options (new ids), to be saved as the user's own decision.
+- **Quick-add from existing options (owner, 2026-10-09, built in 5-3):**
+  - The builder gets a second button, "Thêm từ có sẵn", next to "Thêm lựa chọn". It lists the options of the presets and of the user's saved decisions, grouped by decision.
+  - Tapping one **copies** it into the draft: the label and emoji, with a new id and weight 1. There is no link to the source.
+  - Labels already in the draft are shown as added, and the limit of 20 still applies.
+  - There is no model change.
+  - Rejected for now: an option that points to another decision (chained cases), which needs a model change and loop handling. It is a post-MVP idea.
 - **Storage (default):**
   - One new table `decisions`: `id`, `user_id` (FK → `users`, cascade delete), `title`, `category` (nullable), `options` (**JSONB**, the validated option array in order), `created_at`, `updated_at`; index on `(user_id, updated_at)`.
   - Options are a JSONB column, not a separate table: they are always read and written together with their decision, there are at most 20, and a PUT replaces them atomically. History (Phase 6) will store a snapshot of the labels, so it does not need a foreign key to each option.
