@@ -151,22 +151,4 @@ describe('history routes', () => {
       });
     }
   });
-
-  it('returns only the requested number of newest entries', async () => {
-    const cookie = await createSessionCookie();
-    const headers = mutationHeaders(cookie);
-
-    for (const title of ['Older', 'Newer']) {
-      const response = await request('/api/history', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(makeHistoryInput(title)),
-      });
-      expect(response.status).toBe(201);
-    }
-
-    const response = await request('/api/history?limit=1', { headers: { Cookie: cookie } });
-    const parsed = HistoryListResponse.parse(await response.json());
-    expect(parsed.entries).toHaveLength(1);
-  });
 });

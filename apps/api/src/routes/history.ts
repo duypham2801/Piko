@@ -1,6 +1,5 @@
 import {
   DECISION_LIMITS,
-  HistoryEntry,
   HistoryEntryCreate,
   type HistoryEntryCreateData,
   type HistoryEntryData,
@@ -58,7 +57,7 @@ export function createHistoryRoutes(dependencies: HistoryRouteDependencies): Hon
   routes.post('/', async (c) => {
     const input = await parseHistoryEntry(c);
     const entry: HistoryEntryData = await createHistoryEntry(dependencies.db, c.var.user.id, input);
-    return c.json(HistoryEntry.parse(entry), 201);
+    return c.json(entry, 201);
   });
 
   return routes;

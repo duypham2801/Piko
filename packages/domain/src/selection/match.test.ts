@@ -43,6 +43,17 @@ describe('matchesSelection', () => {
 
     expect(
       matchesSelection(
+        options.map((option, index) => ({ ...option, enabled: index !== 0 })),
+        result,
+      ),
+    ).toBe(false);
+  });
+
+  it('rejects selections with fewer than two enabled options', () => {
+    const result = select(options, 42);
+
+    expect(
+      matchesSelection(
         options.map((option) => ({ ...option, enabled: false })),
         result,
       ),

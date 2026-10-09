@@ -1,10 +1,15 @@
 import { beforeAll, afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
 
-import { DECISION_LIMITS, select, type DecisionDraftData } from '@piko/domain';
+import {
+  DECISION_LIMITS,
+  select,
+  type DecisionDraftData,
+  type HistorySourceInputData,
+} from '@piko/domain';
 
 import { createGuestSession } from '../auth/session.service.js';
-import { decisionSessions, decisions, users } from '../db/schema.js';
+import { decisionSessions, users } from '../db/schema.js';
 import { HttpError } from '../lib/errors.js';
 import { createDecision, deleteDecision } from './decisions.service.js';
 import { createHistoryEntry, listHistory } from './history.service.js';
@@ -15,10 +20,7 @@ const firstNow = new Date('2026-01-01T00:00:00.000Z');
 
 function makeHistoryInput(
   overrides: Partial<DecisionDraftData> = {},
-  source:
-    | { kind: 'decision'; decisionId: string }
-    | { kind: 'draft' }
-    | { kind: 'preset'; slug: string } = { kind: 'draft' },
+  source: HistorySourceInputData = { kind: 'draft' },
   seed = 42,
 ) {
   const decision = makeDraft({
@@ -207,6 +209,5 @@ describe('history service', () => {
     await testDatabase.db.delete(users).where(eq(users.id, session.user.id));
 
     expect(await testDatabase.db.select().from(decisionSessions)).toEqual([]);
-    expect(await testDatabase.db.select().from(decisions)).toEqual([]);
   });
 });

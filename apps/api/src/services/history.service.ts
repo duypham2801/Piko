@@ -94,14 +94,13 @@ export async function createHistoryEntry(
       throw new Error('Failed to create history entry.');
     }
 
-    const userRows = await tx
+    const rowsToDelete = await tx
       .select({ id: decisionSessions.id })
       .from(decisionSessions)
       .where(eq(decisionSessions.userId, userId))
-      .orderBy(desc(decisionSessions.createdAt), asc(decisionSessions.id));
-    const idsToDelete = userRows
-      .slice(DECISION_LIMITS.maxHistoryEntriesPerUser)
-      .map((historyRow) => historyRow.id);
+      .orderBy(desc(decisionSessions.createdAt), asc(decisionSessions.id))
+      .offset(DECISION_LIMITS.maxHistoryEntriesPerUser);
+    const idsToDelete = rowsToDelete.map((historyRow) => historyRow.id);
     if (idsToDelete.length > 0) {
       await tx
         .delete(decisionSessions)
