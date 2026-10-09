@@ -1,4 +1,12 @@
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type SyntheticEvent,
+} from 'react';
 import { useNavigate } from 'react-router';
 import { DECISION_LIMITS } from '@piko/domain';
 import type {
@@ -167,6 +175,7 @@ export default function CaseOpening({
     const dialog = dialogRef.current;
     if (dialog && !dialog.open) {
       dialog.showModal();
+      dialog.querySelector<HTMLElement>('[data-initial-focus]')?.focus();
     }
   }, []);
 
@@ -174,7 +183,12 @@ export default function CaseOpening({
     dialogRef.current?.close();
   };
 
-  const handleClose = () => {
+  const handleClose = (event: SyntheticEvent<HTMLDialogElement>) => {
+    // React propagates close events from nested dialogs.
+    if (event.target !== event.currentTarget) {
+      return;
+    }
+
     navigate(backTo, { replace: true });
   };
 
@@ -269,7 +283,12 @@ export default function CaseOpening({
             </p>
           </div>
         ) : (
-          <Button autoFocus disabled={state.status === 'spinning'} size="lg" onClick={spin}>
+          <Button
+            data-initial-focus
+            disabled={state.status === 'spinning'}
+            size="lg"
+            onClick={spin}
+          >
             {state.status === 'ready' ? t('openCase') : t('opening')}
           </Button>
         )}
