@@ -11,25 +11,23 @@ const timeFormatter = new Intl.DateTimeFormat('vi-VN', {
   minute: '2-digit',
 });
 
-function localDayKey(date: Date): string {
-  const parts = dateFormatter.formatToParts(date);
-  const year = parts.find((part) => part.type === 'year')?.value ?? '';
-  const month = parts.find((part) => part.type === 'month')?.value ?? '';
-  const day = parts.find((part) => part.type === 'day')?.value ?? '';
-  return `${year}-${month}-${day}`;
+function isSameLocalDay(first: Date, second: Date): boolean {
+  return (
+    first.getFullYear() === second.getFullYear() &&
+    first.getMonth() === second.getMonth() &&
+    first.getDate() === second.getDate()
+  );
 }
 
 export function formatHistoryTime(createdAt: string, now: Date): string {
   const createdDate = new Date(createdAt);
   const time = timeFormatter.format(createdDate);
-  const createdDay = localDayKey(createdDate);
-  const today = localDayKey(now);
   const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
 
-  if (createdDay === today) {
+  if (isSameLocalDay(createdDate, now)) {
     return `${t('today')}, ${time}`;
   }
-  if (createdDay === localDayKey(yesterday)) {
+  if (isSameLocalDay(createdDate, yesterday)) {
     return `${t('yesterday')}, ${time}`;
   }
   return `${dateFormatter.format(createdDate)}, ${time}`;

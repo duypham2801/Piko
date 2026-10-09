@@ -43,17 +43,9 @@
   font-size: var(--text-lg);
 }
 
-.quickPicks {
-  display: grid;
-  gap: var(--space-3);
-}
-
+.yourDecisions,
+.quickPicks,
 .recent {
-  display: grid;
-  gap: var(--space-3);
-}
-
-.yourDecisions {
   display: grid;
   gap: var(--space-3);
 }

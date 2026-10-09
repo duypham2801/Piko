@@ -12,6 +12,7 @@ const semanticColors = [
   ['--color-text-muted', 'Text muted'],
   ['--color-text-accent', 'Text accent'],
   ['--color-border', 'Border'],
+  ['--color-divider', 'Divider'],
   ['--color-shadow', 'Shadow'],
   ['--color-primary', 'Primary'],
   ['--color-primary-pressed', 'Primary pressed'],
@@ -102,6 +103,7 @@ const radiusTokens = [
 ] as const;
 
 const borderTokens = [
+  ['--border-width-hairline', 'Hairline'],
   ['--border-width-thin', 'Thin'],
   ['--border-width', 'Chunky'],
 ] as const;

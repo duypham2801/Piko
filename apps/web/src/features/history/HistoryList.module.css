@@ -10,7 +10,7 @@
 }
 
 .item + .item {
-  border-top: var(--border-width-thin) solid var(--color-border);
+  border-top: var(--border-width-hairline) solid var(--color-divider);
 }
 
 .row {
