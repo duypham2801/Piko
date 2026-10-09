@@ -128,7 +128,7 @@ export default function DecisionForm({ backTo, decisionId, initial }: DecisionFo
 
       const destination = decisionId
         ? `/decisions/${record.decision.id}/edit${location.search}`
-        : `/decisions/${record.decision.id}${location.search}`;
+        : `/decisions/${record.decision.id}`;
       navigate(destination, {
         replace: true,
         state: { record },

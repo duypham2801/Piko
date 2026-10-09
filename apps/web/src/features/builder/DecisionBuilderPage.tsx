@@ -14,12 +14,8 @@ export default function DecisionBuilderPage() {
   const [searchParams] = useSearchParams();
   const isNew = location.pathname === '/decisions/new';
   const recordState = useDecisionRecord(isNew ? undefined : id);
-  const presetSlug = searchParams.get('from') ?? undefined;
-  const preset = findPreset(presetSlug);
-  const newInitial = useMemo(() => {
-    const fromPreset = findPreset(presetSlug);
-    return fromPreset ? draftFromPreset(fromPreset) : emptyDraft();
-  }, [presetSlug]);
+  const preset = findPreset(searchParams.get('from') ?? undefined);
+  const newInitial = useMemo(() => (preset ? draftFromPreset(preset) : emptyDraft()), [preset]);
   const pageTitle = isNew ? t('builderNewTitle') : t('builderEditTitle');
   let pageContent: ReactNode;
 

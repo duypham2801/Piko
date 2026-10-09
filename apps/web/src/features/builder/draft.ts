@@ -26,11 +26,9 @@ export function normalizeLabel(label: string): string {
 export function draftFromPreset(preset: Preset): DecisionDraftData {
   return {
     options: preset.decision.options.map((option) => ({
-      enabled: true,
-      emoji: option.emoji,
-      id: crypto.randomUUID(),
+      ...emptyOption(),
       label: option.label,
-      weight: DECISION_LIMITS.weightDefault,
+      emoji: option.emoji,
     })),
     title: preset.decision.title,
   };
@@ -52,16 +50,7 @@ export function withCopiedOption(
 
   return {
     ...draft,
-    options: [
-      ...draft.options,
-      {
-        enabled: true,
-        emoji: source.emoji,
-        id: crypto.randomUUID(),
-        label: source.label,
-        weight: DECISION_LIMITS.weightDefault,
-      },
-    ],
+    options: [...draft.options, { ...emptyOption(), label: source.label, emoji: source.emoji }],
   };
 }
 
