@@ -10,7 +10,6 @@ import { PRESETS } from '../presets/presets';
 import { normalizeLabel, withCopiedOption } from './draft';
 import styles from './ExistingOptionsPanel.module.css';
 
-export const existingOptionsPanelId = 'existing-options-panel';
 export const existingOptionsToggleId = 'existing-options-toggle';
 
 type ExistingOptionsPanelProps = {
@@ -52,6 +51,7 @@ function OptionGroup({ emoji, options, selectedLabels, title, atMax, onAdd }: Op
               selected={selected}
               onSelectedChange={() => onAdd(option)}
             >
+              {selected && <span aria-hidden="true">✓</span>}
               {option.emoji && <span aria-hidden="true">{option.emoji}</span>}
               <span>{option.label}</span>
             </Chip>
@@ -79,7 +79,14 @@ export default function ExistingOptionsPanel({
   const showSavedDecisions = status !== 'loaded' || savedDecisions.length > 0;
 
   const addOption = (option: DecisionOptionData) => {
-    onEditDraft((current) => withCopiedOption(current, option));
+    onEditDraft((current) =>
+      current.options.length >= DECISION_LIMITS.maxOptions ||
+      current.options.some(
+        (currentOption) => normalizeLabel(currentOption.label) === normalizeLabel(option.label),
+      )
+        ? current
+        : withCopiedOption(current, option),
+    );
   };
 
   useEffect(() => {
@@ -103,18 +110,13 @@ export default function ExistingOptionsPanel({
     }
   };
 
-  const handleClose = () => {
-    onClose();
-  };
-
   return (
     <dialog
       aria-labelledby="existing-options-title"
       className={styles.panel}
-      id={existingOptionsPanelId}
       ref={dialogRef}
       onClick={handleBackdropClick}
-      onClose={handleClose}
+      onClose={onClose}
     >
       <div className={styles.shell}>
         <header className={styles.headingRow}>

@@ -38,3 +38,12 @@
   box-shadow: none;
   cursor: not-allowed;
 }
+
+.selected:disabled {
+  border: var(--border-width) solid var(--color-border);
+  background: var(--color-secondary);
+  color: var(--color-on-secondary);
+  font-weight: var(--font-weight-bold);
+  box-shadow: none;
+  cursor: default;
+}

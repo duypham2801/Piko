@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router';
 import { DECISION_LIMITS, DecisionDraft } from '@piko/domain';
 import type { DecisionDraftData } from '@piko/domain';
@@ -83,10 +83,10 @@ export default function DecisionForm({ backTo, decisionId, initial }: DecisionFo
     );
   };
 
-  const closeExisting = useCallback(() => {
+  const closeExisting = () => {
     setExistingOpen(false);
     document.getElementById(existingOptionsToggleId)?.focus();
-  }, []);
+  };
 
   const focusFirstInvalid = (nextErrors: FormErrors) => {
     if (nextErrors.title) {
