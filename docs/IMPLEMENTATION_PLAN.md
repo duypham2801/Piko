@@ -35,7 +35,7 @@
 | 6-5b | Shared links list + revoke | ✅ (`6-5b-fix-1.md`) | `6-5b-shared-links.md`: "Link đã chia sẻ" in `/history` (title → `/s/:id`, winner, expiry) with an inline revoke confirm; `Button variant="danger"` (D-030) |
 | 6-6 | Live viewing + interactions | ⏸ moved | Deferred to the Realtime phase (D-031) |
 | 7-1 | Navigation shell | ✅ (`7-1-fix-1.md`) | `7-1-navigation-shell.md`: layout route + screen shell (back link at one position), mobile top bar, desktop sidebar frame from `64rem`, focus mode on case screens, `/s/:id` outside; replaces the copied screen layouts (D-032) |
-| 7-2 | Sidebar lists + desktop Home | ⬜ | "Của bạn" and "Gần đây" in the sidebar (reload on route change), Home drops both sections from `64rem` (D-032) |
+| 7-2 | Sidebar lists + desktop Home | 🔄 handoff `7-2-sidebar-lists.md` | "Của bạn" and "Gần đây" in the sidebar (reload on route change), Home drops both sections from `64rem` (D-032) |
 | 7-3 | Responsive pass | ⬜ | Every screen at 360 / 768 / 1024 / 1280 / 1920: carousel, winner reveal, CTAs, card grids, option layout |
 | 8 | Polish | ⬜ | States, micro-interactions, consistency |
 | 9 | First prod release | ⬜ | Deploy `v0.1.0` to VPS, verify backup/rollback |
@@ -690,6 +690,12 @@
   - **NICE, not requested:** `.logo` keeps the redundant `gap: 0` and `align-items: start`, and `.wordmark` repeats the logo's `line-height`.
   - **`make check`:** the first run failed with PGlite `beforeAll` hook timeouts (10 s) in up to 5 api test files while the host load average was about 12. The api tests alone, and the next `make check`, passed (domain 48, api 41). This branch touches no api code. It is the same flake as in 6-5b → technical debt.
   - **7-1 accepted.** Fast-forwarded into `feat/phase-7-responsive`.
+- **7-2 handoff (2026-10-09):** `7-2-sidebar-lists.md`.
+  - **Architect defaults:**
+    - `useMediaQuery(DESKTOP_QUERY)` (`useSyncExternalStore`) mounts the sidebar lists only from `64rem`, and Home's list sections only below it, so neither width makes duplicate list requests.
+    - The list hooks take an optional reload key; the sidebar passes `pathname`, so `?off=` changes do not reload, and the current data stays visible while reloading.
+    - "Của bạn" scrolls on its own; "Gần đây" shows winner + title without time.
+    - Desktop Home keeps the create card alone.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
