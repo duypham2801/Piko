@@ -27,7 +27,9 @@ export default function DecisionCasePage() {
         backTo={`/decisions/${id}${search}`}
         key={`${id}?${offKey}`}
         options={options}
+        source={{ kind: 'decision', decisionId: id }}
         title={decision.title}
+        category={decision.category}
       />
     </>
   );

@@ -71,6 +71,45 @@
   line-height: var(--leading-tight);
 }
 
+.actions {
+  display: grid;
+  width: min(100%, var(--content-max-width));
+  gap: var(--space-3);
+}
+
+.secondaryActions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.secondaryActions button {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.hint {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+
+.historyStatus {
+  min-height: var(--tap-target-min);
+  color: var(--color-success);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-bold);
+  text-align: center;
+}
+
+.historyStatus:empty {
+  min-height: 0;
+}
+
+.historyStatusError {
+  color: var(--color-danger);
+}
+
 @keyframes winnerPanelIn {
   from {
     opacity: 0;

@@ -24,7 +24,9 @@ export default function PresetCasePage() {
         backTo={previewPath}
         key={`${slug}?${offKey}`}
         options={options}
+        source={{ kind: 'preset', slug: preset.slug }}
         title={preset.decision.title}
+        category={preset.decision.category}
       />
     </>
   );

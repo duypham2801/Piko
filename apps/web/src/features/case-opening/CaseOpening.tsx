@@ -1,10 +1,12 @@
-import { useMemo } from 'react';
-import type { DecisionOptionData } from '@piko/domain';
+import { useCallback, useMemo, useRef, useState } from 'react';
+import { DECISION_LIMITS } from '@piko/domain';
+import type { DecisionOptionData, HistorySourceInputData } from '@piko/domain';
 
 import BackLink from '../../components/ui/BackLink';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import { t } from '../../i18n';
+import { createHistoryEntry } from '../../lib/api/history';
 import CaseCarousel from './CaseCarousel';
 import styles from './CaseOpening.module.css';
 import Confetti from './Confetti';
@@ -14,16 +16,108 @@ type CaseOpeningProps = {
   title: string;
   options: readonly DecisionOptionData[];
   backTo: string;
+  source: HistorySourceInputData;
+  category?: string;
 };
 
-export default function CaseOpening({ title, options, backTo }: CaseOpeningProps) {
-  const { state, plan, open, viewportRef, stripRef } = useCaseOpening(options);
+type HistorySaveStatus = 'idle' | 'saving' | 'saved' | 'error';
+
+const minOptionsHintId = 'case-min-options-hint';
+
+export default function CaseOpening({
+  title,
+  options,
+  backTo,
+  source,
+  category,
+}: CaseOpeningProps) {
+  const [excludedIds, setExcludedIds] = useState<ReadonlySet<string>>(() => new Set());
+  const [historySaveStatus, setHistorySaveStatus] = useState<HistorySaveStatus>('idle');
+  const saveRequestRef = useRef(0);
+  const spinOptionsRef = useRef<DecisionOptionData[]>([]);
+  const pool = useMemo(
+    () =>
+      options.map((option) =>
+        excludedIds.has(option.id) ? { ...option, enabled: false } : option,
+      ),
+    [excludedIds, options],
+  );
+  const { state, plan, open, viewportRef, stripRef } = useCaseOpening(pool);
+  const resetSaveStatus = useCallback(() => {
+    saveRequestRef.current += 1;
+    setHistorySaveStatus('idle');
+  }, []);
+  const spinAgain = useCallback(() => {
+    resetSaveStatus();
+    spinOptionsRef.current = pool;
+    open();
+  }, [open, pool, resetSaveStatus]);
+  const rejectWinner = useCallback(() => {
+    if (state.status !== 'revealed') {
+      return;
+    }
+
+    const nextExcludedIds = new Set(excludedIds);
+    nextExcludedIds.add(state.result.winnerId);
+    const nextPool = options.map((option) =>
+      nextExcludedIds.has(option.id) ? { ...option, enabled: false } : option,
+    );
+    const enabledCount = nextPool.filter((option) => option.enabled).length;
+    if (enabledCount < DECISION_LIMITS.minEnabledOptions) {
+      return;
+    }
+
+    resetSaveStatus();
+    setExcludedIds(nextExcludedIds);
+    spinOptionsRef.current = nextPool;
+    open(nextPool);
+  }, [excludedIds, open, options, resetSaveStatus, state]);
+  const saveResult = useCallback(async () => {
+    if (
+      state.status !== 'revealed' ||
+      historySaveStatus === 'saving' ||
+      historySaveStatus === 'saved'
+    ) {
+      return;
+    }
+
+    const requestId = saveRequestRef.current + 1;
+    saveRequestRef.current = requestId;
+    setHistorySaveStatus('saving');
+
+    try {
+      await createHistoryEntry({
+        source,
+        decision: {
+          ...(category === undefined ? {} : { category }),
+          options: spinOptionsRef.current,
+          title,
+        },
+        result: state.result,
+      });
+      if (saveRequestRef.current === requestId) {
+        setHistorySaveStatus('saved');
+      }
+    } catch {
+      if (saveRequestRef.current === requestId) {
+        setHistorySaveStatus('error');
+      }
+    }
+  }, [category, historySaveStatus, source, state, title]);
   const optionsById = useMemo(
     () => new Map(options.map((option) => [option.id, option] as const)),
     [options],
   );
   const revealed = state.status === 'revealed';
   const winner = revealed ? optionsById.get(state.result.winnerId) : undefined;
+  const notTodayDisabled =
+    !revealed || state.result.candidateIds.length <= DECISION_LIMITS.minEnabledOptions;
+  const historyStatusMessage =
+    historySaveStatus === 'saved'
+      ? t('historySaved')
+      : historySaveStatus === 'error'
+        ? t('historySaveFailed')
+        : '';
 
   return (
     <main className={styles.screen}>
@@ -59,13 +153,53 @@ export default function CaseOpening({ title, options, backTo }: CaseOpeningProps
           )}
         </div>
 
-        <Button disabled={state.status === 'spinning'} size="lg" onClick={open}>
-          {state.status === 'ready'
-            ? t('openCase')
-            : state.status === 'spinning'
-              ? t('opening')
-              : t('spinAgain')}
-        </Button>
+        {revealed ? (
+          <div className={styles.actions}>
+            <Button
+              disabled={historySaveStatus === 'saving' || historySaveStatus === 'saved'}
+              fullWidth
+              size="lg"
+              onClick={saveResult}
+            >
+              {historySaveStatus === 'saving'
+                ? t('saving')
+                : historySaveStatus === 'saved'
+                  ? t('saved')
+                  : t('goNow')}
+            </Button>
+            <div className={styles.secondaryActions}>
+              <Button fullWidth variant="outline" onClick={spinAgain}>
+                {t('spinAgain')}
+              </Button>
+              <Button
+                aria-describedby={notTodayDisabled ? minOptionsHintId : undefined}
+                disabled={notTodayDisabled}
+                fullWidth
+                variant="outline"
+                onClick={rejectWinner}
+              >
+                {t('notToday')}
+              </Button>
+            </div>
+            {notTodayDisabled && (
+              <p className={styles.hint} id={minOptionsHintId}>
+                {t('minOptionsHint')}
+              </p>
+            )}
+            <p
+              aria-live="polite"
+              className={`${styles.historyStatus} ${
+                historySaveStatus === 'error' ? styles.historyStatusError : ''
+              }`}
+            >
+              {historyStatusMessage}
+            </p>
+          </div>
+        ) : (
+          <Button disabled={state.status === 'spinning'} size="lg" onClick={spinAgain}>
+            {state.status === 'ready' ? t('openCase') : t('opening')}
+          </Button>
+        )}
       </div>
     </main>
   );
