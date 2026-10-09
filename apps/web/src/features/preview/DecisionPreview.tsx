@@ -17,7 +17,6 @@ export type DecisionPreviewProps = {
   options: readonly DecisionOptionData[];
   backTo: string;
   openTo: string;
-  openState?: unknown;
   children?: ReactNode;
 };
 
@@ -27,7 +26,6 @@ export default function DecisionPreview({
   options,
   backTo,
   openTo,
-  openState,
   children,
 }: DecisionPreviewProps) {
   const navigate = useNavigate();
@@ -60,7 +58,7 @@ export default function DecisionPreview({
   };
 
   const openCase = () => {
-    navigate(`${openTo}${search ? `?${search}` : ''}`, { state: openState });
+    navigate(`${openTo}${search ? `?${search}` : ''}`);
   };
 
   return (

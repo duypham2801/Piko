@@ -21,11 +21,13 @@ export default function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/history" element={<HistoryPage />} />
           <Route path="/decisions/new" element={<DecisionBuilderPage />} />
-          <Route path="/decisions/:id" element={<DecisionPreviewPage />} />
+          <Route path="/decisions/:id" element={<DecisionPreviewPage />}>
+            <Route path="open" element={<DecisionCasePage />} />
+          </Route>
           <Route path="/decisions/:id/edit" element={<DecisionBuilderPage />} />
-          <Route path="/decisions/:id/open" element={<DecisionCasePage />} />
-          <Route path="/presets/:slug" element={<PresetPreviewPage />} />
-          <Route path="/presets/:slug/open" element={<PresetCasePage />} />
+          <Route path="/presets/:slug" element={<PresetPreviewPage />}>
+            <Route path="open" element={<PresetCasePage />} />
+          </Route>
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Route>

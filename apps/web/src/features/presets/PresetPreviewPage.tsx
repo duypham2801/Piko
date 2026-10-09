@@ -1,4 +1,4 @@
-import { Link, useParams } from 'react-router';
+import { Link, Outlet, useParams } from 'react-router';
 
 import NotFoundPage from '../../app/NotFoundPage';
 import DecisionPreview from '../preview/DecisionPreview';
@@ -28,6 +28,7 @@ export default function PresetPreviewPage() {
           {t('customize')}
         </Link>
       </DecisionPreview>
+      <Outlet />
     </>
   );
 }

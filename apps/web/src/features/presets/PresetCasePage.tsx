@@ -1,8 +1,6 @@
 import { useParams } from 'react-router';
 
-import NotFoundPage from '../../app/NotFoundPage';
 import CaseOpening from '../case-opening/CaseOpening';
-import { t } from '../../i18n';
 import { useOffOptions } from '../preview/useOffOptions';
 import { findPreset } from './presets';
 
@@ -11,23 +9,18 @@ export default function PresetCasePage() {
   const preset = findPreset(slug);
   const { options, offKey, search } = useOffOptions(preset?.decision.options ?? []);
 
-  if (!preset) {
-    return <NotFoundPage />;
-  }
+  if (!preset) return null;
 
   const previewPath = `/presets/${slug}${search}`;
 
   return (
-    <>
-      <title>{`${preset.decision.title} · ${t('title')}`}</title>
-      <CaseOpening
-        backTo={previewPath}
-        key={`${slug}?${offKey}`}
-        options={options}
-        source={{ kind: 'preset', slug: preset.slug }}
-        title={preset.decision.title}
-        category={preset.decision.category}
-      />
-    </>
+    <CaseOpening
+      backTo={previewPath}
+      key={`${slug}?${offKey}`}
+      options={options}
+      source={{ kind: 'preset', slug: preset.slug }}
+      title={preset.decision.title}
+      category={preset.decision.category}
+    />
   );
 }

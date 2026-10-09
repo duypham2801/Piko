@@ -1,4 +1,5 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router';
 import { DECISION_LIMITS } from '@piko/domain';
 import type {
   DecisionDraftData,
@@ -9,7 +10,6 @@ import type {
 } from '@piko/domain';
 
 import Button from '../../components/ui/Button';
-import Screen from '../../app/Screen';
 import { t } from '../../i18n';
 import { createHistoryEntry } from '../../lib/api/history';
 import { recordShareSpin } from '../../lib/api/shares';
@@ -53,6 +53,9 @@ export default function CaseOpening({
   source,
   category,
 }: CaseOpeningProps) {
+  const navigate = useNavigate();
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
   const [excludedIds, setExcludedIds] = useState<ReadonlySet<string>>(() => new Set());
   const [historySaveStatus, setHistorySaveStatus] = useState<HistorySaveStatus>('idle');
   const [share, setShare] = useState<SharedCaseData | null>(null);
@@ -160,96 +163,126 @@ export default function CaseOpening({
         ? t('historySaveFailed')
         : '';
 
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (dialog && !dialog.open) {
+      dialog.showModal();
+    }
+  }, []);
+
+  const closeDialog = () => {
+    dialogRef.current?.close();
+  };
+
+  const handleClose = () => {
+    navigate(backTo, { replace: true });
+  };
+
   return (
-    <Screen align="center" backTo={backTo} className={styles.content} focus width="wide">
-      <header className={styles.header}>
-        <h1>{title}</h1>
-      </header>
-
-      <div className={styles.stage}>
-        <CaseCarousel
-          optionsById={optionsById}
-          plan={plan}
-          revealed={revealed}
-          stripRef={stripRef}
-          viewportRef={viewportRef}
-        />
-        {revealed && <Confetti />}
-      </div>
-
-      <div aria-live="polite" className={styles.result} role="status">
-        {winner && <WinnerPanel label={t('winnerIs')} option={winner} />}
-      </div>
-
-      {revealed ? (
-        <div className={styles.actions}>
+    <dialog
+      aria-labelledby={titleId}
+      className={styles.dialog}
+      ref={dialogRef}
+      onClose={handleClose}
+    >
+      <div className={styles.content}>
+        <header className={styles.header}>
+          <h2 id={titleId}>{title}</h2>
           <Button
-            disabled={historySaveStatus === 'saving' || historySaveStatus === 'saved'}
-            fullWidth
-            size="lg"
-            onClick={saveResult}
-          >
-            {historySaveStatus === 'saving'
-              ? t('saving')
-              : historySaveStatus === 'saved'
-                ? t('saved')
-                : t('goNow')}
-          </Button>
-          <div className={styles.secondaryActions}>
-            <Button fullWidth variant="outline" onClick={spin}>
-              {t('spinAgain')}
-            </Button>
-            <Button
-              aria-describedby={notTodayDisabled ? lastTwoOptionsHintId : undefined}
-              disabled={notTodayDisabled}
-              fullWidth
-              variant="outline"
-              onClick={rejectWinner}
-            >
-              {t('notToday')}
-            </Button>
-          </div>
-          <Button
-            aria-haspopup="dialog"
-            fullWidth
-            id={shareToggleId}
+            aria-label={t('close')}
+            className={styles.closeButton}
             variant="outline"
-            onClick={openShareDialog}
+            onClick={closeDialog}
           >
-            {t('share')}
+            <span aria-hidden="true">×</span>
           </Button>
-          {notTodayDisabled && (
-            <p className={styles.hint} id={lastTwoOptionsHintId}>
-              {t('lastTwoOptionsHint')}
-            </p>
-          )}
-          <p
-            aria-live="polite"
-            className={
-              historySaveStatus === 'saved'
-                ? 'visually-hidden'
-                : historySaveStatus === 'error'
-                  ? styles.historyStatusError
-                  : ''
-            }
-          >
-            {historyStatusMessage}
-          </p>
+        </header>
+
+        <div className={styles.stage}>
+          <CaseCarousel
+            optionsById={optionsById}
+            plan={plan}
+            revealed={revealed}
+            stripRef={stripRef}
+            viewportRef={viewportRef}
+          />
+          {revealed && <Confetti />}
         </div>
-      ) : (
-        <Button disabled={state.status === 'spinning'} size="lg" onClick={spin}>
-          {state.status === 'ready' ? t('openCase') : t('opening')}
-        </Button>
-      )}
-      {shareSnapshot && (
-        <ShareDialog
-          decision={shareSnapshot.decision}
-          result={shareSnapshot.result}
-          share={share}
-          onClose={closeShareDialog}
-          onShared={setShare}
-        />
-      )}
-    </Screen>
+
+        <div aria-live="polite" className={styles.result} role="status">
+          {winner && <WinnerPanel label={t('winnerIs')} option={winner} />}
+        </div>
+
+        {revealed ? (
+          <div className={styles.actions}>
+            <Button
+              disabled={historySaveStatus === 'saving' || historySaveStatus === 'saved'}
+              fullWidth
+              size="lg"
+              onClick={saveResult}
+            >
+              {historySaveStatus === 'saving'
+                ? t('saving')
+                : historySaveStatus === 'saved'
+                  ? t('saved')
+                  : t('goNow')}
+            </Button>
+            <div className={styles.secondaryActions}>
+              <Button fullWidth variant="outline" onClick={spin}>
+                {t('spinAgain')}
+              </Button>
+              <Button
+                aria-describedby={notTodayDisabled ? lastTwoOptionsHintId : undefined}
+                disabled={notTodayDisabled}
+                fullWidth
+                variant="outline"
+                onClick={rejectWinner}
+              >
+                {t('notToday')}
+              </Button>
+            </div>
+            <Button
+              aria-haspopup="dialog"
+              fullWidth
+              id={shareToggleId}
+              variant="outline"
+              onClick={openShareDialog}
+            >
+              {t('share')}
+            </Button>
+            {notTodayDisabled && (
+              <p className={styles.hint} id={lastTwoOptionsHintId}>
+                {t('lastTwoOptionsHint')}
+              </p>
+            )}
+            <p
+              aria-live="polite"
+              className={
+                historySaveStatus === 'saved'
+                  ? 'visually-hidden'
+                  : historySaveStatus === 'error'
+                    ? styles.historyStatusError
+                    : ''
+              }
+            >
+              {historyStatusMessage}
+            </p>
+          </div>
+        ) : (
+          <Button autoFocus disabled={state.status === 'spinning'} size="lg" onClick={spin}>
+            {state.status === 'ready' ? t('openCase') : t('opening')}
+          </Button>
+        )}
+        {shareSnapshot && (
+          <ShareDialog
+            decision={shareSnapshot.decision}
+            result={shareSnapshot.result}
+            share={share}
+            onClose={closeShareDialog}
+            onShared={setShare}
+          />
+        )}
+      </div>
+    </dialog>
   );
 }

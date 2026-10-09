@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router';
+import { Link, Outlet, useNavigate, useParams } from 'react-router';
 
 import NotFoundPage from '../../app/NotFoundPage';
 import Button from '../../components/ui/Button';
@@ -104,13 +104,13 @@ export default function DecisionPreviewPage() {
       <title>{`${decision.title} · ${t('title')}`}</title>
       <DecisionPreview
         backTo="/"
-        openState={{ record }}
         openTo={`/decisions/${id}/open`}
         options={decision.options}
         title={decision.title}
       >
         {actions}
       </DecisionPreview>
+      <Outlet context={record} />
     </>
   );
 }
