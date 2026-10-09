@@ -1,7 +1,7 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 7 — Responsive pass + navigation shell (kickoff done, D-032). Next task: 7-4 (responsive pass). Phase 6 merged into `main` on 2026-10-09; live viewing moved to the Realtime phase (D-031).
+- **Current phase:** Phase 7 — Responsive pass + navigation shell (kickoff done, D-032). All tasks done; waiting for the owner's Phase 7 walk-through before merging into `main`. Phase 6 merged into `main` on 2026-10-09; live viewing moved to the Realtime phase (D-031).
 - **Integration branch:** `feat/phase-7-responsive`
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`); Phase 4 (4-1, 4-2: router, Home, presets, preview, merged into `main`); Phase 5 (5-1…5-4: decisions API, builder, saved decisions, reuse options, merged into `main`)
 
@@ -37,7 +37,7 @@
 | 7-1 | Navigation shell | ✅ (`7-1-fix-1.md`) | `7-1-navigation-shell.md`: layout route + screen shell (back link at one position), mobile top bar, desktop sidebar frame from `64rem`, focus mode on case screens, `/s/:id` outside; replaces the copied screen layouts (D-032) |
 | 7-2 | Sidebar lists + desktop Home | ✅ (`7-2-fix-1.md`) | "Của bạn" and "Gần đây" in the sidebar (reload on route change), Home drops both sections from `64rem` (D-032) |
 | 7-3 | Case overlay | ✅ (`7-3-fix-1.md`, `7-3-fix-2.md`) | The case opens as a modal overlay above the preview/builder (nested `/open` routes, full-screen on phones, × / Esc / Back to close), focus mode removed, plus the 7-2 carry-overs (C0) (D-033) |
-| 7-4 | Responsive pass | 🔄 handoff `7-4-responsive-pass.md` | Every screen at 360 / 768 / 1024 / 1280 / 1920 after the overlay: carousel, winner reveal, CTAs, card grids, option layout |
+| 7-4 | Responsive pass | ✅ (`07a7a25`) | Every screen at 360 / 768 / 1024 / 1280 / 1920 after the overlay: carousel, winner reveal, CTAs, card grids, option layout |
 | 8 | Polish | ⬜ | States, micro-interactions, consistency |
 | 9 | First prod release | ⬜ | Deploy `v0.1.0` to VPS, verify backup/rollback |
 | — | Final engineering review | ⬜ | Format per master prompt §47–48 |
@@ -790,6 +790,15 @@
   - → `7-4-responsive-pass.md`. The rest goes to Phase 8:
     - emoji-less row alignment
     - scrolling the active sidebar row into view
+- **7-4 (2026-10-09):** verified (`07a7a25`, 2 files, +9/−4). The implementer reported one transient PGlite timeout (`shares.test.ts`) that passed on retry (known flake).
+  - **Overlay (desktop):** the top stays at 64 px and the strip at 195 px, before and after the reveal, at 1280×800 and 1920×1080. At 1280×500 it scrolls inside.
+  - **360×740:**
+    - "Tối nay ăn gì?" fits on one line (37 px).
+    - A 45-character title wraps (147 px) without overlapping "×" (title x 68–292, button x 300–344).
+    - The revealed case needs no scrolling.
+  - **`/s/:id` at 360/1920:** strip → "Xem lại lượt quay" is 160 px (96 reserve + gaps), nothing moves at the reveal, and there is no horizontal scroll.
+  - **NICE (Phase 8):** at 1280×500, focusing "Mở case" on open scrolls the dialog so the strip's top is hidden.
+  - **7-4 accepted.** Fast-forwarded into `feat/phase-7-responsive`. Phase 7 is ready for the owner's walk-through.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
