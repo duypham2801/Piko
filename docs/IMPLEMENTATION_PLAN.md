@@ -33,7 +33,7 @@
 | 6-4 | Shares API | ⬜ | `shared_cases` table, owner routes (create with lifetime, list, revoke, record a spin), public read route without a session (D-030) |
 | 6-5 | Share UI + public page | ⬜ | "Chia sẻ" dialog (lifetime, Web Share / copy), `/s/:id` (options, replay, "Tự quay thử"), "Link đã chia sẻ" with revoke in `/history` (D-030) |
 | 6-6 | Live viewing + interactions | ⬜ | SSE + POST, in-memory pub/sub; interaction kinds and viewer identity decided at kickoff (D-030) |
-| 7 | Responsive pass | ⬜ | Desktop is not in the mockup and must be designed |
+| 7 | Responsive pass + navigation shell | ⬜ | Desktop is not in the mockup and must be designed. **First task: a navigation shell** (owner, 2026-10-09):<br>- a desktop sidebar holding "Của bạn" and "Gần đây"<br>- a mobile navigation pattern (top bar, drawer or bottom tabs), chosen at kickoff<br>- the shared screen shell with the back link at the same position on every screen<br>- the public `/s/:id` page stays outside the shell |
 | 8 | Polish | ⬜ | States, micro-interactions, consistency |
 | 9 | First prod release | ⬜ | Deploy `v0.1.0` to VPS, verify backup/rollback |
 | — | Final engineering review | ⬜ | Format per master prompt §47–48 |
@@ -559,7 +559,9 @@
     - `.recent` repeats the grid rules of `.yourDecisions`/`.quickPicks`
   - **For the owner's visual review:** the `--border-width-thin` (2 px) dividers look heavy; where "Gần đây" sits on Home.
   - **DO NOT TOUCH:** the shared `HistoryList` (one `Card`, rows as `Link` or `div`); `useHistoryList` with `retry`.
-  - Waiting for the owner's visual review before one bundled fix.
+  - **Owner visual review:**
+    - make the dividers thinner → `6-3-fix-1.md`, with a hairline width and a `--color-divider` token, plus the two NICE items
+    - the owner asked for a sidebar holding "Của bạn" and "Gần đây". **Deferred to the start of Phase 7** (owner, HITL): the app has no navigation shell yet, and Phase 6 still adds `/history` "Link đã chia sẻ" and the public `/s/:id`, so the shell is designed once, after Phase 6
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
@@ -568,6 +570,7 @@
 - **The prod build stage must set `NODE_ENV=production` explicitly** and must not load `.env.dev`/`.env.prod` at build time. Otherwise Vite bundles development React (+60 kB gz). Any `vite build` run inside the dev container produces a dev build and is not representative.
 
 ## Pending decisions
+- Phase 7 navigation shell: desktop sidebar layout, mobile pattern (top bar / drawer / bottom tabs), what moves off Home.
 - Live viewing interactions and viewer identity/anti-spam (decide at the start of 6-6).
 - Inactive guest cleanup policy (e.g. delete after N months of inactivity).
 - Hosting target: VPS provider + domain (needed before Phase 9).
