@@ -2,7 +2,7 @@ import { Link, NavLink, useLocation } from 'react-router';
 
 import { t } from '../i18n';
 import { useDecisionList } from '../features/decisions/useDecisionList';
-import { historyEntryHref } from '../features/history/HistoryList';
+import { historyEntryHref } from '../features/history/historyEntryHref';
 import { useHistoryList } from '../features/history/useHistoryList';
 import styles from './NavLists.module.css';
 
@@ -24,7 +24,6 @@ export default function NavLists() {
               return (
                 <li key={decision.id}>
                   <NavLink
-                    aria-label={decision.title}
                     className={`${styles.row} ${styles.link}`}
                     state={{ record }}
                     to={`/decisions/${decision.id}`}
@@ -51,7 +50,7 @@ export default function NavLists() {
         (historyState.status === 'loaded' && historyState.entries.length > 0)) && (
         <section className={styles.recentSection}>
           <header className={styles.sectionHeader}>
-            <h2>{t('recent')}</h2>
+            <h2 className={styles.heading}>{t('recent')}</h2>
             <Link className={styles.seeAll} to="/history">
               {t('seeAll')}
             </Link>

@@ -2,19 +2,9 @@ import { Link } from 'react-router';
 import type { HistoryEntryData } from '@piko/domain';
 
 import Card from '../../components/ui/Card';
-import { findPreset } from '../presets/presets';
+import { historyEntryHref } from './historyEntryHref';
 import { formatHistoryTime } from './historyTime';
 import styles from './HistoryList.module.css';
-
-export function historyEntryHref(entry: HistoryEntryData): string | undefined {
-  if (entry.source.kind === 'decision') {
-    return entry.source.decisionId ? `/decisions/${entry.source.decisionId}` : undefined;
-  }
-  if (entry.source.kind === 'preset') {
-    return findPreset(entry.source.slug) ? `/presets/${entry.source.slug}` : undefined;
-  }
-  return undefined;
-}
 
 type HistoryListProps = {
   entries: readonly HistoryEntryData[];
