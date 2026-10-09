@@ -30,7 +30,7 @@
 | 6-1 | History API | ✅ | `6-1-history-api.md`: `decision_sessions` table (snapshot + `SelectionResult`, re-checked on the server), `POST/GET /api/history`, 200 per user, PGlite tests (D-030) |
 | 6-2 | Result actions | ✅ (`6-2-fix-1.md`, `6-2-fix-2.md`) | `6-2-result-actions.md`: "Đi thôi" (save to history, best-effort), "Mở lại", "Không phải hôm nay" (exclude and respin), on every case screen (D-030) |
 | 6-3 | History UI | ✅ (`6-3-fix-1.md`) | `6-3-history-ui.md`: Home "Gần đây" (5 newest) + `/history` (D-028, D-030) |
-| 6-4 | Shares API | ⬜ | `shared_cases` table, owner routes (create with lifetime, list, revoke, record a spin), public read route without a session (D-030) |
+| 6-4 | Shares API | ⬜ | `6-4-shares-api.md`: `shared_cases` table, owner routes (create with lifetime, list, revoke, record a spin), public read route without a session (D-030) |
 | 6-5 | Share UI + public page | ⬜ | "Chia sẻ" dialog (lifetime, Web Share / copy), `/s/:id` (options, replay, "Tự quay thử"), "Link đã chia sẻ" with revoke in `/history` (D-030) |
 | 6-6 | Live viewing + interactions | ⬜ | SSE + POST, in-memory pub/sub; interaction kinds and viewer identity decided at kickoff (D-030) |
 | 7 | Responsive pass + navigation shell | ⬜ | Desktop is not in the mockup and must be designed. **First task: a navigation shell** (owner, 2026-10-09):<br>- a desktop sidebar holding "Của bạn" and "Gần đây"<br>- a mobile navigation pattern (top bar, drawer or bottom tabs), chosen at kickoff<br>- the shared screen shell with the back link at the same position on every screen<br>- the public `/s/:id` page stays outside the shell |

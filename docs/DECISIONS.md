@@ -410,6 +410,20 @@ Format: Decision · Reason · Alternatives · Tradeoffs · Phase/Date
 
     Revisit it only for voice/video calls in a future group mode.
   - The kinds of interaction (e.g. reactions, votes) and viewer identity and anti-spam are decided when task 6-6 starts.
+- **Shares API defaults (6-4, architect):**
+  - **Table `shared_cases`:**
+    - a snapshot of the title, the optional category and the options
+    - the latest `result` and `spun_at`, both nullable, so a link can exist before the first spin
+    - `created_at`, plus `expires_at` (null = no expiry)
+    - cascade on user delete
+  - **Routes:**
+    - owner routes under `/api/shares` (session required): create with a lifetime, list active, revoke, record a spin
+    - the public read `GET /api/public/shares/:id`: no session middleware, never sets a cookie or creates a guest, `Cache-Control: no-store`
+  - **Revoke deletes the row.** Unknown, revoked and expired ids all answer `404 not_found`, so they cannot be told apart.
+  - **Expired rows** are filtered on read and deleted when the same user creates a new link. At most **50 active links per user**, otherwise `409 share_limit_reached`.
+  - **A recorded spin** may change only the `enabled` flags of the shared options, because "Không phải hôm nay" excludes options. Ids, order, labels, emoji and weights must match, and the result is re-checked with `matchesSelection`.
+  - **The public response includes the option weights.** Replay and "Tự quay thử" must run the shared engine with the same weights (D-005). The UI never displays weights or odds (D-010). A technically curious viewer can still read the sharer's priorities in the response; this is accepted.
+  - **No rate limit on the public route** for now: UUID v4 ids are not enumerable. Revisit before Phase 9.
 - **Task order (owner):**
   1. 6-1 history API
   2. 6-2 result actions
