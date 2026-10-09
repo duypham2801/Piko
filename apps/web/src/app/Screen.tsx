@@ -9,7 +9,6 @@ type ScreenProps = {
   backTo?: To;
   width?: 'narrow' | 'wide';
   align?: 'start' | 'center';
-  focus?: boolean;
   className?: string;
   children: ReactNode;
 };
@@ -18,7 +17,6 @@ export default function Screen({
   backTo,
   width = 'narrow',
   align = 'start',
-  focus = false,
   className,
   children,
 }: ScreenProps) {
@@ -30,7 +28,7 @@ export default function Screen({
     .join(' ');
 
   return (
-    <main className={screenClassName} data-focus={focus ? true : undefined}>
+    <main className={screenClassName}>
       {backTo !== undefined && (
         <div className={styles.top}>
           <BackLink to={backTo}>{t('back')}</BackLink>

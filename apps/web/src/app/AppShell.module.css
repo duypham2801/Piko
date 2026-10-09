@@ -11,12 +11,3 @@
     grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
   }
 }
-
-.shell:has([data-focus]) {
-  grid-template-rows: minmax(0, 1fr);
-  grid-template-columns: minmax(0, 1fr);
-}
-
-.shell:has([data-focus]) > nav {
-  display: none;
-}
