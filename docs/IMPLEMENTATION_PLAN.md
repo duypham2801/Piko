@@ -1,8 +1,8 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 6 — Result + history (not started)
-- **Integration branch:** none yet
+- **Current phase:** Phase 6 — Result, history, share, live viewing (6-1 handed off)
+- **Integration branch:** `feat/phase-6-result-history`
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`); Phase 4 (4-1, 4-2: router, Home, presets, preview, merged into `main`); Phase 5 (5-1…5-4: decisions API, builder, saved decisions, reuse options, merged into `main`)
 
 ## Phases
@@ -27,7 +27,12 @@
 | 5-2 | Builder screen | ✅ done (`5-2-fix-1.md`, `ea973cf`) | `/decisions/new` and `/decisions/:id/edit`: title, options (add/edit/remove), emoji picker, priority dots, shared schema validation, explicit Save, non-blocking save error (D-029) |
 | 5-3 | Saved decisions | ✅ done (`5-3-fix-1.md`, `58e5f14`) | `/decisions/:id` preview (Sửa/Xóa with inline confirm) + `/open` case, Home "Của bạn" (create card + saved cards), a create lands on the preview. Shared `features/preview/` (preview, `?off=` helpers) used by presets too; `useDecisionRecord` shows the state record, then refetches (D-029) |
 | 5-4 | Reuse existing options | ✅ done (`5-4-fix-1.md`, `5-4-fix-2.md`, `aa21530`) | Preset "Tùy chỉnh" (`/decisions/new?from=<slug>`) and builder "Thêm từ có sẵn", which copies options from presets/saved decisions (D-029) |
-| 6 | Result + history | ⬜ | Winner reveal, Let's Go / Spin Again / Not Tonight / Share, history; adds Home "Recent decisions" (D-028) |
+| 6-1 | History API | ⬜ handed off | `6-1-history-api.md`: `decision_sessions` table (snapshot + `SelectionResult`, re-checked on the server), `POST/GET /api/history`, 200 per user, PGlite tests (D-030) |
+| 6-2 | Result actions | ⬜ | "Đi thôi" (save to history, best-effort), "Mở lại", "Không phải hôm nay" (exclude and respin), on every case screen (D-030) |
+| 6-3 | History UI | ⬜ | Home "Gần đây" (5 newest) + `/history` (D-028, D-030) |
+| 6-4 | Shares API | ⬜ | `shared_cases` table, owner routes (create with lifetime, list, revoke, record a spin), public read route without a session (D-030) |
+| 6-5 | Share UI + public page | ⬜ | "Chia sẻ" dialog (lifetime, Web Share / copy), `/s/:id` (options, replay, "Tự quay thử"), "Link đã chia sẻ" with revoke in `/history` (D-030) |
+| 6-6 | Live viewing + interactions | ⬜ | SSE + POST, in-memory pub/sub; interaction kinds and viewer identity decided at kickoff (D-030) |
 | 7 | Responsive pass | ⬜ | Desktop is not in the mockup and must be designed |
 | 8 | Polish | ⬜ | States, micro-interactions, consistency |
 | 9 | First prod release | ⬜ | Deploy `v0.1.0` to VPS, verify backup/rollback |
@@ -479,6 +484,18 @@
   - Architect re-check on `main`: `make check` passes (domain 44, api 17), `/api/healthz` reports ok with the db ok, and the web returns 200.
   - **Phase 5 complete.**
 
+- **Phase 6 kickoff (2026-10-09):** HITL decisions recorded in D-030 (refines D-009; adds an approved exception to CLAUDE.md rule 9).
+  - The owner chose:
+    - history on "Đi thôi" only
+    - Home "Gần đây" + `/history`
+    - "Không phải hôm nay" excludes and respins at once
+    - share as a **public link** with the option list, replay and "Tự quay thử", available as soon as the result is revealed
+    - a lifetime chosen when sharing, plus revoke
+    - **live viewing with viewer interaction**
+  - The owner asked whether LiveKit/WebRTC fits live viewing. The architect advised against it: the spin is deterministic from the seed, so a tiny event is enough and no media needs streaming. The owner chose SSE + POST.
+  - Split into 6-1…6-6, with live viewing last. Integration branch `feat/phase-6-result-history` created from `main` (`36a32ed`). Topology updated (owner approved).
+  - Handoff `6-1-history-api.md` written.
+
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
 - `migrate` resolves `../../drizzle` relative to `dist/db/migrate.js`, so the prod api image must ship `apps/api/drizzle/` next to `dist/`.
@@ -486,7 +503,7 @@
 - **The prod build stage must set `NODE_ENV=production` explicitly** and must not load `.env.dev`/`.env.prod` at build time. Otherwise Vite bundles development React (+60 kB gz). Any `vite build` run inside the dev container produces a dev build and is not representative.
 
 ## Pending decisions
-- Share format (Phase 6).
+- Live viewing interactions and viewer identity/anti-spam (decide at the start of 6-6).
 - Inactive guest cleanup policy (e.g. delete after N months of inactivity).
 - Hosting target: VPS provider + domain (needed before Phase 9).
 - Off-site backup destination (before Phase 9).
