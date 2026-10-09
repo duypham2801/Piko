@@ -14,6 +14,8 @@ export const vi = {
   recent: 'Gần đây',
   seeAll: 'Xem tất cả',
   historyTitle: 'Lịch sử',
+  navLabel: 'Điều hướng chính',
+  navCreate: 'Tạo',
   historyEmpty: 'Chưa có gì ở đây. Mở một case rồi bấm "Đi thôi" để lưu lại.',
   historyLoadFailed: 'Chưa tải được lịch sử.',
   today: 'Hôm nay',

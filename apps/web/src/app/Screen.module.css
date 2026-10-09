@@ -1,0 +1,35 @@
+.screen {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  align-content: start;
+  min-width: 0;
+  padding: var(--space-6) var(--space-4) var(--space-8);
+  background: var(--color-bg);
+}
+
+.top {
+  width: min(100%, var(--content-wide-max-width));
+  margin: 0 auto var(--space-5);
+}
+
+.content {
+  display: grid;
+  width: min(100%, var(--content-max-width));
+  min-width: 0;
+  gap: var(--space-6);
+  margin: 0 auto;
+}
+
+.center .content {
+  align-self: center;
+}
+
+@media (min-width: 48rem) {
+  .screen {
+    padding: var(--space-6);
+  }
+
+  .wide {
+    width: min(100%, var(--content-wide-max-width));
+  }
+}

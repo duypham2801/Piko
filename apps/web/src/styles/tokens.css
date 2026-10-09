@@ -93,6 +93,7 @@
 
   --content-max-width: 30rem;
   --content-wide-max-width: 60rem; /* wide screens such as the case-opening stage */
+  --sidebar-width: 16rem;
   --tap-target-min: 44px;
   --z-base: 0;
   --z-raised: 1; /* lifted elements above their siblings */
