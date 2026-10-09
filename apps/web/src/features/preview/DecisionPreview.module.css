@@ -48,6 +48,10 @@
   gap: var(--space-3);
 }
 
+.optionRow[data-no-emoji] {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
 .optionEmoji {
   font-size: var(--text-xl);
   line-height: var(--leading-tight);

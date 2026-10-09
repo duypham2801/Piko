@@ -20,22 +20,17 @@ type SaveStatus = 'idle' | 'saving' | 'saved' | 'limitError' | 'saveError';
 type DecisionFormProps = {
   decisionId?: string;
   initial: DecisionDraftData;
-  initialStatus?: 'idle' | 'saved';
 };
 
 const emptyErrors: FormErrors = { options: {} };
 
-export default function DecisionForm({
-  decisionId,
-  initial,
-  initialStatus = 'idle',
-}: DecisionFormProps) {
+export default function DecisionForm({ decisionId, initial }: DecisionFormProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [draft, setDraft] = useState<DecisionDraftData>(initial);
   const [submitted, setSubmitted] = useState(false);
-  const [status, setStatus] = useState<SaveStatus>(initialStatus);
+  const [status, setStatus] = useState<SaveStatus>('idle');
   const [openEmojiId, setOpenEmojiId] = useState<string | null>(null);
   const pendingFocusId = useRef<string | null>(null);
   const isCaseView = searchParams.get('view') === 'case';

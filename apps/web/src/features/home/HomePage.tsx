@@ -43,7 +43,8 @@ export default function HomePage() {
                 </Link>
               </li>
               {status === 'loaded' &&
-                decisions.map(({ decision, ...record }) => {
+                decisions.map((record) => {
+                  const { decision } = record;
                   const firstEmoji = decision.options.find((option) => option.emoji)?.emoji;
                   const optionHint = decision.options
                     .slice(0, 3)
@@ -55,7 +56,7 @@ export default function HomePage() {
                       <Link
                         aria-label={decision.title}
                         className={styles.presetLink}
-                        state={{ record: { decision, ...record } }}
+                        state={{ record }}
                         to={`/decisions/${decision.id}`}
                       >
                         <Card className={styles.presetCard} tone="surface">

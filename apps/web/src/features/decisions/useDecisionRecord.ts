@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router';
 import { DecisionRecord, type DecisionRecordData } from '@piko/domain';
 
@@ -13,7 +13,7 @@ export type DecisionRecordLoadState =
 
 type InternalLoadState = {
   id: string | undefined;
-  state: DecisionRecordLoadState;
+  state: Exclude<DecisionRecordLoadState, { status: 'error' }> | { status: 'error' };
 };
 
 export function useDecisionRecord(id: string | undefined): DecisionRecordLoadState {
@@ -28,10 +28,15 @@ export function useDecisionRecord(id: string | undefined): DecisionRecordLoadSta
     const parsed = DecisionRecord.safeParse(state.record);
     return parsed.success && parsed.data.decision.id === id ? parsed.data : undefined;
   }, [id, location.state]);
+  const stateRecordRef = useRef(stateRecord);
   const [internal, setInternal] = useState<InternalLoadState>(() => ({
     id,
     state: stateRecord ? { record: stateRecord, status: 'loaded' } : { status: 'loading' },
   }));
+
+  useEffect(() => {
+    stateRecordRef.current = stateRecord;
+  }, [stateRecord]);
 
   useEffect(() => {
     if (!id) {
@@ -52,21 +57,15 @@ export function useDecisionRecord(id: string | undefined): DecisionRecordLoadSta
 
         if (error instanceof ApiClientError && error.status === 404) {
           setInternal({ id, state: { status: 'notFound' } });
-        } else if (stateRecord) {
-          setInternal({ id, state: { record: stateRecord, status: 'loaded' } });
+        } else if (stateRecordRef.current) {
+          setInternal({ id, state: { record: stateRecordRef.current, status: 'loaded' } });
         } else {
-          setInternal({
-            id,
-            state: {
-              retry: () => setRetryCount((count) => count + 1),
-              status: 'error',
-            },
-          });
+          setInternal({ id, state: { status: 'error' } });
         }
       });
 
     return () => controller.abort();
-  }, [id, retryCount, stateRecord]);
+  }, [id, retryCount]);
 
   const retry = useCallback(() => setRetryCount((count) => count + 1), []);
   if (internal.id !== id) {

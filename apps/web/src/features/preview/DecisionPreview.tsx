@@ -87,11 +87,14 @@ export default function DecisionPreview({
                 <Card
                   className={styles.optionRow}
                   data-off={!checked ? '' : undefined}
+                  data-no-emoji={!option.emoji ? '' : undefined}
                   tone="surface"
                 >
-                  <span aria-hidden="true" className={styles.optionEmoji}>
-                    {option.emoji}
-                  </span>
+                  {option.emoji && (
+                    <span aria-hidden="true" className={styles.optionEmoji}>
+                      {option.emoji}
+                    </span>
+                  )}
                   <span className={styles.optionLabel}>{option.label}</span>
                   <Switch
                     checked={checked}
