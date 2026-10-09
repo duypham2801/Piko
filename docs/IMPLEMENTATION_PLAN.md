@@ -24,7 +24,7 @@
 | 4-1 | Router + Home + preset case route | ✅ done (`39e7baa`) | `4-1-router-home.md`: React Router 8, Home (brand, question, mode selector, 4 preset cards), `/presets/:slug` case, not found (D-028) |
 | 4-2 | Preset preview | ✅ done (`4-2-fix-1.md`, `89fe5cc`) | `4-2-preset-preview.md`: includes the 4-1 clean-up (C0) and a `BackLink` primitive. Preview screen with option switches, `?off=` in the URL, case moves to `/presets/:slug/open` (D-028) |
 | 5-1 | Decisions API | ✅ done (`5-1-fix-1.md`, `5-1-fix-2.md`, `60387fc`) | `5-1-decisions-api.md`: `decisions` table (options as JSONB), CRUD routes requiring a session, ownership, 100 per user, PGlite service tests (D-029) |
-| 5-2 | Builder screen | 🔧 handed off (`5-2-decision-builder.md`) | `/decisions/new` and `/decisions/:id/edit`: title, options (add/edit/remove), emoji picker, priority dots, shared schema validation, explicit Save, non-blocking save error (D-029) |
+| 5-2 | Builder screen | 🔧 fix-1 handed off (`5-2-decision-builder.md`, `5-2-fix-1.md`) | `/decisions/new` and `/decisions/:id/edit`: title, options (add/edit/remove), emoji picker, priority dots, shared schema validation, explicit Save, non-blocking save error (D-029) |
 | 5-3 | Saved decisions | ⬜ | `/decisions/:id` preview + `/open` case, Home "Của bạn" section + "Tạo quyết định", delete with confirm, preset "Tùy chỉnh"; the post-create target moves from `/edit` to the preview; `DELETE` client (D-028, D-029) |
 | 6 | Result + history | ⬜ | Winner reveal, Let's Go / Spin Again / Not Tonight / Share, history; adds Home "Recent decisions" (D-028) |
 | 7 | Responsive pass | ⬜ | Desktop is not in the mockup and must be designed |
@@ -348,6 +348,29 @@
 - **5-2 handoff (2026-10-08):** the owner approved two empty options as the builder start. Architect defaults, recorded in D-029:
   - "Mở case" is always available in the builder. It opens the current draft in place (`?view=case`), so a save failure never blocks a decision.
   - Until 5-3, a create lands on `/decisions/:id/edit`, with the record passed in the router state.
+
+- **5-2 (2026-10-09):** reviewed `feat/5-2-decision-builder` (2 commits, 15 files, +1204/−3).
+  - Architect re-check:
+    - `make check` passes, and the literal and `style=` greps are clean
+    - the builder was driven in headless Chrome at 360 and 1280 px
+  - Prod bundle: main JS 96.47 → **100.70 kB gz** (+4.2 kB), measured with `NODE_ENV=production`. The 164 kB in the report was a dev build.
+  - Accepted:
+    - the API client: one shared response parser; `withSession` resets the session and retries once on 401 `session_required`
+    - the `AbortController` load with 404 → Not found
+    - duplicate labels computed in the web (both rows are marked while another field is empty)
+    - focus goes to the first invalid input
+    - "Mở case" opens in place under `?view=case`, and Back returns to the form with the draft intact
+    - no overflow at 360 px with a long label and the panel open
+    - the 40 emoji are checked against the schema in dev
+  - MUST (`5-2-fix-1.md` F1):
+    - **After a create, Save is stuck on "Đang lưu…" (disabled), and the title stays untrimmed** (reproduced). The form has no `key`, so React reuses the `/new` instance on `/:id/edit`; the handoff asked for one.
+    - The router state record is never refreshed after an update, so a reload shows the content from the create.
+  - SHOULD:
+    - F2 (reproduced): "Kiểm tra lại các ô…" stays after every error is fixed, because it is stored as a status instead of derived
+    - F3 (screenshot): `display: contents` puts the emoji panel between the trigger and the label input, which breaks line 1 of the row
+    - F4: `draftOf`, the empty-option factory and the option input id each exist twice
+  - NICE (F5): the `messages` injection in `formErrors.ts`, `<title>` repeated in five returns, `OptionRow` borrowing `DecisionForm.module.css`.
+  - The report claimed "Save, edit và save lại" passed, but the architect reproduced the opposite.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
