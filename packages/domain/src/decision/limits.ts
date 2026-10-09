@@ -1,5 +1,6 @@
 export const DECISION_LIMITS = {
   maxDecisionsPerUser: 100,
+  maxHistoryEntriesPerUser: 200,
   minOptions: 2,
   maxOptions: 20,
   minEnabledOptions: 2,
