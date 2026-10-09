@@ -31,7 +31,7 @@
 | 6-2 | Result actions | ✅ (`6-2-fix-1.md`, `6-2-fix-2.md`) | `6-2-result-actions.md`: "Đi thôi" (save to history, best-effort), "Mở lại", "Không phải hôm nay" (exclude and respin), on every case screen (D-030) |
 | 6-3 | History UI | ✅ (`6-3-fix-1.md`) | `6-3-history-ui.md`: Home "Gần đây" (5 newest) + `/history` (D-028, D-030) |
 | 6-4 | Shares API | ✅ (`6-4-fix-1.md`) | `6-4-shares-api.md`: `shared_cases` table, owner routes (create with lifetime, list, revoke, record a spin), public read route without a session (D-030) |
-| 6-5a | Share UI + public page | ⬜ | `6-5a-share-ui.md`: "Chia sẻ" dialog (lifetime, Web Share / copy), later spins recorded, `/s/:id` (options, replay, "Tự quay thử", unavailable page) with no session bootstrap; extracts `Sheet` and `WinnerPanel` (D-030) |
+| 6-5a | Share UI + public page | 🔄 (`6-5a-fix-1.md`) | `6-5a-share-ui.md`: "Chia sẻ" dialog (lifetime, Web Share / copy), later spins recorded, `/s/:id` (options, replay, "Tự quay thử", unavailable page) with no session bootstrap; extracts `Sheet` and `WinnerPanel` (D-030) |
 | 6-5b | Shared links list + revoke | ⬜ | "Link đã chia sẻ" with revoke in `/history` (D-030) |
 | 6-6 | Live viewing + interactions | ⬜ | SSE + POST, in-memory pub/sub; interaction kinds and viewer identity decided at kickoff (D-030) |
 | 7 | Responsive pass + navigation shell | ⬜ | Desktop is not in the mockup and must be designed. **First task: a navigation shell** (owner, 2026-10-09):<br>- a desktop sidebar holding "Của bạn" and "Gần đây"<br>- a mobile navigation pattern (top bar, drawer or bottom tabs), chosen at kickoff<br>- the shared screen shell with the back link at the same position on every screen<br>- the public `/s/:id` page stays outside the shell |
@@ -592,6 +592,28 @@
 - **6-5 kickoff (2026-10-09):** split into 6-5a (share dialog, recording later spins, public `/s/:id`) and 6-5b (shared links list + revoke), owner approved. Handoff `6-5a-share-ui.md`.
   - Architect defaults: the app-wide `ensureSession()` effect moves into a `SessionLayout` route so `/s/:id` never bootstraps a session; spins after sharing are recorded at spin start (best-effort, silent); the public page lists enabled options only, keeps the real shared result visible next to local "Tự quay thử" spins, and sets `noindex`.
   - Reuse boundary reached: a second modal, so `ExistingOptionsPanel`'s dialog shell becomes `components/ui/Sheet`; the winner card becomes `WinnerPanel` for the case screen and the public page.
+- **6-5a review (2026-10-09):** verified on `feat/6-5a-share-ui` (3 commits, 21 files). `make check` passes (domain 48, api 41); no dependency change; the session grep shows only `SessionLayout.tsx`; the literal grep is empty.
+  - Browser (headless Chrome, 360/390/1280, reduced motion and normal motion):
+    - "Chia sẻ" → 7 days preselected → one `POST /api/shares` with the spin options and result.
+    - Reopening shows the same link with no new request. `Esc`, a backdrop click and "Đóng" close the dialog and focus returns to "Chia sẻ".
+    - The copy-failure fallback selects the link.
+    - "Mở lại" and "Không phải hôm nay" each make one `POST …/spins`.
+    - `/s/:id` in a fresh browser context: only `GET /api/public/shares/:id`, no cookie, `users` count unchanged (47 → 47), `noindex`, enabled options only, no weights.
+    - Replay lands on the shared winner (normal and reduced motion); three "Tự quay thử" spins sent nothing and the shared result line did not change.
+    - A malformed id and an unknown UUID show "Link này không còn khả dụng".
+  - SHOULD (`6-5a-fix-1.md`):
+    - three states for one share snapshot in `CaseOpening`
+    - `ShareDialog`: a local copy of the lifetime type, a redundant `activeRef`, and a `data-` attribute queried twice
+    - the public stage stays at `--content-max-width` on desktop, unlike the case screen
+    - the option list uses a bordered box per option, heavier than the history list the owner approved
+  - NICE (same fix):
+    - an empty status band in dialog step 2
+    - the verbose seed block in `open`
+    - the import order in `CaseOpening`
+    - the wrapper around the latest-result line
+    - an empty emoji span when an option has none
+  - Note for 6-6: spin records are fire-and-forget, so two quick spins could reach the server out of order and leave the older one as "latest". Live viewing must order spins (e.g. by start time) when it adds the broadcast.
+  - DO NOT TOUCH: the focus return by element id (same pattern as `DecisionForm`), the `NotFoundPage` `title`/`message` props, and the duplicated `screen` layout CSS (the Phase 7 shell will own it).
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
