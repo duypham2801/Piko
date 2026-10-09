@@ -1,7 +1,7 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 6 — Result, history, share, live viewing (6-1 in review, fix-1 handed off)
+- **Current phase:** Phase 6 — Result, history, share, live viewing (6-1 done; 6-2 next)
 - **Integration branch:** `feat/phase-6-result-history`
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`); Phase 4 (4-1, 4-2: router, Home, presets, preview, merged into `main`); Phase 5 (5-1…5-4: decisions API, builder, saved decisions, reuse options, merged into `main`)
 
@@ -27,7 +27,7 @@
 | 5-2 | Builder screen | ✅ done (`5-2-fix-1.md`, `ea973cf`) | `/decisions/new` and `/decisions/:id/edit`: title, options (add/edit/remove), emoji picker, priority dots, shared schema validation, explicit Save, non-blocking save error (D-029) |
 | 5-3 | Saved decisions | ✅ done (`5-3-fix-1.md`, `58e5f14`) | `/decisions/:id` preview (Sửa/Xóa with inline confirm) + `/open` case, Home "Của bạn" (create card + saved cards), a create lands on the preview. Shared `features/preview/` (preview, `?off=` helpers) used by presets too; `useDecisionRecord` shows the state record, then refetches (D-029) |
 | 5-4 | Reuse existing options | ✅ done (`5-4-fix-1.md`, `5-4-fix-2.md`, `aa21530`) | Preset "Tùy chỉnh" (`/decisions/new?from=<slug>`) and builder "Thêm từ có sẵn", which copies options from presets/saved decisions (D-029) |
-| 6-1 | History API | 🔄 fix-1 handed off | `6-1-history-api.md`: `decision_sessions` table (snapshot + `SelectionResult`, re-checked on the server), `POST/GET /api/history`, 200 per user, PGlite tests (D-030) |
+| 6-1 | History API | ✅ | `6-1-history-api.md`: `decision_sessions` table (snapshot + `SelectionResult`, re-checked on the server), `POST/GET /api/history`, 200 per user, PGlite tests (D-030) |
 | 6-2 | Result actions | ⬜ | "Đi thôi" (save to history, best-effort), "Mở lại", "Không phải hôm nay" (exclude and respin), on every case screen (D-030) |
 | 6-3 | History UI | ⬜ | Home "Gần đây" (5 newest) + `/history` (D-028, D-030) |
 | 6-4 | Shares API | ⬜ | `shared_cases` table, owner routes (create with lifetime, list, revoke, record a spin), public read route without a session (D-030) |
@@ -513,6 +513,13 @@
     - an irrelevant `decisions` assertion in the cascade test
     - a hand-typed source union in the test helper
   - DO NOT TOUCH: the `/api/history/*` mount (no sub-routes yet, harmless and consistent with decisions).
+
+- **6-1-fix-1 (2026-10-09):** verified against the diff (`a04582e`, 5 files, +24/−32). `make check` passes (domain 48, api 27).
+  - `POST` returns the typed entry with no re-parse. `HistoryEntry.parse` remains only in the route test.
+  - Pruning selects only the overflow with `offset`; the pruning test still passes.
+  - `match.test.ts` has a real candidate mismatch (two options still enabled) plus a separate test for the throw path.
+  - The redundant route test and the irrelevant assertion are gone; the test helper uses `HistorySourceInputData`.
+  - **6-1 accepted.**
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
