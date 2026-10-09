@@ -124,7 +124,7 @@
 @media (min-width: 48rem) {
   .dialog {
     width: min(calc(100% - (var(--space-6) * 2)), var(--case-dialog-max-width));
-    height: auto;
+    height: fit-content;
     max-height: calc(100dvh - (var(--space-6) * 2));
     margin: auto;
     padding: var(--space-6);
