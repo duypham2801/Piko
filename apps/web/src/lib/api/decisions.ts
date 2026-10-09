@@ -1,6 +1,11 @@
-import { DecisionRecord, type DecisionDraftData, type DecisionRecordData } from '@piko/domain';
+import {
+  DecisionListResponse,
+  DecisionRecord,
+  type DecisionDraftData,
+  type DecisionRecordData,
+} from '@piko/domain';
 
-import { ApiClientError, apiGet, apiSend } from './client';
+import { ApiClientError, apiDelete, apiGet, apiSend } from './client';
 import { ensureSession, resetSession } from './session';
 
 async function withSession<T>(request: () => Promise<T>): Promise<T> {
@@ -40,4 +45,17 @@ export async function updateDecision(
   return withSession(() =>
     apiSend('PUT', `/api/decisions/${encodeURIComponent(id)}`, draft, DecisionRecord),
   );
+}
+
+export async function listDecisions(signal?: AbortSignal): Promise<DecisionRecordData[]> {
+  await ensureSession();
+  return withSession(async () => {
+    const response = await apiGet('/api/decisions', DecisionListResponse, { signal });
+    return response.decisions;
+  });
+}
+
+export async function deleteDecision(id: string): Promise<void> {
+  await ensureSession();
+  return withSession(() => apiDelete(`/api/decisions/${encodeURIComponent(id)}`));
 }

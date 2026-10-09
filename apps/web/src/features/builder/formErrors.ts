@@ -5,7 +5,6 @@ import { t } from '../../i18n';
 export type FormErrors = {
   title?: string;
   options: Record<string, string>;
-  form?: string;
 };
 
 type ValidationIssue = {
@@ -19,7 +18,6 @@ export function getFormErrors(
   state: DecisionDraftData,
 ): FormErrors {
   let title: string | undefined;
-  let form: string | undefined;
   const options: Record<string, string> = {};
 
   for (const issue of issues) {
@@ -30,8 +28,6 @@ export function getFormErrors(
         title = t('titleRequired');
       } else if (issue.code === 'too_big') {
         title = t('titleTooLong');
-      } else {
-        form = t('formInvalid');
       }
       continue;
     }
@@ -44,19 +40,15 @@ export function getFormErrors(
     ) {
       const option = state.options[second];
       if (!option) {
-        form = t('formInvalid');
-      } else if (issue.code === 'too_small') {
+        continue;
+      }
+
+      if (issue.code === 'too_small') {
         options[option.id] = t('optionRequired');
       } else if (issue.code === 'too_big') {
         options[option.id] = t('optionTooLong');
-      } else {
-        form = t('formInvalid');
       }
       continue;
-    }
-
-    if (issue.message !== 'duplicate_option_label') {
-      form = t('formInvalid');
     }
   }
 
@@ -84,5 +76,5 @@ export function getFormErrors(
     }
   }
 
-  return { form, options, title };
+  return { options, title };
 }

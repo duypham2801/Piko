@@ -24,6 +24,8 @@
 }
 
 .header h1 {
+  min-width: 0;
+  overflow-wrap: anywhere;
   font-size: var(--text-display);
 }
 

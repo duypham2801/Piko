@@ -15,15 +15,19 @@ export class ApiClientError extends Error {
 
 async function parseResponse<T>(response: Response, schema: ZodMiniType<T>): Promise<T> {
   if (!response.ok) {
-    const body: unknown = await response.json().catch(() => undefined);
-    const parsed = ApiError.safeParse(body);
-    if (parsed.success) {
-      throw new ApiClientError(response.status, parsed.data.error.code, parsed.data.error.message);
-    }
-    throw new ApiClientError(response.status, 'http_error', 'Request failed.');
+    await throwForError(response);
   }
 
   return schema.parse(await response.json());
+}
+
+async function throwForError(response: Response): Promise<never> {
+  const body: unknown = await response.json().catch(() => undefined);
+  const parsed = ApiError.safeParse(body);
+  if (parsed.success) {
+    throw new ApiClientError(response.status, parsed.data.error.code, parsed.data.error.message);
+  }
+  throw new ApiClientError(response.status, 'http_error', 'Request failed.');
 }
 
 export async function apiGet<T>(
@@ -48,4 +52,16 @@ export async function apiSend<T>(
     method,
   });
   return parseResponse(response, schema);
+}
+
+export async function apiDelete(path: string): Promise<void> {
+  const response = await fetch(path, {
+    credentials: 'same-origin',
+    headers: { 'Content-Type': 'application/json' },
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    await throwForError(response);
+  }
 }
