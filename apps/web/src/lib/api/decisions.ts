@@ -5,25 +5,8 @@ import {
   type DecisionRecordData,
 } from '@piko/domain';
 
-import { ApiClientError, apiDelete, apiGet, apiSend } from './client';
-import { ensureSession, resetSession } from './session';
-
-async function withSession<T>(request: () => Promise<T>): Promise<T> {
-  try {
-    return await request();
-  } catch (error) {
-    if (
-      error instanceof ApiClientError &&
-      error.status === 401 &&
-      error.code === 'session_required'
-    ) {
-      resetSession();
-      await ensureSession();
-      return request();
-    }
-    throw error;
-  }
-}
+import { apiDelete, apiGet, apiSend } from './client';
+import { ensureSession, withSession } from './session';
 
 export async function fetchDecision(id: string, signal?: AbortSignal): Promise<DecisionRecordData> {
   await ensureSession();
