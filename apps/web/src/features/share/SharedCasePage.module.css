@@ -17,10 +17,6 @@
   line-height: var(--leading-tight);
 }
 
-.muted {
-  color: var(--color-text-muted);
-}
-
 .error {
   color: var(--color-danger);
   font-weight: var(--font-weight-bold);

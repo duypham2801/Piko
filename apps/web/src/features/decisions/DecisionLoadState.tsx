@@ -7,14 +7,14 @@ import type { DecisionRecordLoadState } from './useDecisionRecord';
 import styles from './DecisionLoadState.module.css';
 
 type DecisionLoadStateProps = {
-  align?: 'start' | 'center';
+  textAlign?: 'start' | 'center';
   backTo: string;
   width?: 'narrow' | 'wide';
   state: Exclude<DecisionRecordLoadState, { status: 'loaded' }>;
 };
 
 export default function DecisionLoadState({
-  align = 'center',
+  textAlign = 'center',
   backTo,
   state,
   width = 'narrow',
@@ -24,7 +24,7 @@ export default function DecisionLoadState({
   }
 
   if (state.status === 'loading') {
-    const contentClassName = [styles.content, align === 'start' ? styles.start : '']
+    const contentClassName = [styles.content, textAlign === 'start' ? styles.start : '']
       .filter(Boolean)
       .join(' ');
 

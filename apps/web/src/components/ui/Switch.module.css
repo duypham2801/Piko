@@ -34,6 +34,7 @@
   border: var(--border-width-thin) solid var(--color-border);
   border-radius: var(--radius-pill);
   background: var(--color-surface);
+  transform: translateX(var(--switch-thumb-offset));
   transition: transform var(--duration-normal) var(--ease-spring);
 }
 

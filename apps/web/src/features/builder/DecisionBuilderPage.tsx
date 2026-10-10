@@ -31,7 +31,11 @@ export default function DecisionBuilderPage() {
     pageContent = <DecisionForm decisionId={id} initial={draftOf(recordState.record)} key={id} />;
   } else {
     pageContent = (
-      <DecisionLoadState align="start" backTo={id ? `/decisions/${id}` : '/'} state={recordState} />
+      <DecisionLoadState
+        textAlign="start"
+        backTo={id ? `/decisions/${id}` : '/'}
+        state={recordState}
+      />
     );
   }
 

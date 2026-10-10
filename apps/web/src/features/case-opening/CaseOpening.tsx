@@ -182,13 +182,9 @@ export default function CaseOpening({
     }
   }, []);
 
-  const focusDialogTitle = useCallback(() => {
-    titleRef.current?.focus({ preventScroll: true });
-  }, []);
-
   useEffect(() => {
     if (state.status === 'spinning') {
-      focusDialogTitle();
+      titleRef.current?.focus({ preventScroll: true });
       return;
     }
 
@@ -197,11 +193,11 @@ export default function CaseOpening({
         ?.querySelector<HTMLElement>('[data-reveal-focus]')
         ?.focus({ preventScroll: true });
     }
-  }, [focusDialogTitle, state.status]);
+  }, [state.status]);
 
   useEffect(() => {
     if (historySaveStatus === 'saving') {
-      focusDialogTitle();
+      titleRef.current?.focus({ preventScroll: true });
       return;
     }
 
@@ -210,7 +206,7 @@ export default function CaseOpening({
         ?.querySelector<HTMLElement>('[data-post-save-focus]')
         ?.focus({ preventScroll: true });
     }
-  }, [focusDialogTitle, historySaveStatus]);
+  }, [historySaveStatus]);
 
   const closeDialog = () => {
     dialogRef.current?.close();
