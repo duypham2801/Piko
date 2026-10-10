@@ -1,7 +1,7 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 8 — Polish (kickoff done, D-035). 8-1, 8-2 done; next: 8-3. Phase 7 merged into `main` on 2026-10-10.
+- **Current phase:** Phase 8 — Polish (kickoff done, D-035). 8-1, 8-2 done; 8-3 handed off. Phase 7 merged into `main` on 2026-10-10.
 - **Integration branch:** `feat/phase-8-polish`
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`); Phase 4 (4-1, 4-2: router, Home, presets, preview, merged into `main`); Phase 5 (5-1…5-4: decisions API, builder, saved decisions, reuse options, merged into `main`); Phase 6 (6-1…6-5b: history, result actions, share links, merged into `main`); Phase 7 (7-1…7-5: navigation shell, sidebar, case overlay, responsive pass, dev access from other devices, merged into `main`)
 
@@ -41,7 +41,7 @@
 | 7-5 | Dev access from other devices (opt-in) | ✅ (`7-5-fix-1.md`) | `7-5-dev-lan-optin.md`: `DEV_WEB_BIND` adds port 5173 on one LAN IP through `compose.dev.lan.yaml` (`127.0.0.1` is always kept), and `COMPOSE_DEV` uses `--env-file .env.dev`. Fix-1: Tailscale Serve on the host, and `DEV_EXTRA_ORIGINS` (a list) feeds both the API origin check and Vite `allowedHosts` (D-034) |
 | 8-1 | Case polish | ✅ (`4fc838b`) | `8-1-case-polish.md`: marker line fades at the reveal, no overlay scroll at 1280×800, option monogram (`OptionGlyph`), no scroll on initial focus (D-035) |
 | 8-2 | Interaction states | ✅ (`ae4d957`, owner fix) | `8-2-interaction-states.md`: hover/pressed on every interactive surface, loading that keeps space, focused error field, case focus after the reveal and at a respin (D-035) |
-| 8-3 | Consistency + layout | ⬜ | Empty/not-found CTAs, History empty alignment, sidebar "Gần đây" on error, active styles, sticky preview CTA on phones, scroll the active sidebar row into view, "Sổ tay" rows without an emoji (D-035) |
+| 8-3 | Consistency + layout | ⬜ | `8-3-consistency-layout.md`: empty/not-found CTAs, History empty alignment, sidebar "Gần đây" on error, active styles, sticky preview CTA on phones, scroll the active sidebar row into view, "Sổ tay" rows without an emoji (D-035) |
 | 9 | First prod release | ⬜ | Deploy `v0.1.0` to VPS, verify backup/rollback |
 | — | Final engineering review | ⬜ | Format per master prompt §47–48 |
 | R | Realtime: live viewing + Couple/Squad | ⬜ | After `v0.1.0` (D-031). One design for rooms, presence, viewer/participant identity, anti-spam and server-ordered spins; live viewing of shared links (from D-030) is its first consumer. Couple/Squad still need their own approval (CLAUDE.md rule 9). |
@@ -901,6 +901,14 @@
     - renamed `DecisionLoadState`'s `align` to `textAlign`, because it clashed with `Screen.align`, which is vertical
   - **Owner request (D-035 amendment):** "Của bạn" → "Sổ tay" everywhere, and the sidebar section is hidden while loading/empty. This makes the 8-2 sidebar loading line moot, so it is removed (`noDecisionsYet` too).
   - **8-2 accepted.** Fast-forwarded into `feat/phase-8-polish`.
+- **8-3 handoff (2026-10-10):** `8-3-consistency-layout.md`, C1–C7.
+  - **C1:** "Về trang chủ" becomes a primary link-button. A `buttonClassName()` helper is exported from `Button` and applied to a router `Link`; `.backHome` is removed. This is an architect default: coral, because it is the only action on those screens.
+  - **C2:** History states start-aligned.
+  - **C3:** no "Xem tất cả" on a failed list.
+  - **C4:** from `64rem` the current "Lịch sử" uses the lemon row style.
+  - **C5:** sticky "MỞ CASE" below `48rem`.
+  - **C6:** the current "Sổ tay" row is scrolled into view.
+  - **C7:** `OptionGlyph` for decisions without an emoji.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
