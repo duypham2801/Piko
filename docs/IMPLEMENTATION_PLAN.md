@@ -921,8 +921,9 @@
     - It is called as `buttonClassName()`, not `({})`.
     - The preview action bar is written mobile-first (sticky by default, static from `48rem`). It was the repo's only `max-width` media query.
     - Hovering the current "Lịch sử" keeps its lemon fill (`:not([aria-current='page'])`), like the sidebar rows.
-  - **NICE (later):** a disabled but checked `Switch` (minimum options reached) has a grey track like an off switch; only the thumb position tells them apart.
+  - **Locked-on switch (owner chose to fix in Phase 8):** a disabled but checked `Switch` (minimum options reached) had a grey track like an off switch. It now keeps the teal track, with the slate disabled border (`.checked:disabled .track`, done by the architect on owner request).
   - **8-3 accepted.** Fast-forwarded into `feat/phase-8-polish`. **Phase 8 is ready for the owner's walk-through.**
+  - **Owner (HITL):** keep coral for "Về trang chủ". After Phase 8, the **final engineering review** comes before Phase 9.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
