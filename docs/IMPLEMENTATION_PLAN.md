@@ -1,8 +1,8 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 8 — Polish (not started). Phase 7 merged into `main` on 2026-10-10.
-- **Integration branch:** none yet (Phase 8 kickoff creates one from `main`)
+- **Current phase:** Phase 8 — Polish (kickoff done, D-035). Next: 8-1. Phase 7 merged into `main` on 2026-10-10.
+- **Integration branch:** `feat/phase-8-polish`
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`); Phase 4 (4-1, 4-2: router, Home, presets, preview, merged into `main`); Phase 5 (5-1…5-4: decisions API, builder, saved decisions, reuse options, merged into `main`); Phase 6 (6-1…6-5b: history, result actions, share links, merged into `main`); Phase 7 (7-1…7-5: navigation shell, sidebar, case overlay, responsive pass, dev access from other devices, merged into `main`)
 
 ## Phases
@@ -39,7 +39,9 @@
 | 7-3 | Case overlay | ✅ (`7-3-fix-1.md`, `7-3-fix-2.md`) | The case opens as a modal overlay above the preview/builder (nested `/open` routes, full-screen on phones, × / Esc / Back to close), focus mode removed, plus the 7-2 carry-overs (C0) (D-033) |
 | 7-4 | Responsive pass | ✅ (`07a7a25`) | Every screen at 360 / 768 / 1024 / 1280 / 1920 after the overlay: carousel, winner reveal, CTAs, card grids, option layout |
 | 7-5 | Dev access from other devices (opt-in) | ✅ (`7-5-fix-1.md`) | `7-5-dev-lan-optin.md`: `DEV_WEB_BIND` adds port 5173 on one LAN IP through `compose.dev.lan.yaml` (`127.0.0.1` is always kept), and `COMPOSE_DEV` uses `--env-file .env.dev`. Fix-1: Tailscale Serve on the host, and `DEV_EXTRA_ORIGINS` (a list) feeds both the API origin check and Vite `allowedHosts` (D-034) |
-| 8 | Polish | ⬜ | States, micro-interactions, consistency |
+| 8-1 | Case polish | ⬜ | `8-1-case-polish.md`: marker line fades at the reveal, no overlay scroll at 1280×800, option monogram (`OptionGlyph`), no scroll on initial focus (D-035) |
+| 8-2 | Interaction states | ⬜ | Hover/pressed on every interactive surface, loading that keeps space, focused error field (D-035) |
+| 8-3 | Consistency + layout | ⬜ | Empty/not-found CTAs, History empty alignment, sidebar "Gần đây" on error, active styles, sticky preview CTA on phones, scroll the active sidebar row into view (D-035) |
 | 9 | First prod release | ⬜ | Deploy `v0.1.0` to VPS, verify backup/rollback |
 | — | Final engineering review | ⬜ | Format per master prompt §47–48 |
 | R | Realtime: live viewing + Couple/Squad | ⬜ | After `v0.1.0` (D-031). One design for rooms, presence, viewer/participant identity, anti-spam and server-ordered spins; live viewing of shared links (from D-030) is its first consumer. Couple/Squad still need their own approval (CLAUDE.md rule 9). |
@@ -829,6 +831,23 @@
   - **7-5 accepted.** `fix/dev-lan-access` merged into `feat/phase-7-responsive`.
 - **Phase 7 closed (2026-10-10):** the owner did the browser walk-through and approved it. `feat/phase-7-responsive` was merged into `main` with `--no-ff`. `TOPOLOGY.md` already covers 7-5 (D-034); closing the phase changes nothing else.
   - Carried into Phase 8: emoji-less row alignment, scrolling the active sidebar row into view, and the 1280×500 focus scroll that hides the strip's top.
+- **Phase 8 kickoff (2026-10-10):** integration branch `feat/phase-8-polish` created from `main` (`274c3d9`).
+  - **Architect audit** (360×740 and 1280×800; Home, History, builder, presets, saved decision, case ready/spinning/revealed/"Không phải hôm nay"/"Đi thôi", share, bad link, 404; API delayed 3 s; API refused; Tab navigation):
+    - no horizontal overflow, no console errors, and the app stays usable with the API down (rule 5 holds)
+    1. the marker line crosses the winner's emoji and label after the reveal
+    2. the overlay scrolls inside at 1280×800 when a status line shows under the actions ("Chưa lưu được…", "Chỉ còn 2 lựa chọn cuối.")
+    3. options without an emoji: the strip label sits higher, the winner panel has no icon, preview labels are indented differently
+    4. `Button` has no hover; `Card`, `Chip`, `Switch` and the builder controls have no hover or pressed state
+    5. loading is a bare "Đang tải…" and the content then pushes the layout; the sidebar shows a lone "Của bạn" heading
+    6. "Về trang chủ" is coral on the empty History page but teal on not-found and the unavailable share page
+    7. History empty on desktop: the message and button are centred under left-aligned headings
+    8. sidebar "Gần đây" is hidden when empty but appears on error with a "Xem tất cả" link
+    9. active styles differ: "Lịch sử" uses a teal underline, list rows a lemon fill
+    10. the preview "MỞ CASE" sits below every option on phones (8 rows for a preset)
+    11. a focused field with an error shows the teal focus ring around the red error border
+    12. carried from 7-4: scrolling the active sidebar row into view; at 1280×500 the initial focus scrolls the strip's top out of view
+  - **Owner choices (D-035):** monogram for emoji-less options, sticky preview CTA on phones, loading keeps space (no skeletons), "Gần đây" stays hidden while empty, three tasks.
+  - → `8-1-case-polish.md` (1, 2, 3, 12b). 8-2 gets 4, 5, 11. 8-3 gets 6–10 and 12a.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
