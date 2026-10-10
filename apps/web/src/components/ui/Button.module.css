@@ -60,6 +60,12 @@
   width: 100%;
 }
 
+@media (hover: hover) {
+  .button:hover:not(:disabled) {
+    transform: translateY(var(--hover-lift-sm));
+  }
+}
+
 .button:active:not(:disabled) {
   transform: translateY(var(--shadow-offset-sm));
   box-shadow: none;

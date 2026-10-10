@@ -33,6 +33,13 @@
   background: var(--color-surface);
 }
 
+@media (hover: hover) {
+  .emojiButton:hover:not(:disabled) {
+    border-color: var(--color-border);
+    background: var(--color-surface);
+  }
+}
+
 .noEmoji {
   grid-column: 1 / -1;
   justify-self: stretch;

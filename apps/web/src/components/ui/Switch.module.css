@@ -1,4 +1,5 @@
 .switch {
+  --switch-thumb-offset: 0;
   display: inline-flex;
   min-height: var(--tap-target-min);
   align-items: center;
@@ -40,8 +41,8 @@
   background: var(--color-secondary);
 }
 
-.checked .thumb {
-  transform: translateX(calc(var(--space-8) - var(--space-5) - var(--border-width-thin) * 2));
+.checked {
+  --switch-thumb-offset: calc(var(--space-8) - var(--space-5) - var(--border-width-thin) * 2);
 }
 
 .switch:disabled {
@@ -56,4 +57,14 @@
 
 .switch:disabled .thumb {
   border-color: var(--color-disabled-text);
+}
+
+@media (hover: hover) {
+  .switch:hover:not(:disabled) .thumb {
+    transform: translate(var(--switch-thumb-offset), var(--hover-lift-sm));
+  }
+}
+
+.switch:active:not(:disabled) .thumb {
+  transform: translateX(var(--switch-thumb-offset));
 }

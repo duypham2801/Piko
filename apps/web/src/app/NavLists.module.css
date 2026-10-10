@@ -46,11 +46,6 @@
   text-decoration: none;
 }
 
-.seeAll:hover {
-  text-decoration: underline;
-  text-underline-offset: var(--space-1);
-}
-
 .list {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -114,6 +109,11 @@
 }
 
 @media (hover: hover) {
+  .seeAll:hover {
+    text-decoration: underline;
+    text-underline-offset: var(--space-1);
+  }
+
   .link:hover {
     background: var(--color-surface);
   }

@@ -29,6 +29,12 @@
   transition: transform var(--duration-fast) var(--ease-standard);
 }
 
+@media (hover: hover) {
+  .backHome:hover {
+    transform: translateY(var(--hover-lift-sm));
+  }
+}
+
 .backHome:active {
   transform: translateY(var(--shadow-offset-sm));
   box-shadow: none;

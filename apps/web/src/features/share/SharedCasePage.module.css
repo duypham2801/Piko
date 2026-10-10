@@ -104,7 +104,9 @@
   text-decoration: none;
 }
 
-.makeYourOwn:hover {
-  text-decoration: underline;
-  text-underline-offset: var(--space-1);
+@media (hover: hover) {
+  .makeYourOwn:hover {
+    text-decoration: underline;
+    text-underline-offset: var(--space-1);
+  }
 }

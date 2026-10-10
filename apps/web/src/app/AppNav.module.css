@@ -81,6 +81,22 @@
   transition: transform var(--duration-fast) var(--ease-standard);
 }
 
+@media (hover: hover) {
+  .logo:hover .wordmark {
+    text-decoration: underline;
+    text-underline-offset: var(--space-1);
+  }
+
+  .history:hover {
+    text-decoration: underline;
+    text-underline-offset: var(--space-1);
+  }
+
+  .create:hover {
+    transform: translateY(var(--hover-lift-sm));
+  }
+}
+
 .create:active {
   transform: translateY(var(--shadow-offset-sm));
   box-shadow: none;

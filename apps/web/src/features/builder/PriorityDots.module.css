@@ -24,6 +24,7 @@
   height: var(--space-3);
   border: var(--border-width-thin) solid var(--color-primary);
   border-radius: var(--radius-pill);
+  transition: transform var(--duration-fast) var(--ease-standard);
 }
 
 .filled {
@@ -37,4 +38,10 @@
 .option:has(input:focus-visible) .dot {
   outline: var(--border-width) solid var(--color-focus-ring);
   outline-offset: var(--border-width);
+}
+
+@media (hover: hover) {
+  .option:has(input:not(:disabled)):hover .dot {
+    transform: scale(var(--scale-pop));
+  }
 }

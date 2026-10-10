@@ -46,11 +46,6 @@
   text-decoration: none;
 }
 
-.seeAll:hover {
-  text-decoration: underline;
-  text-underline-offset: var(--space-1);
-}
-
 .createCard {
   border-style: dashed;
 }
@@ -109,8 +104,13 @@
 }
 
 @media (hover: hover) {
+  .seeAll:hover {
+    text-decoration: underline;
+    text-underline-offset: var(--space-1);
+  }
+
   .presetLink:hover {
-    transform: translateY(calc(var(--space-1) * -1));
+    transform: translateY(var(--hover-lift));
   }
 }
 

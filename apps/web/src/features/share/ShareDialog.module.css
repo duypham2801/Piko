@@ -47,6 +47,7 @@
   line-height: var(--leading-tight);
   overflow-wrap: anywhere;
   text-align: center;
+  transition: transform var(--duration-fast) var(--ease-standard);
 }
 
 .lifetimeOption:has(input:checked) {
@@ -58,6 +59,12 @@
 .lifetimeOption:has(input:focus-visible) {
   outline: var(--border-width) solid var(--color-focus-ring);
   outline-offset: var(--border-width);
+}
+
+@media (hover: hover) {
+  .lifetimeOption:not(:has(input:checked)):has(input:not(:disabled)):hover {
+    transform: translateY(var(--hover-lift-sm));
+  }
 }
 
 .status {

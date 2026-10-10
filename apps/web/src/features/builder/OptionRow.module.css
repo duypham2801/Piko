@@ -24,6 +24,7 @@
   cursor: pointer;
   font-size: var(--text-xl);
   line-height: var(--leading-tight);
+  transition: transform var(--duration-fast) var(--ease-standard);
 }
 
 .hasEmoji {
@@ -58,6 +59,20 @@
 .removeButton:disabled {
   color: var(--color-disabled-text);
   cursor: not-allowed;
+}
+
+@media (hover: hover) {
+  .trigger:hover:not(:disabled) {
+    transform: translateY(var(--hover-lift-sm));
+  }
+
+  .removeButton:hover:not(:disabled) {
+    background: var(--color-selection);
+  }
+}
+
+.trigger:active:not(:disabled) {
+  transform: translateY(var(--shadow-offset-sm));
 }
 
 .optionMeta {
