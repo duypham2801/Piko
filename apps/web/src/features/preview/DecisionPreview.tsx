@@ -104,11 +104,12 @@ export default function DecisionPreview({
         })}
       </ul>
 
-      {minimumReached && <p className={styles.hint}>{t('minOptionsHint')}</p>}
-
-      <Button className={styles.openButton} size="lg" onClick={openCase}>
-        {t('openCase')}
-      </Button>
+      <div className={styles.actionBar}>
+        {minimumReached && <p className={styles.hint}>{t('minOptionsHint')}</p>}
+        <Button className={styles.openButton} size="lg" onClick={openCase}>
+          {t('openCase')}
+        </Button>
+      </div>
       {children}
     </Screen>
   );
