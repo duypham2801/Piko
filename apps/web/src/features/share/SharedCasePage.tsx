@@ -6,6 +6,7 @@ import NotFoundPage from '../../app/NotFoundPage';
 import Screen from '../../app/Screen';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
+import OptionGlyph from '../../components/ui/OptionGlyph';
 import { t } from '../../i18n';
 import CaseCarousel from '../case-opening/CaseCarousel';
 import Confetti from '../case-opening/Confetti';
@@ -129,11 +130,11 @@ function SharedCaseContent({ share }: { share: SharedCaseData }) {
               .filter((option) => option.enabled)
               .map((option) => (
                 <li className={styles.option} key={option.id}>
-                  {option.emoji && (
-                    <span aria-hidden="true" className={styles.optionEmoji}>
-                      {option.emoji}
-                    </span>
-                  )}
+                  <OptionGlyph
+                    className={styles.optionEmoji}
+                    emoji={option.emoji}
+                    label={option.label}
+                  />
                   <span className={styles.optionLabel}>{option.label}</span>
                 </li>
               ))}

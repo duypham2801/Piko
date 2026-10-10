@@ -6,6 +6,7 @@ import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import Chip from '../../components/ui/Chip';
+import OptionGlyph from '../../components/ui/OptionGlyph';
 import Switch from '../../components/ui/Switch';
 import TextField from '../../components/ui/TextField';
 
@@ -159,6 +160,24 @@ export default function ComponentsSection() {
             label="Nhãn ẩn của switch"
             onCheckedChange={setSwitchHidden}
           />
+        </div>
+      </div>
+
+      <div className={styles.group}>
+        <h3>OptionGlyph</h3>
+        <div className={styles.glyphExamples}>
+          <div className={styles.glyphItem}>
+            <OptionGlyph emoji="🍜" label="Phở" />
+            <span>Phở</span>
+          </div>
+          <div className={styles.glyphItem}>
+            <OptionGlyph label="lẩu" />
+            <span>lẩu</span>
+          </div>
+          <div className={styles.glyphItem}>
+            <OptionGlyph label="Ẩm thực" />
+            <span>Ẩm thực</span>
+          </div>
         </div>
       </div>
     </section>

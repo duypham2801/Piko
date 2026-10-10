@@ -5,6 +5,7 @@ import type { DecisionOptionData } from '@piko/domain';
 
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
+import OptionGlyph from '../../components/ui/OptionGlyph';
 import Switch from '../../components/ui/Switch';
 import Screen from '../../app/Screen';
 import { t } from '../../i18n';
@@ -82,14 +83,13 @@ export default function DecisionPreview({
               <Card
                 className={styles.optionRow}
                 data-off={!checked ? '' : undefined}
-                data-no-emoji={!option.emoji ? '' : undefined}
                 tone="surface"
               >
-                {option.emoji && (
-                  <span aria-hidden="true" className={styles.optionEmoji}>
-                    {option.emoji}
-                  </span>
-                )}
+                <OptionGlyph
+                  className={styles.optionEmoji}
+                  emoji={option.emoji}
+                  label={option.label}
+                />
                 <span className={styles.optionLabel}>{option.label}</span>
                 <Switch
                   checked={checked}

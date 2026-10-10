@@ -1,5 +1,6 @@
 import { Link, NavLink, useLocation } from 'react-router';
 
+import OptionGlyph from '../components/ui/OptionGlyph';
 import { t } from '../i18n';
 import { useDecisionList } from '../features/decisions/useDecisionList';
 import { historyEntryHref } from '../features/history/historyEntryHref';
@@ -63,11 +64,11 @@ export default function NavLists() {
                 const href = historyEntryHref(entry);
                 const row = (
                   <>
-                    {entry.winner.emoji && (
-                      <span aria-hidden="true" className={styles.emoji}>
-                        {entry.winner.emoji}
-                      </span>
-                    )}
+                    <OptionGlyph
+                      className={styles.emoji}
+                      emoji={entry.winner.emoji}
+                      label={entry.winner.label}
+                    />
                     <span className={styles.details}>
                       <span className={styles.label}>{entry.winner.label}</span>
                       <span className={styles.meta}>{entry.title}</span>
