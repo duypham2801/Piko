@@ -16,7 +16,7 @@ export default function OptionGlyph({ emoji, label, className }: OptionGlyphProp
 
   return (
     <span aria-hidden="true" className={classes}>
-      {emoji ? emoji : <span className={styles.monogram}>{getMonogram(label)}</span>}
+      {emoji ?? <span className={styles.monogram}>{getMonogram(label)}</span>}
     </span>
   );
 }

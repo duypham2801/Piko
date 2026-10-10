@@ -170,7 +170,7 @@ export default function CaseOpening({
       : historySaveStatus === 'error'
         ? t('historySaveFailed')
         : '';
-  const hasActionStatus = notTodayDisabled || historyStatusMessage.length > 0;
+  const hasVisibleStatus = notTodayDisabled || historySaveStatus === 'error';
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -266,7 +266,10 @@ export default function CaseOpening({
             >
               {t('share')}
             </Button>
-            <div className={styles.actionStatus} data-empty={!hasActionStatus ? 'true' : undefined}>
+            <div
+              className={styles.actionStatus}
+              data-empty={!hasVisibleStatus ? 'true' : undefined}
+            >
               {notTodayDisabled && (
                 <p className={styles.hint} id={lastTwoOptionsHintId}>
                   {t('lastTwoOptionsHint')}

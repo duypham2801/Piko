@@ -85,7 +85,7 @@
 }
 
 .emoji {
-  flex: 0 0 auto;
+  font-size: var(--text-lg);
   line-height: var(--leading-tight);
 }
 

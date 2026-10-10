@@ -78,6 +78,7 @@
 }
 
 .actionStatus[data-empty='true'] {
+  /* Keeps the live region mounted without taking a row (and its gap). */
   position: absolute;
 }
 
@@ -149,7 +150,8 @@
     gap: var(--space-5);
   }
 
-  .actions {
+  .actions,
+  .secondaryActions {
     gap: var(--space-2);
   }
 }

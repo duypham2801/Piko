@@ -45,19 +45,16 @@
   top: 0;
   bottom: 0;
   left: 50%;
+  width: var(--border-width);
   pointer-events: none;
   transform: translateX(-50%);
 }
 
 .markerLine {
   position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  width: var(--border-width);
+  inset: 0;
   background: var(--color-primary);
   transition: opacity var(--duration-normal) var(--ease-standard);
-  transform: translateX(-50%);
 }
 
 .marker[data-revealed='false'] .markerLine {
