@@ -20,7 +20,7 @@ dev: ## Start the development database, API and web app
 	@$(COMPOSE_DEV) up -d --build
 	@echo 'Web: http://localhost:5173'
 	@echo 'API: http://localhost:8787'
-	@lan_origin="$$(sed -n 's/^DEV_LAN_ORIGIN=//p' .env.dev 2>/dev/null | tail -n 1 | tr -d '\r')"; if [ -n "$$lan_origin" ]; then echo "Web (LAN): $$lan_origin"; fi
+	@sed -n 's/^DEV_EXTRA_ORIGINS=//p' .env.dev 2>/dev/null | tr -d '\r' | tr ',' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$$//' | sed '/^$$/d;s/^/Web (extra): /'
 
 dev-down: ## Stop the development stack and keep its volumes
 	@$(COMPOSE_DEV) down

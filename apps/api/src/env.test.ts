@@ -11,38 +11,58 @@ const baseEnv = (overrides: NodeJS.ProcessEnv = {}): NodeJS.ProcessEnv => ({
   ...overrides,
 });
 
-describe('environment configuration', () => {
-  it('accepts and returns DEV_LAN_ORIGIN in development', () => {
-    const origin = 'http://192.168.1.100:5173';
-
-    expect(loadEnv(baseEnv({ DEV_LAN_ORIGIN: origin })).DEV_LAN_ORIGIN).toBe(origin);
-  });
-
-  it('accepts development without DEV_LAN_ORIGIN', () => {
-    expect(loadEnv(baseEnv()).DEV_LAN_ORIGIN).toBeUndefined();
-  });
-
-  it.each(['production', 'test'])('rejects DEV_LAN_ORIGIN in %s', (nodeEnv) => {
-    const result = envSchema.safeParse(
-      baseEnv({ NODE_ENV: nodeEnv, DEV_LAN_ORIGIN: 'http://192.168.1.100:5173' }),
+function expectExtraOriginIssue(result: ReturnType<typeof envSchema.safeParse>) {
+  expect(result.success).toBe(false);
+  if (!result.success) {
+    expect(result.error.issues).toEqual(
+      expect.arrayContaining([expect.objectContaining({ path: ['DEV_EXTRA_ORIGINS'] })]),
     );
+  }
+}
 
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error.issues).toEqual(
-        expect.arrayContaining([expect.objectContaining({ path: ['DEV_LAN_ORIGIN'] })]),
-      );
-    }
+describe('environment configuration', () => {
+  it('defaults DEV_EXTRA_ORIGINS to an empty list when absent', () => {
+    expect(loadEnv(baseEnv()).DEV_EXTRA_ORIGINS).toEqual([]);
   });
 
-  it('rejects a malformed DEV_LAN_ORIGIN in development', () => {
-    const result = envSchema.safeParse(baseEnv({ DEV_LAN_ORIGIN: 'not-a-url' }));
+  it('defaults an empty DEV_EXTRA_ORIGINS value to an empty list', () => {
+    expect(loadEnv(baseEnv({ DEV_EXTRA_ORIGINS: '' })).DEV_EXTRA_ORIGINS).toEqual([]);
+  });
 
-    expect(result.success).toBe(false);
-    if (!result.success) {
-      expect(result.error.issues).toEqual(
-        expect.arrayContaining([expect.objectContaining({ path: ['DEV_LAN_ORIGIN'] })]),
-      );
-    }
+  it('splits, trims and drops empty extra origins in order', () => {
+    expect(
+      loadEnv(
+        baseEnv({
+          DEV_EXTRA_ORIGINS: ' http://192.168.1.100:5173 , https://dp-1.example.ts.net ',
+        }),
+      ).DEV_EXTRA_ORIGINS,
+    ).toEqual(['http://192.168.1.100:5173', 'https://dp-1.example.ts.net']);
+  });
+
+  it('rejects an extra origin with a path', () => {
+    expectExtraOriginIssue(
+      envSchema.safeParse(baseEnv({ DEV_EXTRA_ORIGINS: 'https://dp-1.example.ts.net/app' })),
+    );
+  });
+
+  it('rejects an extra origin that is not a URL', () => {
+    expectExtraOriginIssue(envSchema.safeParse(baseEnv({ DEV_EXTRA_ORIGINS: 'not-a-url' })));
+  });
+
+  it('rejects an extra origin with an unsupported protocol', () => {
+    expectExtraOriginIssue(
+      envSchema.safeParse(baseEnv({ DEV_EXTRA_ORIGINS: 'ftp://example.com' })),
+    );
+  });
+
+  it.each(['production', 'test'])('rejects extra origins in %s', (nodeEnv) => {
+    expectExtraOriginIssue(
+      envSchema.safeParse(
+        baseEnv({
+          NODE_ENV: nodeEnv,
+          DEV_EXTRA_ORIGINS: 'https://dp-1.example.ts.net',
+        }),
+      ),
+    );
   });
 });

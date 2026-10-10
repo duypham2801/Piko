@@ -33,11 +33,11 @@ make dev                   # start db + api + web with hot reload
 
 - App: http://localhost:5173
 - Design playground (dev only): http://localhost:5173/design
-- By default the web app is available on localhost only. To open it from another
-  device on the same LAN, set both `DEV_WEB_BIND=<this-machine-LAN-IP>` and
-  `DEV_LAN_ORIGIN=http://<this-machine-LAN-IP>:5173` in `.env.dev`, then run
-  `make dev` again. `DEV_WEB_BIND` alone serves the page but writes get `403`;
-  `DEV_LAN_ORIGIN` alone exposes nothing. See [`docs/ENVIRONMENTS.md`](docs/ENVIRONMENTS.md) for steps and caveats.
+- By default the web app is available on localhost only. For LAN access, set
+  `DEV_WEB_BIND=<this-machine-LAN-IP>` and add its URL to
+  `DEV_EXTRA_ORIGINS=http://<this-machine-LAN-IP>:5173`, then run `make dev`.
+  For Tailscale, run `tailscale serve --bg 5173` and add its HTTPS origin to
+  `DEV_EXTRA_ORIGINS`; see [`docs/ENVIRONMENTS.md`](docs/ENVIRONMENTS.md) for details.
 
 Other useful commands:
 

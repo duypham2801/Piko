@@ -16,7 +16,7 @@ import { createPublicShareRoutes, createShareRoutes } from './routes/shares.js';
 export interface AppConfig {
   nodeEnv: 'development' | 'production' | 'test';
   appOrigin: string;
-  additionalAppOrigin?: string;
+  additionalAppOrigins: string[];
   cookieSecure: boolean;
   trustProxy: boolean;
   appVersion: string;
@@ -31,8 +31,7 @@ export interface AppDependencies {
 
 export function createApp(config: AppConfig, dependencies: AppDependencies): Hono<AppEnv> {
   const app = new Hono<AppEnv>();
-  const allowedOrigins = [config.appOrigin];
-  if (config.additionalAppOrigin) allowedOrigins.push(config.additionalAppOrigin);
+  const allowedOrigins = [config.appOrigin, ...config.additionalAppOrigins];
   const limiter =
     dependencies.limiter ?? new FixedWindowRateLimiter({ limit: config.guestRateLimitPerHour });
 

@@ -38,6 +38,7 @@ describe('share routes', () => {
       {
         nodeEnv: 'test',
         appOrigin,
+        additionalAppOrigins: [],
         cookieSecure: false,
         trustProxy: false,
         appVersion: 'test',
