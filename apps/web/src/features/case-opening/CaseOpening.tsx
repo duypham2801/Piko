@@ -170,12 +170,14 @@ export default function CaseOpening({
       : historySaveStatus === 'error'
         ? t('historySaveFailed')
         : '';
+  const hasActionStatus = notTodayDisabled || historyStatusMessage.length > 0;
 
   useEffect(() => {
     const dialog = dialogRef.current;
     if (dialog && !dialog.open) {
       dialog.showModal();
-      dialog.querySelector<HTMLElement>('[data-initial-focus]')?.focus();
+      dialog.scrollTop = 0;
+      dialog.querySelector<HTMLElement>('[data-initial-focus]')?.focus({ preventScroll: true });
     }
   }, []);
 
@@ -264,23 +266,25 @@ export default function CaseOpening({
             >
               {t('share')}
             </Button>
-            {notTodayDisabled && (
-              <p className={styles.hint} id={lastTwoOptionsHintId}>
-                {t('lastTwoOptionsHint')}
+            <div className={styles.actionStatus} data-empty={!hasActionStatus ? 'true' : undefined}>
+              {notTodayDisabled && (
+                <p className={styles.hint} id={lastTwoOptionsHintId}>
+                  {t('lastTwoOptionsHint')}
+                </p>
+              )}
+              <p
+                aria-live="polite"
+                className={
+                  historySaveStatus === 'saved'
+                    ? 'visually-hidden'
+                    : historySaveStatus === 'error'
+                      ? styles.historyStatusError
+                      : ''
+                }
+              >
+                {historyStatusMessage}
               </p>
-            )}
-            <p
-              aria-live="polite"
-              className={
-                historySaveStatus === 'saved'
-                  ? 'visually-hidden'
-                  : historySaveStatus === 'error'
-                    ? styles.historyStatusError
-                    : ''
-              }
-            >
-              {historyStatusMessage}
-            </p>
+            </div>
           </div>
         ) : (
           <Button
