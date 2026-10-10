@@ -38,6 +38,7 @@
 | 7-2 | Sidebar lists + desktop Home | ✅ (`7-2-fix-1.md`) | "Của bạn" and "Gần đây" in the sidebar (reload on route change), Home drops both sections from `64rem` (D-032) |
 | 7-3 | Case overlay | ✅ (`7-3-fix-1.md`, `7-3-fix-2.md`) | The case opens as a modal overlay above the preview/builder (nested `/open` routes, full-screen on phones, × / Esc / Back to close), focus mode removed, plus the 7-2 carry-overs (C0) (D-033) |
 | 7-4 | Responsive pass | ✅ (`07a7a25`) | Every screen at 360 / 768 / 1024 / 1280 / 1920 after the overlay: carousel, winner reveal, CTAs, card grids, option layout |
+| 7-5 | Dev access from other devices (opt-in) | ✅ (`7-5-fix-1.md`) | `7-5-dev-lan-optin.md`: `DEV_WEB_BIND` adds port 5173 on one LAN IP through `compose.dev.lan.yaml` (`127.0.0.1` is always kept), and `COMPOSE_DEV` uses `--env-file .env.dev`. Fix-1: Tailscale Serve on the host, and `DEV_EXTRA_ORIGINS` (a list) feeds both the API origin check and Vite `allowedHosts` (D-034) |
 | 8 | Polish | ⬜ | States, micro-interactions, consistency |
 | 9 | First prod release | ⬜ | Deploy `v0.1.0` to VPS, verify backup/rollback |
 | — | Final engineering review | ⬜ | Format per master prompt §47–48 |
@@ -799,6 +800,33 @@
   - **`/s/:id` at 360/1920:** strip → "Xem lại lượt quay" is 160 px (96 reserve + gaps), nothing moves at the reveal, and there is no horizontal scroll.
   - **NICE (Phase 8):** at 1280×500, focusing "Mở case" on open scrolls the dialog so the strip's top is hidden.
   - **7-4 accepted.** Fast-forwarded into `feat/phase-7-responsive`. Phase 7 is ready for the owner's walk-through.
+- **Dev LAN change review (2026-10-10):** the owner added uncommitted LAN access for the dev web.
+  - **Kept:** the API part, with `DEV_LAN_ORIGIN` (dev-only, rejected by `env.ts` elsewhere) and an exact-match origin list for the guard and `csrf()`. Its test passes. `make check` is green.
+  - **Problems:**
+    - `0.0.0.0:5173` is published on every interface, including Tailscale, and Docker bypasses ufw.
+    - It also changes the default for everyone.
+  - **Owner chose the opt-in (D-034)** → `7-5-dev-lan-optin.md`. Work happens on `fix/dev-lan-access`, then merges into `feat/phase-7-responsive`. The architect commits the docs at review.
+- **7-5 (2026-10-10):** verified (`b8106bd`).
+  - The changes match the handoff: Makefile `--env-file` and the conditional override, `compose.dev.lan.yaml`, and 5 env tests. API 47 tests are green.
+  - Sockets were confirmed by the implementer: default localhost only, opt-in adds `192.168.6.28:5173`.
+  - **New owner request:** Tailscale access too.
+    - **Owner chose Tailscale Serve** (HTTPS MagicDNS name, no extra Docker port).
+    - **"Domain later" = prod (Phase 9),** not a public dev URL.
+  - `DEV_LAN_ORIGIN` → `DEV_EXTRA_ORIGINS` (a list), which also feeds Vite `allowedHosts` → `7-5-fix-1.md`.
+- **7-5-fix-1 (2026-10-10):** verified (`f7bbcb9`).
+  - `DEV_EXTRA_ORIGINS`:
+    - It is trimmed, and each entry must be a bare `http(s)` origin. It is rejected outside development.
+    - It feeds the API guard and `csrf()`, and Vite `allowedHosts` (never `true`).
+  - API 50 tests are green, and `git grep DEV_LAN_ORIGIN` outside `docs/` is empty.
+  - Checked on the host:
+    - The `dp-1.tailfeab26.ts.net` Host header gets 200 and an unknown host gets 403.
+    - The LAN gets 200.
+    - The web is published on `127.0.0.1` + `192.168.6.28` only.
+  - **Tailscale Serve:**
+    - Serve first had to be enabled in the tailnet admin. The owner then ran `tailscale serve --bg 5173` (tailnet only).
+    - The owner confirmed the app loads on the phone over `https://dp-1.tailfeab26.ts.net`.
+    - Curl from the host itself fails to resolve the MagicDNS name, which is expected and not a defect.
+  - **7-5 accepted.** `fix/dev-lan-access` merged into `feat/phase-7-responsive`.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.

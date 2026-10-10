@@ -504,3 +504,40 @@ Format: Decision · Reason · Alternatives · Tradeoffs · Phase/Date
 - **Supersedes:** D-032 "Focus mode".
 - **Topology:** unchanged (same URLs).
 - **Phase:** 7 · 2026-10-09 · approved by user
+
+## D-034 — Dev access from other devices is an explicit opt-in
+- **Choice (owner):**
+  - The owner can open the **dev** web app from a phone over the LAN and over **Tailscale**. Both are off by default and turned on per machine in `.env.dev`.
+  - "Domain later" means the **prod** domain (Phase 9, Caddy + `APP_ORIGIN`). Dev is not exposed on a public domain.
+- **How:**
+  - **`127.0.0.1:5173` is always published.**
+  - **LAN (`DEV_WEB_BIND`):**
+    - When this is set in `.env.dev`, the Makefile also loads `compose.dev.lan.yaml`, which publishes `${DEV_WEB_BIND}:5173`. Set it to the host's LAN IPv4.
+    - Binding to that one IP keeps the port off other interfaces. `0.0.0.0` is not recommended.
+    - Binding only the LAN IP was rejected, because it would break `localhost:5173` on the host.
+    - `COMPOSE_DEV` uses `--env-file .env.dev` so Compose can interpolate the variable.
+  - **Tailscale: Tailscale Serve on the host.**
+    - The owner runs `tailscale serve --bg 5173`, which serves `https://<machine>.<tailnet>.ts.net` (TLS, MagicDNS name) and proxies to `http://127.0.0.1:5173`.
+    - Docker publishes no extra port.
+    - Binding the Tailscale IP with Docker was rejected: it is plain HTTP over a bare IP and needs a second binding.
+  - **`DEV_EXTRA_ORIGINS` (a comma-separated list of bare origins)** drives two checks:
+    - **API:** the mutation guard and Hono `csrf()` accept `APP_ORIGIN` plus these origins. `env.ts` rejects a non-empty list unless `NODE_ENV=development`, so it can never be active in prod.
+    - **Vite:** `server.allowedHosts` is set to their hostnames, because Vite blocks unknown `Host` headers. It is never set to `true`.
+    - Any later reverse proxy in front of dev (Tailscale or other) only needs one more entry.
+  - **API `8787` and DB `5433` stay on `127.0.0.1`.** Devices reach the API through Vite's `/api` proxy.
+  - **Prod is unchanged.** One `APP_ORIGIN` behind Caddy. Its domain is set in Phase 9.
+- **Reason:**
+  - Docker publishes ports through its own iptables rules, which bypass ufw. An unconditional `0.0.0.0:5173` was exposed on every interface regardless of the host firewall.
+  - The Vite dev server can serve workspace files, so it is exposed only when asked for and only to chosen networks: the LAN IP, or the tailnet through Serve.
+- **Rejected:**
+  - An unconditional `0.0.0.0:5173` (the first uncommitted version).
+  - Exposing the API port.
+  - Tailscale Funnel or another public tunnel for dev.
+- **Known limits:**
+  - LAN access is plain HTTP, so use it only on a trusted network.
+  - If the LAN IP changes (DHCP), the web container fails to start until `DEV_WEB_BIND` and its origin are updated.
+  - Tailscale Serve needs HTTPS certificates enabled for the tailnet.
+  - Share links use the address in the browser, so create them from the address the other device will use.
+  - In dev, every device reaches the API through the same proxy, so all of them share one guest rate-limit bucket.
+- **Topology:** dev web exposure (LAN bind + Tailscale Serve on the host). API, DB and prod are unchanged.
+- **Phase:** 7 (7-5, 7-5-fix-1) · 2026-10-10 · approved by user

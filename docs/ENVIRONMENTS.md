@@ -48,6 +48,54 @@ web (Vite dev server, HMR)  ──proxy /api──►  api (tsx watch)  ──�
 
 Bạn sửa file trên máy, container thấy thay đổi ngay. Có thể mở DB dev bằng công cụ GUI (TablePlus, DBeaver...) qua `localhost:5433`.
 
+Mặc định web dev chỉ mở trên `localhost`. Có hai cách mở cho thiết bị khác, bật riêng hoặc cùng lúc (D-034).
+
+**Cách 1: qua Wi-Fi/LAN (HTTP, theo IP)**
+
+1. Trên máy chạy Docker, lấy IPv4 mạng LAN bằng `ip -4 -brief address show scope global`. Chọn địa chỉ của card Wi-Fi/Ethernet, ví dụ `192.168.1.100`. Không chọn địa chỉ Docker (`172.x`) hay Tailscale (`100.x`).
+2. Trong `.env.dev`, đặt:
+   - `DEV_WEB_BIND=192.168.1.100`: mở thêm cổng web 5173 trên đúng IP này (`localhost:5173` vẫn dùng được).
+   - Thêm `http://192.168.1.100:5173` vào `DEV_EXTRA_ORIGINS`.
+3. Chạy `make dev`, rồi trên thiết bị kia mở `http://192.168.1.100:5173`. Hai thiết bị phải cùng mạng, và mạng không được bật "client isolation" (một số Wi-Fi khách có bật).
+
+**Cách 2: qua Tailscale (HTTPS, mở được ở bất kỳ đâu trong tailnet)**
+
+1. Làm một lần trong trang quản trị Tailscale: bật **MagicDNS** và **HTTPS Certificates** (mục DNS).
+2. Trên máy chạy Docker, chạy `tailscale serve --bg 5173`.
+   - Nếu báo thiếu quyền, chạy một lần `sudo tailscale set --operator=$USER`.
+   - Lệnh in ra địa chỉ dạng `https://dp-1.tailfeab26.ts.net`. Cấu hình này vẫn giữ sau khi khởi động lại máy.
+3. Thêm địa chỉ đó vào `DEV_EXTRA_ORIGINS`, rồi chạy `make dev`.
+4. Trên điện thoại đã cài app Tailscale và đăng nhập cùng tailnet, mở địa chỉ đó.
+
+Không cần `DEV_WEB_BIND`, vì Tailscale Serve chuyển tiếp vào `localhost:5173`.
+- Xem trạng thái: `tailscale serve status`.
+- Tắt: `tailscale serve --https=443 off` (hoặc `tailscale serve reset`).
+
+**Ví dụ `.env.dev` bật cả hai cách:**
+
+```dotenv
+DEV_WEB_BIND=192.168.6.28
+DEV_EXTRA_ORIGINS=http://192.168.6.28:5173,https://dp-1.tailfeab26.ts.net
+```
+
+`DEV_EXTRA_ORIGINS` là danh sách địa chỉ, cách nhau bằng dấu phẩy. Mỗi địa chỉ chỉ gồm `scheme://host[:port]`, không có `/` ở cuối. Danh sách này có hai tác dụng:
+- API nhận thao tác ghi (lưu, chia sẻ...) từ các địa chỉ đó.
+- Vite chấp nhận các tên miền đó. Nếu thiếu, Vite trả "Blocked request".
+
+Nếu sau này đặt thêm một reverse proxy khác trước dev, chỉ cần thêm địa chỉ của nó vào danh sách.
+
+Lưu ý:
+- **Thiếu cấu hình:**
+  - Mở được trang nhưng thao tác ghi bị lỗi `403`: địa chỉ đang mở chưa có trong `DEV_EXTRA_ORIGINS`.
+  - Thiết bị khác qua LAN không vào được: chưa đặt `DEV_WEB_BIND`.
+- **Tường lửa (ufw) không chặn được cổng Docker,** vì Docker tự ghi rule iptables. Vì vậy chỉ bind đúng IP LAN, không dùng `0.0.0.0`.
+- **IP LAN đổi** (DHCP): container web sẽ không khởi động được. Sửa `DEV_WEB_BIND` và địa chỉ trong `DEV_EXTRA_ORIGINS` rồi chạy `make dev` lại. Có thể đặt IP cố định cho máy trên router. Tên Tailscale thì không đổi.
+- **Link chia sẻ** lấy theo địa chỉ đang mở, nên hãy tạo link từ địa chỉ mà người nhận dùng được.
+- **API 8787 và PostgreSQL 5433 luôn chỉ mở trên `localhost`.** Thiết bị khác gọi API qua proxy `/api` của web.
+- **Giới hạn tạo khách mới:** mọi thiết bị đi qua cùng một proxy, nên dùng chung giới hạn `GUEST_RATE_LIMIT_PER_HOUR`.
+- **Chỉ dùng trong mạng tin cậy:** đây là dev server, không mở ra internet (không dùng Tailscale Funnel). Bản cho người dùng thật chạy prod qua domain và HTTPS (Phase 9).
+- **Tắt LAN:** comment `DEV_WEB_BIND` trong `.env.dev`, chạy `make dev-down` rồi `make dev`. Khi không còn `DEV_WEB_BIND`, Makefile không nạp `compose.dev.lan.yaml`, nên `up` không tự gỡ binding cũ.
+
 ---
 
 ## 4. Quy trình làm việc hằng ngày
