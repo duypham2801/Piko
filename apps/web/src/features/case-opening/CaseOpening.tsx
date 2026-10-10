@@ -63,6 +63,7 @@ export default function CaseOpening({
 }: CaseOpeningProps) {
   const navigate = useNavigate();
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
   const titleId = useId();
   const [excludedIds, setExcludedIds] = useState<ReadonlySet<string>>(() => new Set());
   const [historySaveStatus, setHistorySaveStatus] = useState<HistorySaveStatus>('idle');
@@ -181,6 +182,36 @@ export default function CaseOpening({
     }
   }, []);
 
+  const focusDialogTitle = useCallback(() => {
+    titleRef.current?.focus({ preventScroll: true });
+  }, []);
+
+  useEffect(() => {
+    if (state.status === 'spinning') {
+      focusDialogTitle();
+      return;
+    }
+
+    if (state.status === 'revealed') {
+      dialogRef.current
+        ?.querySelector<HTMLElement>('[data-reveal-focus]')
+        ?.focus({ preventScroll: true });
+    }
+  }, [focusDialogTitle, state.status]);
+
+  useEffect(() => {
+    if (historySaveStatus === 'saving') {
+      focusDialogTitle();
+      return;
+    }
+
+    if (historySaveStatus === 'saved') {
+      dialogRef.current
+        ?.querySelector<HTMLElement>('[data-post-save-focus]')
+        ?.focus({ preventScroll: true });
+    }
+  }, [focusDialogTitle, historySaveStatus]);
+
   const closeDialog = () => {
     dialogRef.current?.close();
   };
@@ -203,7 +234,9 @@ export default function CaseOpening({
     >
       <div className={styles.content}>
         <header className={styles.header}>
-          <h2 id={titleId}>{title}</h2>
+          <h2 ref={titleRef} id={titleId} tabIndex={-1}>
+            {title}
+          </h2>
           <Button
             aria-label={t('close')}
             className={styles.closeButton}
@@ -232,6 +265,7 @@ export default function CaseOpening({
         {revealed ? (
           <div className={styles.actions}>
             <Button
+              data-reveal-focus
               disabled={historySaveStatus === 'saving' || historySaveStatus === 'saved'}
               fullWidth
               size="lg"
@@ -244,7 +278,7 @@ export default function CaseOpening({
                   : t('goNow')}
             </Button>
             <div className={styles.secondaryActions}>
-              <Button fullWidth variant="outline" onClick={spin}>
+              <Button data-post-save-focus fullWidth variant="outline" onClick={spin}>
                 {t('spinAgain')}
               </Button>
               <Button

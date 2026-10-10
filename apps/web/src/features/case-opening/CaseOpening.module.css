@@ -50,6 +50,10 @@
   line-height: var(--leading-tight);
 }
 
+.header h2:focus {
+  outline: none;
+}
+
 .closeButton {
   grid-column: 3;
   grid-row: 1;
