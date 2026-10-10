@@ -4,8 +4,9 @@
   text-align: center;
 }
 
-.muted {
-  color: var(--color-text-muted);
+.start {
+  justify-items: start;
+  text-align: start;
 }
 
 .error {

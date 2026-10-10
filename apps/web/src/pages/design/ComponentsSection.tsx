@@ -6,6 +6,7 @@ import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import Chip from '../../components/ui/Chip';
+import LoadingText from '../../components/ui/LoadingText';
 import OptionGlyph from '../../components/ui/OptionGlyph';
 import Switch from '../../components/ui/Switch';
 import TextField from '../../components/ui/TextField';
@@ -178,6 +179,13 @@ export default function ComponentsSection() {
             <OptionGlyph label="Ẩm thực" />
             <span>Ẩm thực</span>
           </div>
+        </div>
+      </div>
+
+      <div className={styles.group}>
+        <h3>LoadingText</h3>
+        <div className={styles.demoCell}>
+          <LoadingText />
         </div>
       </div>
     </section>

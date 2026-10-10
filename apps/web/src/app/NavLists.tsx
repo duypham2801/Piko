@@ -1,6 +1,7 @@
 import { Link, NavLink, useLocation } from 'react-router';
 
 import OptionGlyph from '../components/ui/OptionGlyph';
+import LoadingText from '../components/ui/LoadingText';
 import { t } from '../i18n';
 import { useDecisionList } from '../features/decisions/useDecisionList';
 import { historyEntryHref } from '../features/history/historyEntryHref';
@@ -16,6 +17,7 @@ export default function NavLists() {
     <div className={styles.lists}>
       <section className={styles.decisionsSection}>
         <h2 className={styles.heading}>{t('yourDecisions')}</h2>
+        {decisionState.status === 'loading' && <LoadingText />}
         {decisionState.status === 'loaded' && decisionState.decisions.length > 0 && (
           <ul className={styles.list}>
             {decisionState.decisions.map((record) => {

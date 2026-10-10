@@ -30,7 +30,9 @@ export default function DecisionBuilderPage() {
   } else if (recordState.status === 'loaded') {
     pageContent = <DecisionForm decisionId={id} initial={draftOf(recordState.record)} key={id} />;
   } else {
-    pageContent = <DecisionLoadState state={recordState} />;
+    pageContent = (
+      <DecisionLoadState align="start" backTo={id ? `/decisions/${id}` : '/'} state={recordState} />
+    );
   }
 
   return (

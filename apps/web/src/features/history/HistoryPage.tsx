@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import { useNavigate } from 'react-router';
 
 import Button from '../../components/ui/Button';
+import LoadingText from '../../components/ui/LoadingText';
 import Screen from '../../app/Screen';
 import { t } from '../../i18n';
 import SharedLinkList from '../share/SharedLinkList';
@@ -49,7 +50,7 @@ export default function HistoryPage() {
           <h2 ref={historyEntriesHeadingRef} tabIndex={-1}>
             {t('historyEntries')}
           </h2>
-          {status === 'loading' && <p className={styles.muted}>{t('loading')}</p>}
+          {status === 'loading' && <LoadingText />}
           {status === 'error' && (
             <div className={styles.state}>
               <p className={styles.error}>{t('historyLoadFailed')}</p>

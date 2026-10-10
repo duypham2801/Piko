@@ -6,6 +6,7 @@ import NotFoundPage from '../../app/NotFoundPage';
 import Screen from '../../app/Screen';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
+import LoadingText from '../../components/ui/LoadingText';
 import OptionGlyph from '../../components/ui/OptionGlyph';
 import { t } from '../../i18n';
 import CaseCarousel from '../case-opening/CaseCarousel';
@@ -21,7 +22,7 @@ type RevealLabel = 'winner' | 'try';
 function LoadingPage() {
   return (
     <Screen align="center" className={styles.content}>
-      <p className={styles.muted}>{t('loading')}</p>
+      <LoadingText />
     </Screen>
   );
 }

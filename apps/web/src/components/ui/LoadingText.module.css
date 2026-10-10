@@ -1,0 +1,15 @@
+.loading {
+  color: var(--color-text-muted);
+  opacity: 0;
+  animation: loadingTextIn var(--duration-normal) var(--ease-standard) var(--duration-slow) both;
+}
+
+@keyframes loadingTextIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
