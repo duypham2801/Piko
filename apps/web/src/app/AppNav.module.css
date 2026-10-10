@@ -132,4 +132,20 @@
     justify-content: flex-start;
     padding-inline: var(--space-3);
   }
+
+  .history[aria-current='page'] {
+    border-radius: var(--radius-md);
+    background: var(--color-selection);
+    color: var(--color-text);
+    font-weight: var(--font-weight-bold);
+    text-decoration: none;
+  }
+}
+
+@media (min-width: 64rem) and (hover: hover) {
+  .history:hover {
+    background: var(--color-surface);
+    color: var(--color-text);
+    text-decoration: none;
+  }
 }
