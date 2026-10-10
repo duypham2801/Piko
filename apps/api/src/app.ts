@@ -16,6 +16,7 @@ import { createPublicShareRoutes, createShareRoutes } from './routes/shares.js';
 export interface AppConfig {
   nodeEnv: 'development' | 'production' | 'test';
   appOrigin: string;
+  additionalAppOrigins: string[];
   cookieSecure: boolean;
   trustProxy: boolean;
   appVersion: string;
@@ -30,6 +31,7 @@ export interface AppDependencies {
 
 export function createApp(config: AppConfig, dependencies: AppDependencies): Hono<AppEnv> {
   const app = new Hono<AppEnv>();
+  const allowedOrigins = [config.appOrigin, ...config.additionalAppOrigins];
   const limiter =
     dependencies.limiter ?? new FixedWindowRateLimiter({ limit: config.guestRateLimitPerHour });
 
@@ -43,13 +45,13 @@ export function createApp(config: AppConfig, dependencies: AppDependencies): Hon
       if (contentType !== 'application/json') {
         throw new HttpError(415, 'unsupported_media_type', 'Mutations must use application/json.');
       }
-      if (c.req.header('Origin') !== config.appOrigin) {
+      if (!allowedOrigins.includes(c.req.header('Origin') ?? '')) {
         throw new HttpError(403, 'csrf_failed', 'The request origin is not allowed.');
       }
     }
     await next();
   });
-  app.use('/api/*', csrf({ origin: config.appOrigin }));
+  app.use('/api/*', csrf({ origin: allowedOrigins }));
 
   app.get('/api/healthz', healthHandler({ sql: dependencies.sql, version: config.appVersion }));
 

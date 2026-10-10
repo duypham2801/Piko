@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router';
 
 import NotFoundPage from './NotFoundPage';
+import AppShell from './AppShell';
 import SessionLayout from './SessionLayout';
 import DecisionBuilderPage from '../features/builder/DecisionBuilderPage';
 import DecisionCasePage from '../features/decisions/DecisionCasePage';
@@ -16,15 +17,19 @@ export default function App() {
     <Routes>
       <Route path="/s/:id" element={<SharedCasePage />} />
       <Route element={<SessionLayout />}>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/history" element={<HistoryPage />} />
-        <Route path="/decisions/new" element={<DecisionBuilderPage />} />
-        <Route path="/decisions/:id" element={<DecisionPreviewPage />} />
-        <Route path="/decisions/:id/edit" element={<DecisionBuilderPage />} />
-        <Route path="/decisions/:id/open" element={<DecisionCasePage />} />
-        <Route path="/presets/:slug" element={<PresetPreviewPage />} />
-        <Route path="/presets/:slug/open" element={<PresetCasePage />} />
-        <Route path="*" element={<NotFoundPage />} />
+        <Route element={<AppShell />}>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/history" element={<HistoryPage />} />
+          <Route path="/decisions/new" element={<DecisionBuilderPage />} />
+          <Route path="/decisions/:id" element={<DecisionPreviewPage />}>
+            <Route path="open" element={<DecisionCasePage />} />
+          </Route>
+          <Route path="/decisions/:id/edit" element={<DecisionBuilderPage />} />
+          <Route path="/presets/:slug" element={<PresetPreviewPage />}>
+            <Route path="open" element={<PresetCasePage />} />
+          </Route>
+          <Route path="*" element={<NotFoundPage />} />
+        </Route>
       </Route>
     </Routes>
   );

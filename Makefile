@@ -1,4 +1,5 @@
-COMPOSE_DEV = docker compose -f compose.dev.yaml
+DEV_WEB_BIND := $(shell sed -n 's/^DEV_WEB_BIND=//p' .env.dev 2>/dev/null | tail -n 1 | tr -d '\r')
+COMPOSE_DEV = docker compose -f compose.dev.yaml $(if $(DEV_WEB_BIND),-f compose.dev.lan.yaml) --env-file .env.dev
 COMPOSE_PROD = docker compose -f compose.prod.yaml --env-file .env.prod
 
 TAG ?= $(shell git describe --tags --exact-match 2>/dev/null)
@@ -19,6 +20,7 @@ dev: ## Start the development database, API and web app
 	@$(COMPOSE_DEV) up -d --build
 	@echo 'Web: http://localhost:5173'
 	@echo 'API: http://localhost:8787'
+	@sed -n 's/^DEV_EXTRA_ORIGINS=//p' .env.dev 2>/dev/null | tr -d '\r' | tr ',' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$$//' | sed '/^$$/d;s/^/Web (extra): /'
 
 dev-down: ## Stop the development stack and keep its volumes
 	@$(COMPOSE_DEV) down

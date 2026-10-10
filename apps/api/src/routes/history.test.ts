@@ -33,6 +33,7 @@ describe('history routes', () => {
       {
         nodeEnv: 'test',
         appOrigin,
+        additionalAppOrigins: [],
         cookieSecure: false,
         trustProxy: false,
         appVersion: 'test',

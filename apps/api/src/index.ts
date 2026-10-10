@@ -19,6 +19,7 @@ async function main(): Promise<void> {
     {
       nodeEnv: env.NODE_ENV,
       appOrigin: env.APP_ORIGIN,
+      additionalAppOrigins: env.DEV_EXTRA_ORIGINS,
       cookieSecure: env.COOKIE_SECURE,
       trustProxy: env.TRUST_PROXY,
       appVersion: env.APP_VERSION,

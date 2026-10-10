@@ -1,36 +1,12 @@
-.screen {
-  min-height: 100dvh;
-  padding: var(--space-6) var(--space-4) var(--space-8);
-  background: var(--color-bg);
-}
-
 .content {
-  display: grid;
-  width: min(100%, var(--content-max-width));
   gap: var(--space-7);
-  margin: 0 auto;
 }
 
-.brand,
 .intro {
   display: grid;
   justify-items: center;
   gap: var(--space-2);
   text-align: center;
-}
-
-.wordmark {
-  color: var(--color-text);
-  font-family: var(--font-display);
-  font-size: var(--text-3xl);
-  font-weight: var(--font-weight-display);
-  line-height: var(--leading-tight);
-  letter-spacing: 0.04em;
-}
-
-.tagline {
-  color: var(--color-text-muted);
-  font-size: var(--text-lg);
 }
 
 .intro h1 {
@@ -147,14 +123,6 @@
 }
 
 @media (min-width: 48rem) {
-  .screen {
-    padding: var(--space-6);
-  }
-
-  .content {
-    width: min(100%, var(--content-wide-max-width));
-  }
-
   .presetList {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

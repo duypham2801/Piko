@@ -1,14 +1,27 @@
-.screen {
-  display: grid;
-  min-height: 100dvh;
-  place-items: center;
-  padding: var(--space-4);
+.dialog {
+  inset: 0;
+  width: 100%;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: calc(var(--space-4) + env(safe-area-inset-top)) var(--space-4)
+    calc(var(--space-4) + env(safe-area-inset-bottom));
+  overflow-y: auto;
+  border: 0;
+  border-radius: 0;
   background: var(--color-bg);
+  animation: dialogIn var(--duration-normal) var(--ease-out) both;
+}
+
+.dialog::backdrop {
+  background: var(--color-backdrop);
+  backdrop-filter: blur(var(--blur-backdrop));
 }
 
 .content {
   display: grid;
-  width: min(100%, var(--content-max-width));
+  min-width: 0;
   gap: var(--space-6);
   justify-items: center;
 }
@@ -21,20 +34,37 @@
 
 .header {
   display: grid;
+  width: 100%;
+  grid-template-columns: var(--tap-target-min) minmax(0, 1fr) var(--tap-target-min);
+  align-items: center;
   gap: var(--space-2);
-  justify-items: center;
   text-align: center;
 }
 
-.header h1 {
+.header h2 {
+  grid-column: 2;
+  min-width: 0;
+  overflow-wrap: anywhere;
   color: var(--color-text);
-  font-size: var(--text-display);
+  font-size: var(--text-2xl);
   line-height: var(--leading-tight);
+}
+
+.closeButton {
+  grid-column: 3;
+  grid-row: 1;
+  justify-self: end;
+  width: var(--tap-target-min);
+  min-width: var(--tap-target-min);
+  height: var(--tap-target-min);
+  padding: 0;
+  font-size: var(--text-xl);
+  line-height: 1;
 }
 
 .result {
   width: min(100%, var(--content-max-width));
-  min-height: calc(var(--space-8) * 2);
+  min-height: calc(var(--space-8) * 1.5);
 }
 
 .actions {
@@ -67,12 +97,43 @@
   text-align: center;
 }
 
-@media (min-width: 48rem) {
-  .screen {
-    padding: var(--space-6);
+@keyframes dialogIn {
+  from {
+    opacity: 0;
+    transform: translateY(var(--space-3));
   }
 
-  .content {
-    width: min(100%, var(--content-wide-max-width));
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dialog {
+    animation: none;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .dialog::backdrop {
+    backdrop-filter: none;
+  }
+}
+
+@media (min-width: 48rem) {
+  .dialog {
+    width: min(calc(100% - (var(--space-6) * 2)), var(--case-dialog-max-width));
+    height: fit-content;
+    max-height: calc(100dvh - var(--space-8) - var(--space-6));
+    margin: var(--space-8) auto auto;
+    padding: var(--space-6);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-chunky);
+  }
+
+  .header h2 {
+    font-size: var(--text-display);
   }
 }

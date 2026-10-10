@@ -21,6 +21,7 @@ describe('decision routes', () => {
       {
         nodeEnv: 'test',
         appOrigin,
+        additionalAppOrigins: ['http://192.168.6.28:5173', 'https://dp-1.example.ts.net'],
         cookieSecure: false,
         trustProxy: false,
         appVersion: 'test',
@@ -67,6 +68,27 @@ describe('decision routes', () => {
       error: { code: 'session_required', message: 'A session is required.' },
     });
     expect(await testDatabase.db.select({ id: users.id }).from(users)).toEqual([]);
+  });
+
+  it('accepts the configured LAN origin and rejects another origin for writes', async () => {
+    const cookie = await createSessionCookie();
+    const body = JSON.stringify(makeDraft({ category: 'food' }));
+    for (const origin of ['http://192.168.6.28:5173', 'https://dp-1.example.ts.net']) {
+      const allowed = await request('/api/decisions', {
+        method: 'POST',
+        headers: { ...mutationHeaders(cookie), Origin: origin },
+        body,
+      });
+      expect(allowed.status).toBe(201);
+    }
+
+    const denied = await request('/api/decisions', {
+      method: 'POST',
+      headers: { ...mutationHeaders(cookie), Origin: 'http://192.168.6.29:5173' },
+      body,
+    });
+    expect(denied.status).toBe(403);
+    expect((await denied.json()).error.code).toBe('csrf_failed');
   });
 
   it('returns not_found for an invalid decision UUID', async () => {

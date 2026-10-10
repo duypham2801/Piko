@@ -3,9 +3,9 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router';
 import { DECISION_LIMITS, DecisionDraft } from '@piko/domain';
 import type { DecisionDraftData } from '@piko/domain';
 
-import BackLink from '../../components/ui/BackLink';
 import Button from '../../components/ui/Button';
 import TextField from '../../components/ui/TextField';
+import Screen from '../../app/Screen';
 import { t } from '../../i18n';
 import { ApiClientError } from '../../lib/api/client';
 import { createDecision, updateDecision } from '../../lib/api/decisions';
@@ -211,109 +211,107 @@ export default function DecisionForm({ backTo, decisionId, initial }: DecisionFo
   const statusIsError =
     status === 'limitError' || status === 'saveError' || (submitted && !parsed.success);
 
-  if (isCaseView && parsed.success) {
-    return (
-      <CaseOpening
-        backTo={caseBackTo}
-        category={parsed.data.category}
-        options={caseOptions}
-        source={{ kind: 'draft' }}
-        title={parsed.data.title}
-      />
-    );
-  }
-
   return (
-    <main className={styles.screen}>
-      <form className={styles.content} onSubmit={handleSave}>
-        <BackLink to={backTo ?? (decisionId ? `/decisions/${decisionId}` : '/')}>
-          {t('back')}
-        </BackLink>
-        <h1>{decisionId ? t('builderEditTitle') : t('builderNewTitle')}</h1>
+    <>
+      <Screen backTo={backTo ?? (decisionId ? `/decisions/${decisionId}` : '/')}>
+        <form className={styles.form} onSubmit={handleSave}>
+          <h1>{decisionId ? t('builderEditTitle') : t('builderNewTitle')}</h1>
 
-        <TextField
-          error={errors.title}
-          id="decision-title"
-          label={t('decisionTitleLabel')}
-          maxLength={DECISION_LIMITS.titleMaxLength}
-          placeholder={t('decisionTitlePlaceholder')}
-          value={draft.title}
-          onChange={(event) => editDraft((current) => ({ ...current, title: event.target.value }))}
-        />
-
-        <section className={styles.optionsSection}>
-          <h2>{t('optionsHeading')}</h2>
-          <ul className={styles.optionList}>
-            {draft.options.map((option, index) => (
-              <li key={option.id}>
-                <OptionRow
-                  error={errors.options[option.id]}
-                  index={index}
-                  open={openEmojiId === option.id}
-                  option={option}
-                  optionCount={draft.options.length}
-                  onCloseEmoji={() => setOpenEmojiId(null)}
-                  onRemove={() => removeOption(index)}
-                  onToggleEmoji={() => {
-                    setOpenEmojiId((current) => (current === option.id ? null : option.id));
-                  }}
-                  onUpdate={(update) => updateOption(option.id, update)}
-                />
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <div className={styles.optionActions}>
-          <Button
-            disabled={draft.options.length >= DECISION_LIMITS.maxOptions}
-            variant="outline"
-            onClick={addOption}
-          >
-            {t('addOption')}
-          </Button>
-          <Button
-            aria-haspopup="dialog"
-            id={existingOptionsToggleId}
-            variant="outline"
-            onClick={() => {
-              setOpenEmojiId(null);
-              setExistingOpen((current) => !current);
-            }}
-          >
-            {t('addFromExisting')}
-          </Button>
-        </div>
-        {draft.options.length >= DECISION_LIMITS.maxOptions && (
-          <p className={styles.hint}>{t('maxOptionsHint')}</p>
-        )}
-        {existingOpen && (
-          <ExistingOptionsPanel
-            decisionId={decisionId}
-            draft={draft}
-            onClose={closeExisting}
-            onEditDraft={editDraft}
+          <TextField
+            error={errors.title}
+            id="decision-title"
+            label={t('decisionTitleLabel')}
+            maxLength={DECISION_LIMITS.titleMaxLength}
+            placeholder={t('decisionTitlePlaceholder')}
+            value={draft.title}
+            onChange={(event) =>
+              editDraft((current) => ({ ...current, title: event.target.value }))
+            }
           />
-        )}
 
-        <div className={styles.actionBar}>
-          <p
-            aria-live={statusIsError ? 'assertive' : 'polite'}
-            className={`${styles.status} ${statusIsError ? styles.statusError : ''}`}
-            role={statusIsError ? 'alert' : 'status'}
-          >
-            {statusMessage}
-          </p>
-          <div className={styles.actionButtons}>
-            <Button fullWidth variant="secondary" type="button" onClick={handleOpenCase}>
-              {t('openCase')}
+          <section className={styles.optionsSection}>
+            <h2>{t('optionsHeading')}</h2>
+            <ul className={styles.optionList}>
+              {draft.options.map((option, index) => (
+                <li key={option.id}>
+                  <OptionRow
+                    error={errors.options[option.id]}
+                    index={index}
+                    open={openEmojiId === option.id}
+                    option={option}
+                    optionCount={draft.options.length}
+                    onCloseEmoji={() => setOpenEmojiId(null)}
+                    onRemove={() => removeOption(index)}
+                    onToggleEmoji={() => {
+                      setOpenEmojiId((current) => (current === option.id ? null : option.id));
+                    }}
+                    onUpdate={(update) => updateOption(option.id, update)}
+                  />
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <div className={styles.optionActions}>
+            <Button
+              disabled={draft.options.length >= DECISION_LIMITS.maxOptions}
+              variant="outline"
+              onClick={addOption}
+            >
+              {t('addOption')}
             </Button>
-            <Button fullWidth disabled={status === 'saving'} type="submit">
-              {status === 'saving' ? t('saving') : t('save')}
+            <Button
+              aria-haspopup="dialog"
+              id={existingOptionsToggleId}
+              variant="outline"
+              onClick={() => {
+                setOpenEmojiId(null);
+                setExistingOpen((current) => !current);
+              }}
+            >
+              {t('addFromExisting')}
             </Button>
           </div>
-        </div>
-      </form>
-    </main>
+          {draft.options.length >= DECISION_LIMITS.maxOptions && (
+            <p className={styles.hint}>{t('maxOptionsHint')}</p>
+          )}
+          {existingOpen && (
+            <ExistingOptionsPanel
+              decisionId={decisionId}
+              draft={draft}
+              onClose={closeExisting}
+              onEditDraft={editDraft}
+            />
+          )}
+
+          <div className={styles.actionBar}>
+            <p
+              aria-live={statusIsError ? 'assertive' : 'polite'}
+              className={`${styles.status} ${statusIsError ? styles.statusError : ''}`}
+              role={statusIsError ? 'alert' : 'status'}
+            >
+              {statusMessage}
+            </p>
+            <div className={styles.actionButtons}>
+              <Button fullWidth variant="secondary" type="button" onClick={handleOpenCase}>
+                {t('openCase')}
+              </Button>
+              <Button fullWidth disabled={status === 'saving'} type="submit">
+                {status === 'saving' ? t('saving') : t('save')}
+              </Button>
+            </div>
+          </div>
+        </form>
+      </Screen>
+      {isCaseView && parsed.success && (
+        <CaseOpening
+          backTo={caseBackTo}
+          category={parsed.data.category}
+          options={caseOptions}
+          source={{ kind: 'draft' }}
+          title={parsed.data.title}
+        />
+      )}
+    </>
   );
 }

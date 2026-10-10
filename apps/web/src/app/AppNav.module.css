@@ -1,0 +1,119 @@
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: var(--border-width-hairline) solid var(--color-divider);
+  background: var(--color-bg);
+}
+
+.logo,
+.history,
+.create {
+  min-height: var(--tap-target-min);
+}
+
+.logo {
+  display: grid;
+  flex: 0 0 auto;
+  align-content: center;
+  align-items: start;
+  gap: 0;
+  color: var(--color-text);
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--font-weight-display);
+  line-height: var(--leading-tight);
+  text-decoration: none;
+}
+
+.wordmark {
+  line-height: var(--leading-tight);
+}
+
+.tagline {
+  color: var(--color-text-muted);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--leading-tight);
+  white-space: nowrap;
+}
+
+.links {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.history,
+.create {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  font-weight: var(--font-weight-bold);
+  text-decoration: none;
+}
+
+.history {
+  padding: var(--space-2) var(--space-1);
+  color: var(--color-text);
+}
+
+.history[aria-current='page'] {
+  color: var(--color-text-accent);
+  text-decoration: underline;
+  text-underline-offset: var(--space-1);
+}
+
+.create {
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-primary);
+  box-shadow: var(--shadow-chunky-sm);
+  color: var(--color-on-primary-strong);
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
+
+.create:active {
+  transform: translateY(var(--shadow-offset-sm));
+  box-shadow: none;
+}
+
+@media (min-width: 64rem) {
+  .nav {
+    position: sticky;
+    top: 0;
+    height: 100dvh;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: var(--space-4);
+    padding: var(--space-6) var(--space-4);
+    overflow-y: auto;
+    border-right: var(--border-width-hairline) solid var(--color-divider);
+    border-bottom: 0;
+  }
+
+  .links {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-2);
+  }
+
+  .history,
+  .create {
+    width: 100%;
+  }
+
+  .history {
+    justify-content: flex-start;
+    padding-inline: var(--space-3);
+  }
+}

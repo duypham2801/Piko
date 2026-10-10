@@ -1,16 +1,4 @@
-.screen {
-  display: grid;
-  min-height: 100dvh;
-  place-items: center;
-  padding: var(--space-6) var(--space-4);
-  background: var(--color-bg);
-}
-
 .content {
-  display: grid;
-  width: min(100%, var(--content-max-width));
-  min-width: 0;
-  gap: var(--space-6);
   justify-items: center;
   text-align: center;
 }
@@ -54,7 +42,7 @@
 
 .result {
   width: min(100%, var(--content-max-width));
-  min-height: calc(var(--space-8) * 2);
+  min-height: calc(var(--space-8) * 1.5);
   text-align: start;
 }
 
@@ -120,14 +108,4 @@
 .makeYourOwn:hover {
   text-decoration: underline;
   text-underline-offset: var(--space-1);
-}
-
-@media (min-width: 48rem) {
-  .content {
-    width: min(100%, var(--content-wide-max-width));
-  }
-
-  .screen {
-    padding: var(--space-8) var(--space-6);
-  }
 }

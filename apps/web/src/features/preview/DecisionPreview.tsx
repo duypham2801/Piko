@@ -3,10 +3,10 @@ import { useNavigate, useSearchParams } from 'react-router';
 import { DECISION_LIMITS } from '@piko/domain';
 import type { DecisionOptionData } from '@piko/domain';
 
-import BackLink from '../../components/ui/BackLink';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import Switch from '../../components/ui/Switch';
+import Screen from '../../app/Screen';
 import { t } from '../../i18n';
 import { formatOff, parseOff } from './off';
 import styles from './DecisionPreview.module.css';
@@ -17,7 +17,6 @@ export type DecisionPreviewProps = {
   options: readonly DecisionOptionData[];
   backTo: string;
   openTo: string;
-  openState?: unknown;
   children?: ReactNode;
 };
 
@@ -27,7 +26,6 @@ export default function DecisionPreview({
   options,
   backTo,
   openTo,
-  openState,
   children,
 }: DecisionPreviewProps) {
   const navigate = useNavigate();
@@ -60,62 +58,58 @@ export default function DecisionPreview({
   };
 
   const openCase = () => {
-    navigate(`${openTo}${search ? `?${search}` : ''}`, { state: openState });
+    navigate(`${openTo}${search ? `?${search}` : ''}`);
   };
 
   return (
-    <main className={styles.screen}>
-      <div className={styles.content}>
-        <BackLink to={backTo}>{t('back')}</BackLink>
+    <Screen backTo={backTo} width="wide">
+      <header className={styles.header}>
+        {emoji && (
+          <span aria-hidden="true" className={styles.headerEmoji}>
+            {emoji}
+          </span>
+        )}
+        <h1>{title}</h1>
+        <p>{t('previewLead')}</p>
+      </header>
 
-        <header className={styles.header}>
-          {emoji && (
-            <span aria-hidden="true" className={styles.headerEmoji}>
-              {emoji}
-            </span>
-          )}
-          <h1>{title}</h1>
-          <p>{t('previewLead')}</p>
-        </header>
+      <ul className={styles.optionList}>
+        {options.map((option, index) => {
+          const checked = !off.has(index);
 
-        <ul className={styles.optionList}>
-          {options.map((option, index) => {
-            const checked = !off.has(index);
+          return (
+            <li key={option.id}>
+              <Card
+                className={styles.optionRow}
+                data-off={!checked ? '' : undefined}
+                data-no-emoji={!option.emoji ? '' : undefined}
+                tone="surface"
+              >
+                {option.emoji && (
+                  <span aria-hidden="true" className={styles.optionEmoji}>
+                    {option.emoji}
+                  </span>
+                )}
+                <span className={styles.optionLabel}>{option.label}</span>
+                <Switch
+                  checked={checked}
+                  disabled={minimumReached && checked}
+                  hideLabel
+                  label={option.label}
+                  onCheckedChange={(nextChecked) => updateOption(index, nextChecked)}
+                />
+              </Card>
+            </li>
+          );
+        })}
+      </ul>
 
-            return (
-              <li key={option.id}>
-                <Card
-                  className={styles.optionRow}
-                  data-off={!checked ? '' : undefined}
-                  data-no-emoji={!option.emoji ? '' : undefined}
-                  tone="surface"
-                >
-                  {option.emoji && (
-                    <span aria-hidden="true" className={styles.optionEmoji}>
-                      {option.emoji}
-                    </span>
-                  )}
-                  <span className={styles.optionLabel}>{option.label}</span>
-                  <Switch
-                    checked={checked}
-                    disabled={minimumReached && checked}
-                    hideLabel
-                    label={option.label}
-                    onCheckedChange={(nextChecked) => updateOption(index, nextChecked)}
-                  />
-                </Card>
-              </li>
-            );
-          })}
-        </ul>
+      {minimumReached && <p className={styles.hint}>{t('minOptionsHint')}</p>}
 
-        {minimumReached && <p className={styles.hint}>{t('minOptionsHint')}</p>}
-
-        <Button className={styles.openButton} size="lg" onClick={openCase}>
-          {t('openCase')}
-        </Button>
-        {children}
-      </div>
-    </main>
+      <Button className={styles.openButton} size="lg" onClick={openCase}>
+        {t('openCase')}
+      </Button>
+      {children}
+    </Screen>
   );
 }

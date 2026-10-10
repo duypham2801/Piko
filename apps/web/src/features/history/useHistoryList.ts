@@ -8,7 +8,10 @@ type HistoryListState =
   | { status: 'loaded'; entries: readonly HistoryEntryData[] }
   | { status: 'error'; entries: readonly HistoryEntryData[] };
 
-export function useHistoryList(limit?: number): HistoryListState & { retry: () => void } {
+export function useHistoryList(
+  limit?: number,
+  reloadKey?: string,
+): HistoryListState & { retry: () => void } {
   const [state, setState] = useState<HistoryListState>({ entries: [], status: 'loading' });
   const [retryCount, setRetryCount] = useState(0);
   const retry = useCallback(() => {
@@ -31,7 +34,7 @@ export function useHistoryList(limit?: number): HistoryListState & { retry: () =
       });
 
     return () => controller.abort();
-  }, [limit, retryCount]);
+  }, [limit, reloadKey, retryCount]);
 
   return { ...state, retry };
 }

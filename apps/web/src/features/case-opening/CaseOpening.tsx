@@ -1,4 +1,13 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type SyntheticEvent,
+} from 'react';
+import { useNavigate } from 'react-router';
 import { DECISION_LIMITS } from '@piko/domain';
 import type {
   DecisionDraftData,
@@ -8,7 +17,6 @@ import type {
   SharedCaseData,
 } from '@piko/domain';
 
-import BackLink from '../../components/ui/BackLink';
 import Button from '../../components/ui/Button';
 import { t } from '../../i18n';
 import { createHistoryEntry } from '../../lib/api/history';
@@ -53,6 +61,9 @@ export default function CaseOpening({
   source,
   category,
 }: CaseOpeningProps) {
+  const navigate = useNavigate();
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
   const [excludedIds, setExcludedIds] = useState<ReadonlySet<string>>(() => new Set());
   const [historySaveStatus, setHistorySaveStatus] = useState<HistorySaveStatus>('idle');
   const [share, setShare] = useState<SharedCaseData | null>(null);
@@ -160,13 +171,45 @@ export default function CaseOpening({
         ? t('historySaveFailed')
         : '';
 
-  return (
-    <main className={styles.screen}>
-      <div className={styles.content}>
-        <BackLink to={backTo}>{t('back')}</BackLink>
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (dialog && !dialog.open) {
+      dialog.showModal();
+      dialog.querySelector<HTMLElement>('[data-initial-focus]')?.focus();
+    }
+  }, []);
 
+  const closeDialog = () => {
+    dialogRef.current?.close();
+  };
+
+  const handleClose = (event: SyntheticEvent<HTMLDialogElement>) => {
+    // React propagates close events from nested dialogs.
+    if (event.target !== event.currentTarget) {
+      return;
+    }
+
+    navigate(backTo, { replace: true });
+  };
+
+  return (
+    <dialog
+      aria-labelledby={titleId}
+      className={styles.dialog}
+      ref={dialogRef}
+      onClose={handleClose}
+    >
+      <div className={styles.content}>
         <header className={styles.header}>
-          <h1>{title}</h1>
+          <h2 id={titleId}>{title}</h2>
+          <Button
+            aria-label={t('close')}
+            className={styles.closeButton}
+            variant="outline"
+            onClick={closeDialog}
+          >
+            <span aria-hidden="true">×</span>
+          </Button>
         </header>
 
         <div className={styles.stage}>
@@ -240,20 +283,25 @@ export default function CaseOpening({
             </p>
           </div>
         ) : (
-          <Button disabled={state.status === 'spinning'} size="lg" onClick={spin}>
+          <Button
+            data-initial-focus
+            disabled={state.status === 'spinning'}
+            size="lg"
+            onClick={spin}
+          >
             {state.status === 'ready' ? t('openCase') : t('opening')}
           </Button>
         )}
+        {shareSnapshot && (
+          <ShareDialog
+            decision={shareSnapshot.decision}
+            result={shareSnapshot.result}
+            share={share}
+            onClose={closeShareDialog}
+            onShared={setShare}
+          />
+        )}
       </div>
-      {shareSnapshot && (
-        <ShareDialog
-          decision={shareSnapshot.decision}
-          result={shareSnapshot.result}
-          share={share}
-          onClose={closeShareDialog}
-          onShared={setShare}
-        />
-      )}
-    </main>
+    </dialog>
   );
 }

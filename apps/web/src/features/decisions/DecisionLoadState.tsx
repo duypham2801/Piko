@@ -1,5 +1,6 @@
 import Button from '../../components/ui/Button';
 import NotFoundPage from '../../app/NotFoundPage';
+import Screen from '../../app/Screen';
 import { t } from '../../i18n';
 import type { DecisionRecordLoadState } from './useDecisionRecord';
 import styles from './DecisionLoadState.module.css';
@@ -14,17 +15,15 @@ export default function DecisionLoadState({ state }: DecisionLoadStateProps) {
   }
 
   return (
-    <main className={styles.screen}>
-      <div className={styles.content}>
-        {state.status === 'loading' ? (
-          <p className={styles.muted}>{t('loading')}</p>
-        ) : (
-          <>
-            <p className={styles.error}>{t('loadFailed')}</p>
-            <Button onClick={state.retry}>{t('retry')}</Button>
-          </>
-        )}
-      </div>
-    </main>
+    <Screen align="center" className={styles.content}>
+      {state.status === 'loading' ? (
+        <p className={styles.muted}>{t('loading')}</p>
+      ) : (
+        <>
+          <p className={styles.error}>{t('loadFailed')}</p>
+          <Button onClick={state.retry}>{t('retry')}</Button>
+        </>
+      )}
+    </Screen>
   );
 }

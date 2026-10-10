@@ -1,9 +1,9 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 7 — Responsive pass + navigation shell (next; kickoff with the owner). Phase 6 merged into `main` on 2026-10-09; live viewing moved to the Realtime phase (D-031).
-- **Integration branch:** `feat/phase-6-result-history`
-- **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`); Phase 4 (4-1, 4-2: router, Home, presets, preview, merged into `main`); Phase 5 (5-1…5-4: decisions API, builder, saved decisions, reuse options, merged into `main`)
+- **Current phase:** Phase 8 — Polish (not started). Phase 7 merged into `main` on 2026-10-10.
+- **Integration branch:** none yet (Phase 8 kickoff creates one from `main`)
+- **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`); Phase 4 (4-1, 4-2: router, Home, presets, preview, merged into `main`); Phase 5 (5-1…5-4: decisions API, builder, saved decisions, reuse options, merged into `main`); Phase 6 (6-1…6-5b: history, result actions, share links, merged into `main`); Phase 7 (7-1…7-5: navigation shell, sidebar, case overlay, responsive pass, dev access from other devices, merged into `main`)
 
 ## Phases
 
@@ -34,7 +34,11 @@
 | 6-5a | Share UI + public page | ✅ (`6-5a-fix-1.md`) | `6-5a-share-ui.md`: "Chia sẻ" dialog (lifetime, Web Share / copy), later spins recorded, `/s/:id` (options, replay, "Tự quay thử", unavailable page) with no session bootstrap; extracts `Sheet` and `WinnerPanel` (D-030) |
 | 6-5b | Shared links list + revoke | ✅ (`6-5b-fix-1.md`) | `6-5b-shared-links.md`: "Link đã chia sẻ" in `/history` (title → `/s/:id`, winner, expiry) with an inline revoke confirm; `Button variant="danger"` (D-030) |
 | 6-6 | Live viewing + interactions | ⏸ moved | Deferred to the Realtime phase (D-031) |
-| 7 | Responsive pass + navigation shell | ⬜ | Desktop is not in the mockup and must be designed. **First task: a navigation shell** (owner, 2026-10-09):<br>- a desktop sidebar holding "Của bạn" and "Gần đây"<br>- a mobile navigation pattern (top bar, drawer or bottom tabs), chosen at kickoff<br>- the shared screen shell with the back link at the same position on every screen<br>- the public `/s/:id` page stays outside the shell |
+| 7-1 | Navigation shell | ✅ (`7-1-fix-1.md`) | `7-1-navigation-shell.md`: layout route + screen shell (back link at one position), mobile top bar, desktop sidebar frame from `64rem`, focus mode on case screens, `/s/:id` outside; replaces the copied screen layouts (D-032) |
+| 7-2 | Sidebar lists + desktop Home | ✅ (`7-2-fix-1.md`) | "Của bạn" and "Gần đây" in the sidebar (reload on route change), Home drops both sections from `64rem` (D-032) |
+| 7-3 | Case overlay | ✅ (`7-3-fix-1.md`, `7-3-fix-2.md`) | The case opens as a modal overlay above the preview/builder (nested `/open` routes, full-screen on phones, × / Esc / Back to close), focus mode removed, plus the 7-2 carry-overs (C0) (D-033) |
+| 7-4 | Responsive pass | ✅ (`07a7a25`) | Every screen at 360 / 768 / 1024 / 1280 / 1920 after the overlay: carousel, winner reveal, CTAs, card grids, option layout |
+| 7-5 | Dev access from other devices (opt-in) | ✅ (`7-5-fix-1.md`) | `7-5-dev-lan-optin.md`: `DEV_WEB_BIND` adds port 5173 on one LAN IP through `compose.dev.lan.yaml` (`127.0.0.1` is always kept), and `COMPOSE_DEV` uses `--env-file .env.dev`. Fix-1: Tailscale Serve on the host, and `DEV_EXTRA_ORIGINS` (a list) feeds both the API origin check and Vite `allowedHosts` (D-034) |
 | 8 | Polish | ⬜ | States, micro-interactions, consistency |
 | 9 | First prod release | ⬜ | Deploy `v0.1.0` to VPS, verify backup/rollback |
 | — | Final engineering review | ⬜ | Format per master prompt §47–48 |
@@ -653,6 +657,178 @@
   - 6-5b accepted. The implementer reported one transient PGlite setup timeout in `shares.test.ts` that passed on rerun; not reproduced in this review.
 - **6-6 decision (2026-10-09):** the owner asked whether live viewing should wait, since Couple/Squad will also need live spins. Owner chose to defer (D-031): Phase 6 closes at 6-5b, and live viewing moves to a Realtime phase after `v0.1.0`, designed once with Couple/Squad. Nothing built in 6-1…6-5b is wasted: `shared_cases` keeps the latest spin and `POST /api/shares/:id/spins` is recorded at spin start.
 - **Phase 6 closed (2026-10-09):** the owner did the browser review on phone and desktop and approved it. `feat/phase-6-result-history` was merged into `main` with `--no-ff`. `TOPOLOGY.md` was updated (owner approved).
+- **Phase 7 kickoff (2026-10-09):** integration branch `feat/phase-7-responsive` created from `main` (`06139c3`). Decisions in D-032.
+  - Owner: mobile top bar (logo, "Lịch sử", "+ Tạo"); desktop sidebar from `64rem` with "Của bạn" and "Gần đây"; Home drops both sections on desktop; case screens are focus screens with no sidebar.
+  - Architect defaults: case screens also hide the mobile top bar; one layout route + one screen-shell component; sidebar lists reload on route change, no global store; `/s/:id` stays outside the shell.
+  - Split into 7-1 (shell), 7-2 (sidebar lists + desktop Home), 7-3 (responsive pass per screen). No topology change.
+- **7-1 review (2026-10-09):** reviewed `d0dd31a`, `0488519` (26 files, +626/−517). `make check` passes (domain 48, api 41); no dependency change; `ensureSession` only in `SessionLayout`.
+  - **Browser (headless Chrome, 360/768/1024/1280):**
+    - The top bar shows below `64rem` and the sticky sidebar from `64rem`.
+    - `aria-current` is set on `/history`.
+    - Focus mode hides the nav on the preset case, the decision case and the builder's `?view=case`.
+    - Sharing still works: dialog, `Esc`, focus back on "Chia sẻ".
+    - `/s/:id` has no nav, only the public GET, no cookie.
+    - The back link is at one position on every shell screen.
+  - **MUST:**
+    - `Screen` `.content` stretches in the `1fr` row, which spreads `/history` and the public page over the full height ("Về trang chủ" about 100 px tall).
+    - `align="center"` does not centre without a back link, because the content lands in the `auto` row. This affects NotFound, the load state and the public states.
+  - **SHOULD:**
+    - The nav's DOM order ("+ Tạo", "Lịch sử") differs from its mobile visual order (CSS `order`), so tab order runs right-to-left.
+    - `overflow-x: hidden` and a repeated `display: flex` in `AppNav`.
+    - Page `.content` rules repeat `Screen` defaults.
+  - **Owner (HITL):** remove Home's large PIKO wordmark and move the tagline under the nav logo (D-032 note).
+  - **NICE, not requested:** `data-focus={focus || undefined}`; `import type { To }`.
+  - **DO NOT TOUCH:**
+    - page `className` overrides of `Screen`'s `.content` rely on CSS order (each page imports `Screen` before its own module), the same as the `className` props on UI primitives
+    - the dev double public GET comes from StrictMode
+  - → `7-1-fix-1.md`.
+- **7-1-fix-1 (2026-10-09):** verified (`fadfdaa`, 9 files, +25/−39). Lockfile unchanged.
+  - **Browser at 360/1280:**
+    - `/history` keeps its normal gaps; "Về trang chủ" is 44 px tall.
+    - `/nope` and `/s/<unknown>` are centred vertically.
+    - The case screen is unchanged.
+    - Tab order: "PIKO Pick. Open. Go." → "Lịch sử" → "+ Tạo" → "← Trở về" (the accessible name keeps the space).
+    - Home has no large wordmark; the nav shows the tagline under the logo; no horizontal scroll.
+  - **NICE, not requested:** `.logo` keeps the redundant `gap: 0` and `align-items: start`, and `.wordmark` repeats the logo's `line-height`.
+  - **`make check`:** the first run failed with PGlite `beforeAll` hook timeouts (10 s) in up to 5 api test files while the host load average was about 12. The api tests alone, and the next `make check`, passed (domain 48, api 41). This branch touches no api code. It is the same flake as in 6-5b → technical debt.
+  - **7-1 accepted.** Fast-forwarded into `feat/phase-7-responsive`.
+- **7-2 handoff (2026-10-09):** `7-2-sidebar-lists.md`.
+  - **Architect defaults:**
+    - `useMediaQuery(DESKTOP_QUERY)` (`useSyncExternalStore`) mounts the sidebar lists only from `64rem`, and Home's list sections only below it, so neither width makes duplicate list requests.
+    - The list hooks take an optional reload key; the sidebar passes `pathname`, so `?off=` changes do not reload, and the current data stays visible while reloading.
+    - "Của bạn" scrolls on its own; "Gần đây" shows winner + title without time.
+    - Desktop Home keeps the create card alone.
+- **7-2 review (2026-10-09):** reviewed `4b5c55a`, `2e83b94`, `f7b97cb`, `7ba2497` (9 files, +352/−69). `make check` passes (domain 48, api 41), with **1 lint warning**.
+  - **Browser:**
+    - **Requests:**
+      - At 1280 px, `/` makes one `GET /api/decisions` and one `GET /api/history?limit=5`, both from the sidebar; Home renders only "Chọn nhanh".
+      - At 360 px there are no nav lists and Home keeps its sections (dev StrictMode doubles its two GETs).
+    - **Layout and links:**
+      - Resizing across `64rem` switches the layout live.
+      - The active row has `aria-current`.
+    - **Reloads:**
+      - `?off=` toggles make no list request.
+      - "Đi thôi" → "Trở về" puts the new entry first without emptying the sidebar.
+      - A deleted decision disappears after the redirect.
+  - **MUST:** "Của bạn" with many decisions shows a horizontal scrollbar. `.list` is an `auto` grid column, so `nowrap` labels widen each `<li>`. The heading also scrolls away with the rows.
+  - **SHOULD:**
+    - `react-refresh/only-export-components` warning from exporting `historyEntryHref` in `HistoryList.tsx` (architect handoff mistake) → own module.
+    - `NavLists.module.css` repeats `global.css` resets and has two heading selectors.
+    - Redundant `aria-label` on the sidebar rows.
+    - An unused server snapshot in `useMediaQuery`.
+  - **NICE (Phase 8):**
+    - the active row is not scrolled into view
+    - recent rows without a winner emoji start further left (same as the 6-3 note)
+  - **DO NOT TOUCH:**
+    - "Xem tất cả" next to the nav's "Lịch sử" (D-032)
+    - `RecentSection` returning `null` before its first load
+  - → `7-2-fix-1.md`.
+- **7-2-fix-1 (2026-10-09):** verified (`18451c7`, 5 files, +33/−32). `make check` passes (domain 48, api 41) with **0 lint warnings**; lockfile unchanged.
+  - **Browser:**
+    - With 20 saved decisions at 1280×800 and 1024×700, only the "Của bạn" `<ul>` scrolls (956/433 px); the heading stays put and "Gần đây" stays visible.
+    - Every nav element has `scrollWidth === clientWidth`, and the long title ends in "…".
+  - `historyEntryHref` lives in its own module; the redundant `aria-label` and server snapshot are gone.
+  - **SHOULD (carried into 7-3 as C0):** the "Của bạn" `<h2>` lost its bottom spacing, because only the "Gần đây" header got `margin-bottom`. The heading now touches the list and the empty line.
+  - **NICE (carried into 7-3 as C0):** `.list > li { min-width: 0 }` is redundant with `minmax(0, 1fr)`.
+  - **7-2 accepted.** Fast-forwarded into `feat/phase-7-responsive`.
+- **7-3 kickoff (2026-10-09):** the architect ran a responsive audit (360×740, 768×1024, 1024×768, 1280×800, 1920×1080; Home, History, preview, builder, preset, case ready and revealed).
+  - **Overflow:** no horizontal overflow anywhere.
+  - **Findings:**
+    - The revealed case at 360×740 scrolls by about 25 px, because the result reserve (128 px) is taller than the winner panel (85–95 px).
+    - On a tall window the sidebar pushes "Gần đây" to the bottom.
+    - At 1920 px the case stage (60rem) leaves half the screen empty.
+  - **Owner:** instead of widening the stage, open the case as an overlay above the page (D-033), closed by × or `Esc` but not by a backdrop click.
+  - Phase 7 becomes 7-3 (overlay + C0 fixes) and 7-4 (responsive pass after the overlay).
+- **7-3 review (2026-10-09):** reviewed `6f71ee3`, `13df3f0`, `68f2fe9` (13 files, +330/−248). `make check` passes (domain 48, api 41, 0 lint warnings); lockfile unchanged.
+  - **Browser:**
+    - **Opening:**
+      - Nested `/open` routes keep the preview mounted, and opening makes no second record GET.
+      - A deep link to `/decisions/<id>/open` shows the preview with the overlay; `/presets/nope/open` shows not-found.
+    - **Closing:**
+      - A backdrop click does nothing.
+      - `Esc` (also mid-spin), "×" and Back close the overlay.
+      - After "×", Back does not reopen it, and focus returns to "Mở case".
+    - **Builder:** the overlay opens above the form, and the draft survives.
+    - **Case behaviour:**
+      - "Đi thôi" makes one `POST /api/history`.
+      - Reduced motion reveals quickly.
+      - The revealed case fits 360×740.
+    - **C0:** the sidebar heading gap and the short-list placement are fixed. The panel is 86.6 / 95.8 px against a 96 px reserve.
+  - **MUST:**
+    - Closing the nested share `Sheet` (`Esc` or "Đóng") also closes the case overlay. React propagates the synthetic `close` event to the parent dialog's `onClose`, which navigates back, and the revealed result is lost.
+    - At 360 px the "×" overlaps a long title (`1fr auto 1fr` header).
+  - **SHOULD:**
+    - From `48rem` the dialog always takes its full `max-height`, because the phone's `height: 100dvh` is not reset.
+    - Initial focus lands on "×", because `showModal()` runs after React's `autoFocus`.
+    - The "×" glyph is tiny.
+  - **DO NOT TOUCH:**
+    - `if (!id) return null` / `if (!preset) return null` in the case pages (unreachable guards for the type checker)
+    - the case pages no longer set `<title>` (the preview's title is the same)
+  - → `7-3-fix-1.md`.
+- **7-3-fix-1 (2026-10-09):** verified (`e630769`, 2 files).
+  - **Verified:**
+    - Closing the share dialog (`Esc` or "Đóng") keeps the case overlay open with its result, and focus returns to "Chia sẻ".
+    - Initial focus is on "Mở case".
+    - At 360 px the title and "×" no longer overlap.
+    - The "×" glyph is larger.
+  - **Test note:** with CDP `Runtime.evaluate` clicks (no user activation), one `Esc` closed both dialogs. Chrome's close watcher groups dialogs opened without user activation. With real mouse input via `Input.dispatchMouseEvent`, it behaves correctly. Future nested-dialog checks must use real input.
+  - **Still open (F3):** the desktop overlay is 736 px tall for 498–622 px of content. `inset: 0` makes `height: auto` stretch. `height: fit-content` was verified in the browser (568 px, centred; clamps and scrolls at 1280×500).
+  - The implementer reported one transient PGlite timeout in `history.test.ts` that passed on rerun (known flake, technical debt).
+  - → `7-3-fix-2.md`.
+- **7-3-fix-2 (2026-10-09):** verified (`b4d0132`, one line).
+  - **1280×800:** the overlay is 568 px when ready and 692 px when revealed, centred.
+  - **1280×500:** it clamps and scrolls inside.
+  - **360 px:** still full-screen.
+  - **Note for 7-4:** because the overlay is centred and grows when the actions appear, it moves up about 60 px at the reveal. The old centred case screen did the same. Consider anchoring it to the top or reserving the actions' height.
+  - **7-3 accepted.** Fast-forwarded into `feat/phase-7-responsive`.
+- **7-4 audit (2026-10-09):** the architect audited Home, History, a preview, the builder, `/s/:id`, not-found and the overlay (ready and revealed).
+  - **Viewports:** 360×740, 740×360, 768×1024, 1024×768, 1280×800, 1920×1080.
+  - **Overflow:** no horizontal overflow anywhere. The landscape phone overlay scrolls inside (accepted).
+  - **Findings:**
+    - the desktop overlay moves up about 60 px at the reveal (centred, `fit-content`)
+    - the overlay title wraps at 360 px (`--text-display` between two 44 px columns)
+    - `/s/:id` reserves 128 px for a 96 px result panel
+  - → `7-4-responsive-pass.md`. The rest goes to Phase 8:
+    - emoji-less row alignment
+    - scrolling the active sidebar row into view
+- **7-4 (2026-10-09):** verified (`07a7a25`, 2 files, +9/−4). The implementer reported one transient PGlite timeout (`shares.test.ts`) that passed on retry (known flake).
+  - **Overlay (desktop):** the top stays at 64 px and the strip at 195 px, before and after the reveal, at 1280×800 and 1920×1080. At 1280×500 it scrolls inside.
+  - **360×740:**
+    - "Tối nay ăn gì?" fits on one line (37 px).
+    - A 45-character title wraps (147 px) without overlapping "×" (title x 68–292, button x 300–344).
+    - The revealed case needs no scrolling.
+  - **`/s/:id` at 360/1920:** strip → "Xem lại lượt quay" is 160 px (96 reserve + gaps), nothing moves at the reveal, and there is no horizontal scroll.
+  - **NICE (Phase 8):** at 1280×500, focusing "Mở case" on open scrolls the dialog so the strip's top is hidden.
+  - **7-4 accepted.** Fast-forwarded into `feat/phase-7-responsive`. Phase 7 is ready for the owner's walk-through.
+- **Dev LAN change review (2026-10-10):** the owner added uncommitted LAN access for the dev web.
+  - **Kept:** the API part, with `DEV_LAN_ORIGIN` (dev-only, rejected by `env.ts` elsewhere) and an exact-match origin list for the guard and `csrf()`. Its test passes. `make check` is green.
+  - **Problems:**
+    - `0.0.0.0:5173` is published on every interface, including Tailscale, and Docker bypasses ufw.
+    - It also changes the default for everyone.
+  - **Owner chose the opt-in (D-034)** → `7-5-dev-lan-optin.md`. Work happens on `fix/dev-lan-access`, then merges into `feat/phase-7-responsive`. The architect commits the docs at review.
+- **7-5 (2026-10-10):** verified (`b8106bd`).
+  - The changes match the handoff: Makefile `--env-file` and the conditional override, `compose.dev.lan.yaml`, and 5 env tests. API 47 tests are green.
+  - Sockets were confirmed by the implementer: default localhost only, opt-in adds `192.168.6.28:5173`.
+  - **New owner request:** Tailscale access too.
+    - **Owner chose Tailscale Serve** (HTTPS MagicDNS name, no extra Docker port).
+    - **"Domain later" = prod (Phase 9),** not a public dev URL.
+  - `DEV_LAN_ORIGIN` → `DEV_EXTRA_ORIGINS` (a list), which also feeds Vite `allowedHosts` → `7-5-fix-1.md`.
+- **7-5-fix-1 (2026-10-10):** verified (`f7bbcb9`).
+  - `DEV_EXTRA_ORIGINS`:
+    - It is trimmed, and each entry must be a bare `http(s)` origin. It is rejected outside development.
+    - It feeds the API guard and `csrf()`, and Vite `allowedHosts` (never `true`).
+  - API 50 tests are green, and `git grep DEV_LAN_ORIGIN` outside `docs/` is empty.
+  - Checked on the host:
+    - The `dp-1.tailfeab26.ts.net` Host header gets 200 and an unknown host gets 403.
+    - The LAN gets 200.
+    - The web is published on `127.0.0.1` + `192.168.6.28` only.
+  - **Tailscale Serve:**
+    - Serve first had to be enabled in the tailnet admin. The owner then ran `tailscale serve --bg 5173` (tailnet only).
+    - The owner confirmed the app loads on the phone over `https://dp-1.tailfeab26.ts.net`.
+    - Curl from the host itself fails to resolve the MagicDNS name, which is expected and not a defect.
+  - **7-5 accepted.** `fix/dev-lan-access` merged into `feat/phase-7-responsive`.
+- **Phase 7 closed (2026-10-10):** the owner did the browser walk-through and approved it. `feat/phase-7-responsive` was merged into `main` with `--no-ff`. `TOPOLOGY.md` already covers 7-5 (D-034); closing the phase changes nothing else.
+  - Carried into Phase 8: emoji-less row alignment, scrolling the active sidebar row into view, and the 1280×500 focus scroll that hides the strip's top.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
@@ -661,7 +837,6 @@
 - **The prod build stage must set `NODE_ENV=production` explicitly** and must not load `.env.dev`/`.env.prod` at build time. Otherwise Vite bundles development React (+60 kB gz). Any `vite build` run inside the dev container produces a dev build and is not representative.
 
 ## Pending decisions
-- Phase 7 navigation shell: desktop sidebar layout, mobile pattern (top bar / drawer / bottom tabs), what moves off Home.
 - Realtime phase (D-031): room model, presence, viewer/participant identity, interaction kinds, anti-spam (decide at its kickoff).
 - Inactive guest cleanup policy (e.g. delete after N months of inactivity).
 - Hosting target: VPS provider + domain (needed before Phase 9).
@@ -674,6 +849,7 @@
 - Docker bind mounts + pnpm workspace `node_modules` can be fiddly (handled with container-owned volumes).
 
 ## Technical debt
+- **API tests flake under host load:** each PGlite test file creates its own database in `beforeAll` under the default 10 s `hookTimeout`, which times out when the machine is busy (seen in 6-5b and the 7-1 review). Fix before Phase 9, either by raising `hookTimeout` for the api project or by sharing one PGlite per worker.
 - `prod-deploy` skips the backup when the prod stack is stopped (e.g. after `make prod-down`) but `piko-prod_pgdata` holds data, so migrations would run without a backup. Fix before Phase 9: if the volume exists, start `db` (`up -d --wait db`) and back up before `up`.
 - `prod-restore` does not take a safety backup of the current data before `--clean`. Add one before Phase 9.
 - Restoring an old dump into a newer schema is not guarded. The runbook must say: restore only with the image version that created the dump.

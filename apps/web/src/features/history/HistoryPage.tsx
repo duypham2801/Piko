@@ -1,8 +1,8 @@
 import { useRef } from 'react';
 import { useNavigate } from 'react-router';
 
-import BackLink from '../../components/ui/BackLink';
 import Button from '../../components/ui/Button';
+import Screen from '../../app/Screen';
 import { t } from '../../i18n';
 import SharedLinkList from '../share/SharedLinkList';
 import { useShareList } from '../share/useShareList';
@@ -29,47 +29,42 @@ export default function HistoryPage() {
   return (
     <>
       <title>{`${t('historyTitle')} · ${t('title')}`}</title>
-      <main className={styles.screen}>
-        <div className={styles.content}>
-          <BackLink to="/">{t('back')}</BackLink>
-          <h1>{t('historyTitle')}</h1>
+      <Screen backTo="/" className={styles.content}>
+        <h1>{t('historyTitle')}</h1>
 
-          {(sharesStatus === 'error' || (sharesStatus === 'loaded' && shares.length > 0)) && (
-            <section className={styles.section}>
-              <h2 ref={sharedLinksHeadingRef} tabIndex={-1}>
-                {t('sharedLinks')}
-              </h2>
-              {sharesStatus === 'error' ? (
-                <p className={styles.sharesError}>{t('sharesLoadFailed')}</p>
-              ) : (
-                <SharedLinkList now={now} shares={shares} onRevoked={handleRevoked} />
-              )}
-            </section>
-          )}
-
+        {(sharesStatus === 'error' || (sharesStatus === 'loaded' && shares.length > 0)) && (
           <section className={styles.section}>
-            <h2 ref={historyEntriesHeadingRef} tabIndex={-1}>
-              {t('historyEntries')}
+            <h2 ref={sharedLinksHeadingRef} tabIndex={-1}>
+              {t('sharedLinks')}
             </h2>
-            {status === 'loading' && <p className={styles.muted}>{t('loading')}</p>}
-            {status === 'error' && (
-              <div className={styles.state}>
-                <p className={styles.error}>{t('historyLoadFailed')}</p>
-                <Button onClick={retry}>{t('retry')}</Button>
-              </div>
-            )}
-            {status === 'loaded' && entries.length === 0 && (
-              <div className={styles.state}>
-                <p className={styles.muted}>{t('historyEmpty')}</p>
-                <Button onClick={() => navigate('/')}>{t('backHome')}</Button>
-              </div>
-            )}
-            {status === 'loaded' && entries.length > 0 && (
-              <HistoryList entries={entries} now={now} />
+            {sharesStatus === 'error' ? (
+              <p className={styles.sharesError}>{t('sharesLoadFailed')}</p>
+            ) : (
+              <SharedLinkList now={now} shares={shares} onRevoked={handleRevoked} />
             )}
           </section>
-        </div>
-      </main>
+        )}
+
+        <section className={styles.section}>
+          <h2 ref={historyEntriesHeadingRef} tabIndex={-1}>
+            {t('historyEntries')}
+          </h2>
+          {status === 'loading' && <p className={styles.muted}>{t('loading')}</p>}
+          {status === 'error' && (
+            <div className={styles.state}>
+              <p className={styles.error}>{t('historyLoadFailed')}</p>
+              <Button onClick={retry}>{t('retry')}</Button>
+            </div>
+          )}
+          {status === 'loaded' && entries.length === 0 && (
+            <div className={styles.state}>
+              <p className={styles.muted}>{t('historyEmpty')}</p>
+              <Button onClick={() => navigate('/')}>{t('backHome')}</Button>
+            </div>
+          )}
+          {status === 'loaded' && entries.length > 0 && <HistoryList entries={entries} now={now} />}
+        </section>
+      </Screen>
     </>
   );
 }
