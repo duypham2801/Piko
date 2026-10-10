@@ -60,6 +60,11 @@
   border-color: var(--color-disabled-text);
 }
 
+/* Locked on (e.g. the minimum number of options): still reads as on. */
+.checked:disabled .track {
+  background: var(--color-secondary);
+}
+
 @media (hover: hover) {
   .switch:hover:not(:disabled) .thumb {
     transform: translate(var(--switch-thumb-offset), var(--hover-lift-sm));
