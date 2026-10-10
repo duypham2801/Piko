@@ -1,7 +1,8 @@
 import { useRef } from 'react';
 import { Link } from 'react-router';
 
-import Button, { buttonClassName } from '../../components/ui/Button';
+import Button from '../../components/ui/Button';
+import { buttonClassName } from '../../components/ui/buttonClassName';
 import LoadingText from '../../components/ui/LoadingText';
 import Screen from '../../app/Screen';
 import { t } from '../../i18n';
@@ -59,7 +60,7 @@ export default function HistoryPage() {
           {status === 'loaded' && entries.length === 0 && (
             <div className={styles.state}>
               <p className={styles.muted}>{t('historyEmpty')}</p>
-              <Link className={buttonClassName({})} to="/">
+              <Link className={buttonClassName()} to="/">
                 {t('backHome')}
               </Link>
             </div>

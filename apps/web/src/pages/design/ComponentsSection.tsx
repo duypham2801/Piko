@@ -3,7 +3,8 @@ import { Link, MemoryRouter } from 'react-router';
 
 import BackLink from '../../components/ui/BackLink';
 import Badge from '../../components/ui/Badge';
-import Button, { buttonClassName } from '../../components/ui/Button';
+import Button from '../../components/ui/Button';
+import { buttonClassName } from '../../components/ui/buttonClassName';
 import Card from '../../components/ui/Card';
 import Chip from '../../components/ui/Chip';
 import LoadingText from '../../components/ui/LoadingText';
@@ -74,7 +75,7 @@ export default function ComponentsSection() {
         <div className={styles.demoCell}>
           <span className={styles.demoLabel}>button-styled link</span>
           <MemoryRouter>
-            <Link className={buttonClassName({})} to="/">
+            <Link className={buttonClassName()} to="/">
               Về trang chủ
             </Link>
           </MemoryRouter>

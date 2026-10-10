@@ -58,8 +58,13 @@
 }
 
 .actionBar {
+  position: sticky;
+  bottom: 0;
+  z-index: var(--z-raised);
   display: grid;
   gap: var(--space-2);
+  padding: var(--space-3) 0 calc(var(--space-3) + env(safe-area-inset-bottom));
+  background: var(--color-bg);
 }
 
 .openButton {
@@ -72,17 +77,13 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .actionBar {
+    position: static;
+    padding: 0;
+    background: none;
+  }
+
   .openButton {
     width: auto;
-  }
-}
-
-@media (max-width: 47.99rem) {
-  .actionBar {
-    position: sticky;
-    bottom: 0;
-    z-index: var(--z-raised);
-    padding: var(--space-3) 0 calc(var(--space-3) + env(safe-area-inset-bottom));
-    background: var(--color-bg);
   }
 }

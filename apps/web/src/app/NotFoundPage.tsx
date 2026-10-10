@@ -1,6 +1,6 @@
 import { Link } from 'react-router';
 
-import { buttonClassName } from '../components/ui/Button';
+import { buttonClassName } from '../components/ui/buttonClassName';
 import { t } from '../i18n';
 import Screen from './Screen';
 import styles from './NotFoundPage.module.css';
@@ -17,7 +17,7 @@ export default function NotFoundPage({ title = t('notFoundTitle'), message }: No
       <Screen align="center" className={styles.content}>
         <h1>{title}</h1>
         {message && <p className={styles.message}>{message}</p>}
-        <Link className={buttonClassName({})} to="/">
+        <Link className={buttonClassName()} to="/">
           {t('backHome')}
         </Link>
       </Screen>
