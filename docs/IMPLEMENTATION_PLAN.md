@@ -1,7 +1,7 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 8 — Polish (kickoff done, D-035). Next: 8-1. Phase 7 merged into `main` on 2026-10-10.
+- **Current phase:** Phase 8 — Polish (kickoff done, D-035). 8-1 done; next: 8-2. Phase 7 merged into `main` on 2026-10-10.
 - **Integration branch:** `feat/phase-8-polish`
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`); Phase 4 (4-1, 4-2: router, Home, presets, preview, merged into `main`); Phase 5 (5-1…5-4: decisions API, builder, saved decisions, reuse options, merged into `main`); Phase 6 (6-1…6-5b: history, result actions, share links, merged into `main`); Phase 7 (7-1…7-5: navigation shell, sidebar, case overlay, responsive pass, dev access from other devices, merged into `main`)
 
@@ -39,9 +39,9 @@
 | 7-3 | Case overlay | ✅ (`7-3-fix-1.md`, `7-3-fix-2.md`) | The case opens as a modal overlay above the preview/builder (nested `/open` routes, full-screen on phones, × / Esc / Back to close), focus mode removed, plus the 7-2 carry-overs (C0) (D-033) |
 | 7-4 | Responsive pass | ✅ (`07a7a25`) | Every screen at 360 / 768 / 1024 / 1280 / 1920 after the overlay: carousel, winner reveal, CTAs, card grids, option layout |
 | 7-5 | Dev access from other devices (opt-in) | ✅ (`7-5-fix-1.md`) | `7-5-dev-lan-optin.md`: `DEV_WEB_BIND` adds port 5173 on one LAN IP through `compose.dev.lan.yaml` (`127.0.0.1` is always kept), and `COMPOSE_DEV` uses `--env-file .env.dev`. Fix-1: Tailscale Serve on the host, and `DEV_EXTRA_ORIGINS` (a list) feeds both the API origin check and Vite `allowedHosts` (D-034) |
-| 8-1 | Case polish | ⬜ | `8-1-case-polish.md`: marker line fades at the reveal, no overlay scroll at 1280×800, option monogram (`OptionGlyph`), no scroll on initial focus (D-035) |
-| 8-2 | Interaction states | ⬜ | Hover/pressed on every interactive surface, loading that keeps space, focused error field (D-035) |
-| 8-3 | Consistency + layout | ⬜ | Empty/not-found CTAs, History empty alignment, sidebar "Gần đây" on error, active styles, sticky preview CTA on phones, scroll the active sidebar row into view (D-035) |
+| 8-1 | Case polish | ✅ (`4fc838b`) | `8-1-case-polish.md`: marker line fades at the reveal, no overlay scroll at 1280×800, option monogram (`OptionGlyph`), no scroll on initial focus (D-035) |
+| 8-2 | Interaction states | ⬜ | Hover/pressed on every interactive surface, loading that keeps space, focused error field, case focus after the reveal and at a respin (D-035) |
+| 8-3 | Consistency + layout | ⬜ | Empty/not-found CTAs, History empty alignment, sidebar "Gần đây" on error, active styles, sticky preview CTA on phones, scroll the active sidebar row into view, "Của bạn" rows without an emoji (D-035) |
 | 9 | First prod release | ⬜ | Deploy `v0.1.0` to VPS, verify backup/rollback |
 | — | Final engineering review | ⬜ | Format per master prompt §47–48 |
 | R | Realtime: live viewing + Couple/Squad | ⬜ | After `v0.1.0` (D-031). One design for rooms, presence, viewer/participant identity, anti-spam and server-ordered spins; live viewing of shared links (from D-030) is its first consumer. Couple/Squad still need their own approval (CLAUDE.md rule 9). |
@@ -848,6 +848,30 @@
     12. carried from 7-4: scrolling the active sidebar row into view; at 1280×500 the initial focus scrolls the strip's top out of view
   - **Owner choices (D-035):** monogram for emoji-less options, sticky preview CTA on phones, loading keeps space (no skeletons), "Gần đây" stays hidden while empty, three tasks.
   - → `8-1-case-polish.md` (1, 2, 3, 12b). 8-2 gets 4, 5, 11. 8-3 gets 6–10 and 12a.
+- **8-1 review (2026-10-10):** reviewed `c7512fb`, `d58cba6`, `c7ca5ca` (15 files, +170/−50). `make check` passes (domain 48, api 50, 0 lint warnings); lockfile unchanged; the literal grep is empty.
+  - **Browser, re-measured by the architect:**
+    - **Marker:** the line goes to opacity 0 at the reveal and is back at once on "Mở lại". The arrow heads stay.
+    - **Overlay at 1280×800** (scrollHeight/clientHeight):
+      - normal 642/642
+      - hint 671/671
+      - hint + error 692/692
+      - no inner scroll in any state
+    - **Overlay position:** the top stays at 64 px and the strip at 187 px before and after the reveal.
+    - **360×740:** 740/740.
+    - **1280×500:** `scrollTop` 0 on open, and focus is on "Mở case".
+    - **Monogram:** "ẩm thực" → "Ẩ" as one character. It shows in the strip, the winner panel, the preview (labels at one x), History and the sidebar "Gần đây".
+  - **Cleanup by the architect (owner asked for review + cleanup), `4fc838b`:**
+    - The marker keeps its own geometry and the line just fills it (`inset: 0`), which removes the duplicated positioning.
+    - "Đã lưu" no longer reserves a status row. It is announced visually hidden, so the status counts only the hint or an error. The saved state is now 642, like normal; it was 650.
+    - From `48rem`, `.secondaryActions` uses the same `--space-2` as `.actions`. Before, the vertical gap was 8 px and the horizontal gap 12 px.
+    - The per-site `flex: 0 0 auto` is removed, because `OptionGlyph` owns its box.
+    - The sidebar glyph uses `--text-lg`, so the monogram letter is readable. At 14 px it was about 8 px.
+    - `emoji ?? monogram`: the schema guarantees a non-empty emoji.
+    - The rest of the repo was scanned: no dead files, unused dependencies, unused i18n keys or debug code. The flagged CSS classes are dynamic `styles[variant]` lookups, and the API `console.log`s are operational logs.
+  - **Found, not caused by 8-1 (pre-existing):**
+    - Focus falls to `<body>` at the reveal and at "Mở lại", because the focused button unmounts → 8-2.
+    - Sidebar "Của bạn" rows of a decision with no emoji have no icon, so their labels start left of the "Gần đây" rows → 8-3.
+  - **8-1 accepted.** Fast-forwarded into `feat/phase-8-polish`.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
