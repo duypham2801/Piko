@@ -551,5 +551,9 @@ Format: Decision · Reason · Alternatives · Tradeoffs · Phase/Date
 - **Architect defaults:**
   - The marker line fades out at the reveal so it no longer crosses the winner cell; the arrow heads stay. It returns on the next spin.
   - Every interactive surface gets hover and pressed states from motion tokens, with hover limited to `(hover: hover)` devices.
+- **Amendment (owner, 8-2 browser review, 2026-10-10):**
+  - The saved-decisions section is renamed **"Sổ tay"** (was "Của bạn") everywhere the label appears: the sidebar, Home and the builder's "Thêm từ có sẵn".
+  - **The sidebar "Sổ tay" is hidden while loading and while empty**, like "Gần đây". It shows on error with its failure line. Home keeps the section, because it holds the "Tạo quyết định" card. The builder panel is unchanged.
+  - `noDecisionsYet` ("Chưa có quyết định nào.") is removed. Nothing uses it any more.
 - **Split:** 8-1 case polish, 8-2 interaction states (hover, pressed, loading, focused error field), 8-3 consistency and layout.
 - **Phase:** 8 · 2026-10-10 · approved by user
