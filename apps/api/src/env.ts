@@ -12,12 +12,20 @@ export const envSchema = z
     API_PORT: z.coerce.number().int().min(1).max(65535).default(8787),
     DATABASE_URL: z.string().min(1),
     APP_ORIGIN: z.url(),
+    DEV_LAN_ORIGIN: z.url().optional(),
     COOKIE_SECURE: booleanFromEnv,
     TRUST_PROXY: booleanFromEnv,
     APP_VERSION: z.string().min(1).default('dev'),
     GUEST_RATE_LIMIT_PER_HOUR: z.coerce.number().int().min(0).default(20),
   })
   .superRefine((env, context) => {
+    if (env.NODE_ENV !== 'development' && env.DEV_LAN_ORIGIN) {
+      context.addIssue({
+        code: 'custom',
+        path: ['DEV_LAN_ORIGIN'],
+        message: 'DEV_LAN_ORIGIN is only allowed in development.',
+      });
+    }
     if (
       env.NODE_ENV === 'production' &&
       env.APP_ORIGIN.startsWith('https://') &&

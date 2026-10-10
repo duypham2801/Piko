@@ -1,0 +1,5 @@
+# Loaded by the Makefile only when DEV_WEB_BIND is set in .env.dev (D-034).
+services:
+  web:
+    ports:
+      - '${DEV_WEB_BIND:?DEV_WEB_BIND must be set}:5173:5173'
