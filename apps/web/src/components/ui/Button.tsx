@@ -8,6 +8,25 @@ type ButtonProps = ComponentPropsWithoutRef<'button'> & {
   fullWidth?: boolean;
 };
 
+type ButtonClassNameProps = {
+  variant?: ButtonProps['variant'];
+  size?: ButtonProps['size'];
+  fullWidth?: ButtonProps['fullWidth'];
+  className?: ButtonProps['className'];
+};
+
+// eslint-disable-next-line react-refresh/only-export-components
+export function buttonClassName({
+  variant = 'primary',
+  size = 'md',
+  fullWidth = false,
+  className,
+}: ButtonClassNameProps = {}) {
+  return [styles.button, styles[variant], styles[size], fullWidth && styles.fullWidth, className]
+    .filter(Boolean)
+    .join(' ');
+}
+
 export default function Button({
   variant = 'primary',
   size = 'md',
@@ -16,15 +35,11 @@ export default function Button({
   type = 'button',
   ...props
 }: ButtonProps) {
-  const classes = [
-    styles.button,
-    styles[variant],
-    styles[size],
-    fullWidth && styles.fullWidth,
-    className,
-  ]
-    .filter(Boolean)
-    .join(' ');
-
-  return <button {...props} className={classes} type={type} />;
+  return (
+    <button
+      {...props}
+      className={buttonClassName({ className, fullWidth, size, variant })}
+      type={type}
+    />
+  );
 }

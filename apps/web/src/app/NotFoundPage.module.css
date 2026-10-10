@@ -12,30 +12,3 @@
   max-width: var(--content-max-width);
   color: var(--color-text-muted);
 }
-
-.backHome {
-  display: inline-flex;
-  min-height: var(--tap-target-min);
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-2) var(--space-4);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-secondary);
-  box-shadow: var(--shadow-chunky-sm);
-  color: var(--color-on-secondary);
-  font-weight: var(--font-weight-bold);
-  text-decoration: none;
-  transition: transform var(--duration-fast) var(--ease-standard);
-}
-
-@media (hover: hover) {
-  .backHome:hover {
-    transform: translateY(var(--hover-lift-sm));
-  }
-}
-
-.backHome:active {
-  transform: translateY(var(--shadow-offset-sm));
-  box-shadow: none;
-}

@@ -1,7 +1,7 @@
 import { useRef } from 'react';
-import { useNavigate } from 'react-router';
+import { Link } from 'react-router';
 
-import Button from '../../components/ui/Button';
+import Button, { buttonClassName } from '../../components/ui/Button';
 import LoadingText from '../../components/ui/LoadingText';
 import Screen from '../../app/Screen';
 import { t } from '../../i18n';
@@ -12,7 +12,6 @@ import styles from './HistoryPage.module.css';
 import { useHistoryList } from './useHistoryList';
 
 export default function HistoryPage() {
-  const navigate = useNavigate();
   const { entries, retry, status } = useHistoryList();
   const { removeShare, shares, status: sharesStatus } = useShareList();
   const sharedLinksHeadingRef = useRef<HTMLHeadingElement>(null);
@@ -60,7 +59,9 @@ export default function HistoryPage() {
           {status === 'loaded' && entries.length === 0 && (
             <div className={styles.state}>
               <p className={styles.muted}>{t('historyEmpty')}</p>
-              <Button onClick={() => navigate('/')}>{t('backHome')}</Button>
+              <Link className={buttonClassName({})} to="/">
+                {t('backHome')}
+              </Link>
             </div>
           )}
           {status === 'loaded' && entries.length > 0 && <HistoryList entries={entries} now={now} />}
