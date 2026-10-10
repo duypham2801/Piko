@@ -45,10 +45,27 @@
   top: 0;
   bottom: 0;
   left: 50%;
-  width: var(--border-width);
-  background: var(--color-primary);
   pointer-events: none;
   transform: translateX(-50%);
+}
+
+.markerLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: var(--border-width);
+  background: var(--color-primary);
+  transition: opacity var(--duration-normal) var(--ease-standard);
+  transform: translateX(-50%);
+}
+
+.marker[data-revealed='false'] .markerLine {
+  transition: none;
+}
+
+.marker[data-revealed='true'] .markerLine {
+  opacity: 0;
 }
 
 .marker::before,
@@ -78,5 +95,11 @@
 @media (min-width: 48rem) {
   .viewport {
     --case-cell-width: calc(var(--space-8) * 2.5);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .markerLine {
+    transition: none;
   }
 }

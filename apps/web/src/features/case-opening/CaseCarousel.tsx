@@ -38,7 +38,9 @@ export default function CaseCarousel({
           );
         })}
       </div>
-      <span className={styles.marker} />
+      <span className={styles.marker} data-revealed={revealed}>
+        <span aria-hidden="true" className={styles.markerLine} />
+      </span>
     </div>
   );
 }
