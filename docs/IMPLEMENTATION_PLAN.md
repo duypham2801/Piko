@@ -1,9 +1,9 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 7 — Responsive pass + navigation shell (kickoff done, D-032). All tasks done; waiting for the owner's Phase 7 walk-through before merging into `main`. Phase 6 merged into `main` on 2026-10-09; live viewing moved to the Realtime phase (D-031).
-- **Integration branch:** `feat/phase-7-responsive`
-- **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`); Phase 4 (4-1, 4-2: router, Home, presets, preview, merged into `main`); Phase 5 (5-1…5-4: decisions API, builder, saved decisions, reuse options, merged into `main`)
+- **Current phase:** Phase 8 — Polish (not started). Phase 7 merged into `main` on 2026-10-10.
+- **Integration branch:** none yet (Phase 8 kickoff creates one from `main`)
+- **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`); Phase 4 (4-1, 4-2: router, Home, presets, preview, merged into `main`); Phase 5 (5-1…5-4: decisions API, builder, saved decisions, reuse options, merged into `main`); Phase 6 (6-1…6-5b: history, result actions, share links, merged into `main`); Phase 7 (7-1…7-5: navigation shell, sidebar, case overlay, responsive pass, dev access from other devices, merged into `main`)
 
 ## Phases
 
@@ -827,6 +827,8 @@
     - The owner confirmed the app loads on the phone over `https://dp-1.tailfeab26.ts.net`.
     - Curl from the host itself fails to resolve the MagicDNS name, which is expected and not a defect.
   - **7-5 accepted.** `fix/dev-lan-access` merged into `feat/phase-7-responsive`.
+- **Phase 7 closed (2026-10-10):** the owner did the browser walk-through and approved it. `feat/phase-7-responsive` was merged into `main` with `--no-ff`. `TOPOLOGY.md` already covers 7-5 (D-034); closing the phase changes nothing else.
+  - Carried into Phase 8: emoji-less row alignment, scrolling the active sidebar row into view, and the 1280×500 focus scroll that hides the strip's top.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
