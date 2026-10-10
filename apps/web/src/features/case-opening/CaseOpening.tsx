@@ -243,92 +243,96 @@ export default function CaseOpening({
           </Button>
         </header>
 
-        <div className={styles.stage}>
-          <CaseCarousel
-            optionsById={optionsById}
-            plan={plan}
-            revealed={revealed}
-            stripRef={stripRef}
-            viewportRef={viewportRef}
-          />
-          {revealed && <Confetti />}
-        </div>
-
-        <div aria-live="polite" className={styles.result} role="status">
-          {winner && <WinnerPanel label={t('winnerIs')} option={winner} />}
-        </div>
-
-        {revealed ? (
-          <div className={styles.actions}>
-            <Button
-              data-reveal-focus
-              disabled={historySaveStatus === 'saving' || historySaveStatus === 'saved'}
-              fullWidth
-              size="lg"
-              onClick={saveResult}
-            >
-              {historySaveStatus === 'saving'
-                ? t('saving')
-                : historySaveStatus === 'saved'
-                  ? t('saved')
-                  : t('goNow')}
-            </Button>
-            <div className={styles.secondaryActions}>
-              <Button data-post-save-focus fullWidth variant="outline" onClick={spin}>
-                {t('spinAgain')}
-              </Button>
-              <Button
-                aria-describedby={notTodayDisabled ? lastTwoOptionsHintId : undefined}
-                disabled={notTodayDisabled}
-                fullWidth
-                variant="outline"
-                onClick={rejectWinner}
-              >
-                {t('notToday')}
-              </Button>
-            </div>
-            <Button
-              aria-haspopup="dialog"
-              fullWidth
-              id={shareToggleId}
-              variant="outline"
-              onClick={openShareDialog}
-            >
-              {t('share')}
-            </Button>
-            <div
-              className={styles.actionStatus}
-              data-empty={!hasVisibleStatus ? 'true' : undefined}
-            >
-              {notTodayDisabled && (
-                <p className={styles.hint} id={lastTwoOptionsHintId}>
-                  {t('lastTwoOptionsHint')}
-                </p>
-              )}
-              <p
-                aria-live="polite"
-                className={
-                  historySaveStatus === 'saved'
-                    ? 'visually-hidden'
-                    : historySaveStatus === 'error'
-                      ? styles.historyStatusError
-                      : ''
-                }
-              >
-                {historyStatusMessage}
-              </p>
-            </div>
+        <div className={styles.caseBlock}>
+          <div className={styles.stage}>
+            <CaseCarousel
+              optionsById={optionsById}
+              plan={plan}
+              revealed={revealed}
+              stripRef={stripRef}
+              viewportRef={viewportRef}
+            />
+            {revealed && <Confetti />}
           </div>
-        ) : (
-          <Button
-            data-initial-focus
-            disabled={state.status === 'spinning'}
-            size="lg"
-            onClick={spin}
-          >
-            {state.status === 'ready' ? t('openCase') : t('opening')}
-          </Button>
-        )}
+
+          <div aria-live="polite" className={styles.result} role="status">
+            {winner && <WinnerPanel label={t('winnerIs')} option={winner} />}
+          </div>
+
+          <div className={styles.footer}>
+            {revealed ? (
+              <div className={styles.actions}>
+                <Button
+                  data-reveal-focus
+                  disabled={historySaveStatus === 'saving' || historySaveStatus === 'saved'}
+                  fullWidth
+                  size="lg"
+                  onClick={saveResult}
+                >
+                  {historySaveStatus === 'saving'
+                    ? t('saving')
+                    : historySaveStatus === 'saved'
+                      ? t('saved')
+                      : t('goNow')}
+                </Button>
+                <div className={styles.secondaryActions}>
+                  <Button data-post-save-focus fullWidth variant="outline" onClick={spin}>
+                    {t('spinAgain')}
+                  </Button>
+                  <Button
+                    aria-describedby={notTodayDisabled ? lastTwoOptionsHintId : undefined}
+                    disabled={notTodayDisabled}
+                    fullWidth
+                    variant="outline"
+                    onClick={rejectWinner}
+                  >
+                    {t('notToday')}
+                  </Button>
+                </div>
+                <Button
+                  aria-haspopup="dialog"
+                  fullWidth
+                  id={shareToggleId}
+                  variant="outline"
+                  onClick={openShareDialog}
+                >
+                  {t('share')}
+                </Button>
+                <div
+                  className={styles.actionStatus}
+                  data-empty={!hasVisibleStatus ? 'true' : undefined}
+                >
+                  {notTodayDisabled && (
+                    <p className={styles.hint} id={lastTwoOptionsHintId}>
+                      {t('lastTwoOptionsHint')}
+                    </p>
+                  )}
+                  <p
+                    aria-live="polite"
+                    className={
+                      historySaveStatus === 'saved'
+                        ? 'visually-hidden'
+                        : historySaveStatus === 'error'
+                          ? styles.historyStatusError
+                          : ''
+                    }
+                  >
+                    {historyStatusMessage}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <Button
+                data-initial-focus
+                disabled={state.status === 'spinning'}
+                size="lg"
+                onClick={spin}
+              >
+                {state.status === 'ready' ? t('openCase') : t('opening')}
+              </Button>
+            )}
+          </div>
+        </div>
         {shareSnapshot && (
           <ShareDialog
             decision={shareSnapshot.decision}

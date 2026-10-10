@@ -21,9 +21,19 @@
 
 .content {
   display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-height: 100%;
   min-width: 0;
-  gap: var(--space-6);
+  gap: 0;
   justify-items: center;
+}
+
+.caseBlock {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  align-self: safe center;
+  gap: var(--space-6);
 }
 
 .stage {
@@ -71,10 +81,39 @@
   min-height: calc(var(--space-8) * 1.5);
 }
 
+.footer {
+  display: grid;
+  width: min(100%, var(--content-max-width));
+  align-content: start;
+  justify-items: center;
+  --case-button-lg-height: calc(
+    (var(--text-xl) * var(--leading-tight)) + (var(--space-3) * 2) + (var(--border-width) * 2)
+  );
+  --case-button-md-height: max(
+    var(--tap-target-min),
+    calc((var(--text-md) * var(--leading-tight)) + (var(--space-2) * 2) + (var(--border-width) * 2))
+  );
+  --case-secondary-lines: 2;
+  --case-secondary-button-height: max(
+    var(--tap-target-min),
+    calc(
+      (var(--text-md) * var(--leading-tight) * var(--case-secondary-lines)) + (var(--space-2) * 2) +
+        (var(--border-width) * 2)
+    )
+  );
+  --case-status-line-height: calc(var(--text-sm) * var(--leading-normal));
+  --case-actions-gap: var(--space-3);
+  min-height: calc(
+    var(--case-button-lg-height) + var(--case-button-md-height) +
+      var(--case-secondary-button-height) + var(--case-status-line-height) +
+      (var(--case-actions-gap) * 3)
+  );
+}
+
 .actions {
   display: grid;
   width: min(100%, var(--content-max-width));
-  gap: var(--space-3);
+  gap: var(--case-actions-gap);
 }
 
 .actionStatus {
@@ -138,8 +177,8 @@
   .dialog {
     width: min(calc(100% - (var(--space-6) * 2)), var(--case-dialog-max-width));
     height: fit-content;
-    max-height: calc(100dvh - var(--space-8) - var(--space-6));
-    margin: var(--space-8) auto auto;
+    max-height: calc(100dvh - (var(--space-6) * 2));
+    margin: auto;
     padding: var(--space-6);
     border: var(--border-width) solid var(--color-border);
     border-radius: var(--radius-lg);
@@ -151,7 +190,19 @@
   }
 
   .content {
+    grid-template-rows: none;
+    min-height: 0;
     gap: var(--space-5);
+  }
+
+  .caseBlock {
+    align-self: stretch;
+    gap: var(--space-5);
+  }
+
+  .footer {
+    --case-secondary-lines: 1;
+    --case-actions-gap: var(--space-2);
   }
 
   .actions,
