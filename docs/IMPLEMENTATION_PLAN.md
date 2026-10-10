@@ -1,7 +1,7 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 8 — Polish (D-035). All tasks done; waiting for the owner's Phase 8 walk-through before merging into `main`. Phase 7 merged into `main` on 2026-10-10.
+- **Current phase:** Phase 8 — Polish (D-035). Walk-through found 2 case issues → 8-4 handed off; then merge into `main`. Phase 7 merged into `main` on 2026-10-10.
 - **Integration branch:** `feat/phase-8-polish`
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`); Phase 4 (4-1, 4-2: router, Home, presets, preview, merged into `main`); Phase 5 (5-1…5-4: decisions API, builder, saved decisions, reuse options, merged into `main`); Phase 6 (6-1…6-5b: history, result actions, share links, merged into `main`); Phase 7 (7-1…7-5: navigation shell, sidebar, case overlay, responsive pass, dev access from other devices, merged into `main`)
 
@@ -42,6 +42,7 @@
 | 8-1 | Case polish | ✅ (`4fc838b`) | `8-1-case-polish.md`: marker line fades at the reveal, no overlay scroll at 1280×800, option monogram (`OptionGlyph`), no scroll on initial focus (D-035) |
 | 8-2 | Interaction states | ✅ (`ae4d957`, owner fix) | `8-2-interaction-states.md`: hover/pressed on every interactive surface, loading that keeps space, focused error field, case focus after the reveal and at a respin (D-035) |
 | 8-3 | Consistency + layout | ✅ (architect cleanup) | `8-3-consistency-layout.md`: empty/not-found CTAs, History empty alignment, sidebar "Gần đây" on error, active styles, sticky preview CTA on phones, scroll the active sidebar row into view, "Sổ tay" rows without an emoji (D-035) |
+| 8-4 | Case arrows + centring | ⬜ | `8-4-case-marker-centering.md`: inward arrows that follow the winner's edges (marker moved out of the clip), the case vertically centred on desktop and phones with the revealed footer reserved so the strip never moves |
 | 9 | First prod release | ⬜ | Deploy `v0.1.0` to VPS, verify backup/rollback |
 | — | Final engineering review | ⬜ | Format per master prompt §47–48 |
 | R | Realtime: live viewing + Couple/Squad | ⬜ | After `v0.1.0` (D-031). One design for rooms, presence, viewer/participant identity, anti-spam and server-ordered spins; live viewing of shared links (from D-030) is its first consumer. Couple/Squad still need their own approval (CLAUDE.md rule 9). |
@@ -924,6 +925,16 @@
   - **Locked-on switch (owner chose to fix in Phase 8):** a disabled but checked `Switch` (minimum options reached) had a grey track like an off switch. It now keeps the teal track, with the slate disabled border (`.checked:disabled .track`, done by the architect on owner request).
   - **8-3 accepted.** Fast-forwarded into `feat/phase-8-polish`. **Phase 8 is ready for the owner's walk-through.**
   - **Owner (HITL):** keep coral for "Về trang chủ". After Phase 8, the **final engineering review** comes before Phase 9.
+- **Phase 8 walk-through (owner, 2026-10-10):** everything passes except two case issues.
+  1. The arrows point outward. The owner wants one tip pointing in. At the reveal the winner rises and scales, so its top edge covers the top arrow. Measured: the winner goes from 199–359 to 189.0–361.8 at 1280, and from 104–232 to 94.9–233.1 at 360. The arrows are clipped by the viewport's `overflow: hidden`.
+  2. The case sits high:
+     - desktop: anchored at 64 px; 368 px empty below at 1920×1080
+     - phone: 278 px (ready) / 152 px (revealed) empty below at 360×740
+  - **Architect defaults:**
+    - Arrows keep a `--space-1` gap to the cells and follow the winner's edges, using the same tokens.
+    - The case is centred, with the revealed footer plus one status line reserved, so the strip does not move at the reveal (keeps the 7-4 goal).
+    - On phones the header stays at the top.
+  - → `8-4-case-marker-centering.md`.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.

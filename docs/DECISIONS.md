@@ -555,5 +555,8 @@ Format: Decision · Reason · Alternatives · Tradeoffs · Phase/Date
   - The saved-decisions section is renamed **"Sổ tay"** (was "Của bạn") everywhere the label appears: the sidebar, Home and the builder's "Thêm từ có sẵn".
   - **The sidebar "Sổ tay" is hidden while loading and while empty**, like "Gần đây". It shows on error with its failure line. Home keeps the section, because it holds the "Tạo quyết định" card. The builder panel is unchanged.
   - `noDecisionsYet` ("Chưa có quyết định nào.") is removed. Nothing uses it any more.
+- **Amendment (owner walk-through, 2026-10-10):**
+  - The marker arrows point **inward** (one tip each, at the strip) and follow the winner's edges at the reveal.
+  - The case is **vertically centred** on desktop and phones. This supersedes the 7-4 top anchor; the strip still must not move at the reveal, so the revealed footer is reserved.
 - **Split:** 8-1 case polish, 8-2 interaction states (hover, pressed, loading, focused error field), 8-3 consistency and layout.
 - **Phase:** 8 · 2026-10-10 · approved by user
