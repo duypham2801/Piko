@@ -1,8 +1,8 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Final engineering review (next). Phase 8 merged into `main` on 2026-10-12. Phase 7 merged into `main` on 2026-10-10.
-- **Integration branch:** none (the final review starts from `main`)
+- **Current phase:** Final engineering review (report done, `docs/FINAL_ENGINEERING_REVIEW.md`; waiting for the owner's choices). Phase 8 merged into `main` on 2026-10-12. Phase 7 merged into `main` on 2026-10-10.
+- **Integration branch:** `feat/final-review`
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`); Phase 4 (4-1, 4-2: router, Home, presets, preview, merged into `main`); Phase 5 (5-1…5-4: decisions API, builder, saved decisions, reuse options, merged into `main`); Phase 6 (6-1…6-5b: history, result actions, share links, merged into `main`); Phase 7 (7-1…7-5: navigation shell, sidebar, case overlay, responsive pass, dev access from other devices, merged into `main`); Phase 8 (8-1…8-4: case polish, interaction states, consistency, case arrows + centring, merged into `main`)
 
 ## Phases
@@ -44,7 +44,7 @@
 | 8-3 | Consistency + layout | ✅ (architect cleanup) | `8-3-consistency-layout.md`: empty/not-found CTAs, History empty alignment, sidebar "Gần đây" on error, active styles, sticky preview CTA on phones, scroll the active sidebar row into view, "Sổ tay" rows without an emoji (D-035) |
 | 8-4 | Case arrows + centring | ✅ (`53ce766`) | `8-4-case-marker-centering.md`: inward arrows that follow the winner's edges (marker moved out of the clip), the case vertically centred on desktop and phones with the revealed footer reserved so the strip never moves |
 | 9 | First prod release | ⬜ | Deploy `v0.1.0` to VPS, verify backup/rollback |
-| — | Final engineering review | ⬜ | Format per master prompt §47–48 |
+| — | Final engineering review | 🟡 report done | `docs/FINAL_ENGINEERING_REVIEW.md`: 7.8/10. MUST before Phase 9: deploy backup, safe restore, a reliable test gate, the session retry race, a local prod rehearsal |
 | R | Realtime: live viewing + Couple/Squad | ⬜ | After `v0.1.0` (D-031). One design for rooms, presence, viewer/participant identity, anti-spam and server-ordered spins; live viewing of shared links (from D-030) is its first consumer. Couple/Squad still need their own approval (CLAUDE.md rule 9). |
 
 ## Next tasks (Phase 1a)
