@@ -70,6 +70,13 @@ export const envSchema = z
         message: 'COOKIE_SECURE must be true when APP_ORIGIN uses https:// in production.',
       });
     }
+    if (env.NODE_ENV === 'production' && env.DATABASE_URL.includes('CHANGE_ME')) {
+      context.addIssue({
+        code: 'custom',
+        path: ['DATABASE_URL'],
+        message: 'DATABASE_URL still contains the CHANGE_ME placeholder.',
+      });
+    }
   });
 
 export type ApiEnv = z.infer<typeof envSchema>;

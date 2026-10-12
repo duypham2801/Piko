@@ -65,4 +65,34 @@ describe('environment configuration', () => {
       ),
     );
   });
+
+  it('rejects the CHANGE_ME database placeholder in production', () => {
+    const result = envSchema.safeParse(
+      baseEnv({
+        DATABASE_URL: 'postgres://piko:CHANGE_ME@db:5432/piko',
+        NODE_ENV: 'production',
+      }),
+    );
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            message: 'DATABASE_URL still contains the CHANGE_ME placeholder.',
+            path: ['DATABASE_URL'],
+          }),
+        ]),
+      );
+    }
+  });
+
+  it('accepts the CHANGE_ME database placeholder in development', () => {
+    expect(
+      envSchema.safeParse({
+        ...baseEnv(),
+        DATABASE_URL: 'postgres://piko:CHANGE_ME@db:5432/piko',
+      }).success,
+    ).toBe(true);
+  });
 });
