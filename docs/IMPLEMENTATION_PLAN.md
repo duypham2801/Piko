@@ -45,7 +45,7 @@
 | 8-4 | Case arrows + centring | ✅ (`53ce766`) | `8-4-case-marker-centering.md`: inward arrows that follow the winner's edges (marker moved out of the clip), the case vertically centred on desktop and phones with the revealed footer reserved so the strip never moves |
 | 9 | First prod release | ⬜ | Deploy `v0.1.0` to VPS, verify backup/rollback |
 | — | Final engineering review | 🟡 fixes in progress (D-036) | `docs/FINAL_ENGINEERING_REVIEW.md`: 7.8/10. MUST before Phase 9: deploy backup, safe restore, a reliable test gate, the session retry race, a local prod rehearsal |
-| FR-1 | Release safety + session single-flight | ⬜ (handed off) | `FR-1-release-safety.md`: deploy backup when the volume exists, a safe restore, the api vitest timeout, the `CHANGE_ME` guard, the session retry race, `withSession` owns `ensureSession` |
+| FR-1 | Release safety + session single-flight | ✅ (`d0414fd`) | `FR-1-release-safety.md`: deploy backup when the volume exists, a safe restore, the api vitest timeout, the `CHANGE_ME` guard, the session retry race, `withSession` owns `ensureSession` |
 | FR-2 | Case plays a result + list store | ⬜ | `play(result)` vs `open()`, exact `/s/:id` replay, a shared decisions/history store with invalidation, `useHistorySave` out of `CaseOpening` |
 | FR-3 | "Đi thôi" closes + result card, mode selector in nav, "Random" title | ⬜ | D-036 P2–P4 (needs the FR-2 store for an instant sidebar update) |
 | FR-4 | Accessibility + ops hardening | ⬜ | Skip link, focus loss (share page, "Tạo link", delete), live regions, load-state titles, emoji picker focus; IPv6 /64 rate limit, pruning expired rows |
@@ -961,6 +961,19 @@
     - P3: the mode selector moves into the navigation.
     - P4: the title is optional and defaults to "Random".
     - The MUST and SHOULD items are fixed before Phase 9, in FR-1 … FR-4.
+- **FR-1 review (2026-10-12):** reviewed `d0414fd` (8 files, +95/−24). `make check` passes (domain 48, **api 52**, 0 lint warnings); lockfile unchanged.
+  - **Release safety (R1–R3):**
+    - `prod-deploy` keys the backup on the `piko-prod_pgdata` volume, starts `db` when needed and aborts on a failed backup.
+      - Rehearsed: first deploy, then a deploy over existing data, which backed up before `migrate`.
+      - The backup version falls back to `TAG` when `.deploy/current` is missing.
+    - `prod-restore` takes a safety backup and uses `--single-transaction --exit-on-error`.
+      - Rehearsed: a truncated dump failed, the row count stayed unchanged, `api` stayed stopped, and the safety file was printed.
+    - api vitest timeouts are 30 s: 3 runs out of 3 were green under parallel load.
+  - **Session (R4):** `withSession` awaits `ensureSession()` and resets only the session promise it ran under. `git grep "await ensureSession"` in `lib/api` shows `session.ts` only. A cold desktop Home sent one `/api/me` and created one guest (101 → 102).
+  - **Env guard (R5):** a production `DATABASE_URL` with `CHANGE_ME` is rejected, and dev accepts it. The local `.env.prod` placeholder had to be replaced for the rehearsal; this is the intended effect.
+  - **Docs by the architect:** `ENVIRONMENTS.md` §7 now documents deploy and restore exactly, including "restore only with the image version that made the dump", and §8 the `CHANGE_ME` guard. The matching technical-debt items are marked resolved.
+  - **Not changed (accepted):** the API helpers keep their `async` wrappers; this is harmless.
+  - **FR-1 accepted.** Fast-forwarded into `feat/final-review`.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
@@ -981,10 +994,10 @@
 - Docker bind mounts + pnpm workspace `node_modules` can be fiddly (handled with container-owned volumes).
 
 ## Technical debt
-- **API tests flake under host load:** each PGlite test file creates its own database in `beforeAll` under the default 10 s `hookTimeout`, which times out when the machine is busy (seen in 6-5b and the 7-1 review). Fix before Phase 9, either by raising `hookTimeout` for the api project or by sharing one PGlite per worker.
-- `prod-deploy` skips the backup when the prod stack is stopped (e.g. after `make prod-down`) but `piko-prod_pgdata` holds data, so migrations would run without a backup. Fix before Phase 9: if the volume exists, start `db` (`up -d --wait db`) and back up before `up`.
-- `prod-restore` does not take a safety backup of the current data before `--clean`. Add one before Phase 9.
-- Restoring an old dump into a newer schema is not guarded. The runbook must say: restore only with the image version that created the dump.
+- ~~**API tests flake under host load:** each PGlite test file creates its own database in `beforeAll` under the default 10 s `hookTimeout`, which times out when the machine is busy (seen in 6-5b and the 7-1 review). Fix before Phase 9, either by raising `hookTimeout` for the api project or by sharing one PGlite per worker.~~ Resolved in FR-1 (2026-10-12).
+- ~~`prod-deploy` skips the backup when the prod stack is stopped (e.g. after `make prod-down`) but `piko-prod_pgdata` holds data, so migrations would run without a backup. Fix before Phase 9: if the volume exists, start `db` (`up -d --wait db`) and back up before `up`.~~ Resolved in FR-1 (2026-10-12).
+- ~~`prod-restore` does not take a safety backup of the current data before `--clean`. Add one before Phase 9.~~ Resolved in FR-1 (2026-10-12).
+- ~~Restoring an old dump into a newer schema is not guarded. The runbook must say: restore only with the image version that created the dump.~~ Resolved in FR-1 (2026-10-12).
 
 ## Before Phase 9 (VPS runbook, to be written in ENVIRONMENTS.md)
 - Docker Engine ≥ 23 (BuildKit by default, unprivileged low ports inside containers), `make`, `git`.
