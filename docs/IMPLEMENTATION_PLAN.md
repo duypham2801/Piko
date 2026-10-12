@@ -1,7 +1,7 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Final engineering review (report done, `docs/FINAL_ENGINEERING_REVIEW.md`; waiting for the owner's choices). Phase 8 merged into `main` on 2026-10-12.
+- **Current phase:** Final engineering review fixes (D-036): FR-1 → FR-4, then Phase 9. Phase 8 merged into `main` on 2026-10-12.
 - **Integration branch:** `feat/final-review`
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`); Phase 4 (4-1, 4-2: router, Home, presets, preview, merged into `main`); Phase 5 (5-1…5-4: decisions API, builder, saved decisions, reuse options, merged into `main`); Phase 6 (6-1…6-5b: history, result actions, share links, merged into `main`); Phase 7 (7-1…7-5: navigation shell, sidebar, case overlay, responsive pass, dev access from other devices, merged into `main`); Phase 8 (8-1…8-4: case polish, interaction states, consistency, case arrows + centring, merged into `main`)
 
@@ -44,7 +44,11 @@
 | 8-3 | Consistency + layout | ✅ (architect cleanup) | `8-3-consistency-layout.md`: empty/not-found CTAs, History empty alignment, sidebar "Gần đây" on error, active styles, sticky preview CTA on phones, scroll the active sidebar row into view, "Sổ tay" rows without an emoji (D-035) |
 | 8-4 | Case arrows + centring | ✅ (`53ce766`) | `8-4-case-marker-centering.md`: inward arrows that follow the winner's edges (marker moved out of the clip), the case vertically centred on desktop and phones with the revealed footer reserved so the strip never moves |
 | 9 | First prod release | ⬜ | Deploy `v0.1.0` to VPS, verify backup/rollback |
-| — | Final engineering review | 🟡 report done | `docs/FINAL_ENGINEERING_REVIEW.md`: 7.8/10. MUST before Phase 9: deploy backup, safe restore, a reliable test gate, the session retry race, a local prod rehearsal |
+| — | Final engineering review | 🟡 fixes in progress (D-036) | `docs/FINAL_ENGINEERING_REVIEW.md`: 7.8/10. MUST before Phase 9: deploy backup, safe restore, a reliable test gate, the session retry race, a local prod rehearsal |
+| FR-1 | Release safety + session single-flight | ⬜ | `FR-1-release-safety.md`: deploy backup when the volume exists, a safe restore, the api vitest timeout, the `CHANGE_ME` guard, the session retry race, `withSession` owns `ensureSession` |
+| FR-2 | Case plays a result + list store | ⬜ | `play(result)` vs `open()`, exact `/s/:id` replay, a shared decisions/history store with invalidation, `useHistorySave` out of `CaseOpening` |
+| FR-3 | "Đi thôi" closes + result card, mode selector in nav, "Random" title | ⬜ | D-036 P2–P4 (needs the FR-2 store for an instant sidebar update) |
+| FR-4 | Accessibility + ops hardening | ⬜ | Skip link, focus loss (share page, "Tạo link", delete), live regions, load-state titles, emoji picker focus; IPv6 /64 rate limit, pruning expired rows |
 | R | Realtime: live viewing + Couple/Squad | ⬜ | After `v0.1.0` (D-031). One design for rooms, presence, viewer/participant identity, anti-spam and server-ordered spins; live viewing of shared links (from D-030) is its first consumer. Couple/Squad still need their own approval (CLAUDE.md rule 9). |
 
 ## Next tasks (Phase 1a)
@@ -949,6 +953,14 @@
   - **8-4 accepted.**
 - **Phase 8 closed (2026-10-12):** the owner did the browser walk-through ("khá ổn") and approved it. `feat/phase-8-polish` was merged into `main` with `--no-ff`. No topology change.
   - Next: the **final engineering review** (owner choice), then Phase 9.
+- **Final engineering review (2026-10-12):** `docs/FINAL_ENGINEERING_REVIEW.md`, 7.8/10. Integration branch `feat/final-review`.
+  - **Owner walk-through bug:** the case footer and result were left-aligned in the dialog. `.caseBlock` lacked `justify-items: center` (introduced in 8-4). The architect's 8-4 review measured vertical positions only and missed it. Fixed directly in `9ec5a39`; the centre offset is now 0 at 768–1920.
+  - **Owner choices (D-036):**
+    - P1: keep the two-step "Mở case".
+    - P2: "Đi thôi" closes the case, with a result card and a toast.
+    - P3: the mode selector moves into the navigation.
+    - P4: the title is optional and defaults to "Random".
+    - The MUST and SHOULD items are fixed before Phase 9, in FR-1 … FR-4.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
