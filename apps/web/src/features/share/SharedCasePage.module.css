@@ -17,10 +17,6 @@
   line-height: var(--leading-tight);
 }
 
-.muted {
-  color: var(--color-text-muted);
-}
-
 .error {
   color: var(--color-danger);
   font-weight: var(--font-weight-bold);
@@ -94,7 +90,6 @@
 }
 
 .optionEmoji {
-  flex: 0 0 auto;
   font-size: var(--text-xl);
   line-height: var(--leading-tight);
 }
@@ -105,7 +100,9 @@
   text-decoration: none;
 }
 
-.makeYourOwn:hover {
-  text-decoration: underline;
-  text-underline-offset: var(--space-1);
+@media (hover: hover) {
+  .makeYourOwn:hover {
+    text-decoration: underline;
+    text-underline-offset: var(--space-1);
+  }
 }

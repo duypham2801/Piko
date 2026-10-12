@@ -5,7 +5,9 @@
   text-decoration: none;
 }
 
-.link:hover {
-  text-decoration: underline;
-  text-underline-offset: var(--space-1);
+@media (hover: hover) {
+  .link:hover {
+    text-decoration: underline;
+    text-underline-offset: var(--space-1);
+  }
 }

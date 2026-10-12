@@ -37,7 +37,6 @@
 }
 
 .winnerEmoji {
-  flex: 0 0 auto;
   font-size: var(--text-xl);
   line-height: var(--leading-tight);
 }

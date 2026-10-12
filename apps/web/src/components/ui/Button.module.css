@@ -11,6 +11,7 @@
   font-family: var(--font-body);
   font-weight: var(--font-weight-bold);
   line-height: var(--leading-tight);
+  text-decoration: none;
   transition: transform var(--duration-fast) var(--ease-standard);
 }
 
@@ -58,6 +59,12 @@
 
 .fullWidth {
   width: 100%;
+}
+
+@media (hover: hover) {
+  .button:hover:not(:disabled) {
+    transform: translateY(var(--hover-lift-sm));
+  }
 }
 
 .button:active:not(:disabled) {

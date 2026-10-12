@@ -33,7 +33,7 @@ export default function DecisionPreviewPage() {
   }, [confirming]);
 
   if (recordState.status !== 'loaded') {
-    return <DecisionLoadState state={recordState} />;
+    return <DecisionLoadState backTo="/" state={recordState} width="wide" />;
   }
   if (!id) return <NotFoundPage />;
 

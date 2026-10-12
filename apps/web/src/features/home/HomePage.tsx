@@ -1,6 +1,7 @@
 import { Link } from 'react-router';
 
 import Card from '../../components/ui/Card';
+import OptionGlyph from '../../components/ui/OptionGlyph';
 import Screen from '../../app/Screen';
 import { t } from '../../i18n';
 import { DESKTOP_QUERY, useMediaQuery } from '../../lib/useMediaQuery';
@@ -54,11 +55,11 @@ function SavedDecisionsSection() {
                   to={`/decisions/${decision.id}`}
                 >
                   <Card className={styles.presetCard} tone="surface">
-                    {firstEmoji && (
-                      <span aria-hidden="true" className={styles.presetEmoji}>
-                        {firstEmoji}
-                      </span>
-                    )}
+                    <OptionGlyph
+                      className={styles.presetEmoji}
+                      emoji={firstEmoji}
+                      label={decision.title}
+                    />
                     <span className={styles.presetTitle}>{decision.title}</span>
                     <span className={styles.presetHint}>
                       {optionHint}
@@ -87,9 +88,11 @@ function RecentSection() {
     <section className={styles.recent}>
       <header className={styles.sectionHeader}>
         <h2>{t('recent')}</h2>
-        <Link className={styles.seeAll} to="/history">
-          {t('seeAll')}
-        </Link>
+        {status !== 'error' && (
+          <Link className={styles.seeAll} to="/history">
+            {t('seeAll')}
+          </Link>
+        )}
       </header>
       {status === 'error' ? (
         <p className={styles.listFailed}>{t('historyLoadFailed')}</p>

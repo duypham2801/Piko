@@ -81,6 +81,8 @@
   --shadow-chunky-lg: 0 var(--shadow-offset-lg) 0 var(--color-shadow);
   --shadow-soft: 0 12px 32px rgb(15 23 42 / 0.18);
 
+  --hover-lift: calc(var(--space-1) * -1);
+  --hover-lift-sm: calc(var(--space-1) * -0.5);
   --duration-fast: 120ms;
   --duration-normal: 220ms;
   --duration-slow: 400ms;

@@ -3,6 +3,7 @@ import { DECISION_LIMITS } from '@piko/domain';
 import type { DecisionDraftData, DecisionOptionData } from '@piko/domain';
 
 import Chip from '../../components/ui/Chip';
+import LoadingText from '../../components/ui/LoadingText';
 import Sheet from '../../components/ui/Sheet';
 import { t } from '../../i18n';
 import { useDecisionList } from '../decisions/useDecisionList';
@@ -95,7 +96,7 @@ export default function ExistingOptionsPanel({
       {showSavedDecisions && (
         <section className={styles.section}>
           <h3>{t('yourDecisions')}</h3>
-          {status === 'loading' && <p className={styles.muted}>{t('loading')}</p>}
+          {status === 'loading' && <LoadingText />}
           {status === 'error' && <p className={styles.muted}>{t('listFailed')}</p>}
           {status === 'loaded' && (
             <div className={styles.groups}>

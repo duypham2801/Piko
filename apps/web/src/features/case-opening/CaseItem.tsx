@@ -1,5 +1,6 @@
 import type { DecisionOptionData } from '@piko/domain';
 
+import OptionGlyph from '../../components/ui/OptionGlyph';
 import styles from './CaseItem.module.css';
 
 type CaseItemProps = {
@@ -15,9 +16,7 @@ export default function CaseItem({ option, isWinner, revealed }: CaseItemProps) 
 
   return (
     <div className={classes} title={option.label}>
-      <span aria-hidden="true" className={styles.emoji}>
-        {option.emoji}
-      </span>
+      <OptionGlyph className={styles.emoji} emoji={option.emoji} label={option.label} />
       <span className={styles.label}>{option.label}</span>
     </div>
   );

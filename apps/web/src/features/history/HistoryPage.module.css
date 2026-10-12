@@ -21,9 +21,9 @@
 
 .state {
   display: grid;
-  justify-items: center;
+  justify-items: start;
   gap: var(--space-4);
-  text-align: center;
+  text-align: start;
 }
 
 .error {

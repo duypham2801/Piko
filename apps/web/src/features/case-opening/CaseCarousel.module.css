@@ -1,9 +1,14 @@
+.carousel {
+  position: relative;
+  width: 100%;
+  --case-cell-width: calc(var(--space-8) * 2);
+}
+
 .viewport {
   position: relative;
   width: 100%;
   overflow: hidden;
   padding-block: var(--space-3);
-  --case-cell-width: calc(var(--space-8) * 2);
 }
 
 .viewport::before,
@@ -46,9 +51,24 @@
   bottom: 0;
   left: 50%;
   width: var(--border-width);
-  background: var(--color-primary);
+  z-index: var(--z-raised);
   pointer-events: none;
   transform: translateX(-50%);
+}
+
+.markerLine {
+  position: absolute;
+  inset: 0;
+  background: var(--color-primary);
+  transition: opacity var(--duration-normal) var(--ease-standard);
+}
+
+.marker[data-revealed='false'] .markerLine {
+  transition: none;
+}
+
+.marker[data-revealed='true'] .markerLine {
+  opacity: 0;
 }
 
 .marker::before,
@@ -58,25 +78,47 @@
   width: 0;
   height: 0;
   content: '';
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateY(0);
+  transition: transform var(--duration-normal) var(--ease-spring);
 }
 
 .marker::before {
   top: 0;
-  border-right: var(--space-2) solid transparent;
-  border-bottom: var(--space-2) solid var(--color-primary);
-  border-left: var(--space-2) solid transparent;
-}
-
-.marker::after {
-  bottom: 0;
   border-top: var(--space-2) solid var(--color-primary);
   border-right: var(--space-2) solid transparent;
   border-left: var(--space-2) solid transparent;
 }
 
+.marker::after {
+  bottom: 0;
+  border-bottom: var(--space-2) solid var(--color-primary);
+  border-right: var(--space-2) solid transparent;
+  border-left: var(--space-2) solid transparent;
+}
+
+.marker[data-revealed='false']::before,
+.marker[data-revealed='false']::after {
+  transition: none;
+}
+
+.marker[data-revealed='true']::before {
+  transform: translateX(-50%)
+    translateY(calc((var(--space-1) + (var(--scale-pop) - 1) * var(--case-cell-width) / 2) * -1));
+}
+
+.marker[data-revealed='true']::after {
+  transform: translateX(-50%)
+    translateY(calc((var(--scale-pop) - 1) * var(--case-cell-width) / 2 - var(--space-1)));
+}
+
 @media (min-width: 48rem) {
-  .viewport {
+  .carousel {
     --case-cell-width: calc(var(--space-8) * 2.5);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .markerLine {
+    transition: none;
   }
 }

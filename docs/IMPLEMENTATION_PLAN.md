@@ -1,9 +1,9 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 8 — Polish (not started). Phase 7 merged into `main` on 2026-10-10.
-- **Integration branch:** none yet (Phase 8 kickoff creates one from `main`)
-- **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`); Phase 4 (4-1, 4-2: router, Home, presets, preview, merged into `main`); Phase 5 (5-1…5-4: decisions API, builder, saved decisions, reuse options, merged into `main`); Phase 6 (6-1…6-5b: history, result actions, share links, merged into `main`); Phase 7 (7-1…7-5: navigation shell, sidebar, case overlay, responsive pass, dev access from other devices, merged into `main`)
+- **Current phase:** Final engineering review (next). Phase 8 merged into `main` on 2026-10-12. Phase 7 merged into `main` on 2026-10-10.
+- **Integration branch:** none (the final review starts from `main`)
+- **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`); Phase 4 (4-1, 4-2: router, Home, presets, preview, merged into `main`); Phase 5 (5-1…5-4: decisions API, builder, saved decisions, reuse options, merged into `main`); Phase 6 (6-1…6-5b: history, result actions, share links, merged into `main`); Phase 7 (7-1…7-5: navigation shell, sidebar, case overlay, responsive pass, dev access from other devices, merged into `main`); Phase 8 (8-1…8-4: case polish, interaction states, consistency, case arrows + centring, merged into `main`)
 
 ## Phases
 
@@ -39,7 +39,10 @@
 | 7-3 | Case overlay | ✅ (`7-3-fix-1.md`, `7-3-fix-2.md`) | The case opens as a modal overlay above the preview/builder (nested `/open` routes, full-screen on phones, × / Esc / Back to close), focus mode removed, plus the 7-2 carry-overs (C0) (D-033) |
 | 7-4 | Responsive pass | ✅ (`07a7a25`) | Every screen at 360 / 768 / 1024 / 1280 / 1920 after the overlay: carousel, winner reveal, CTAs, card grids, option layout |
 | 7-5 | Dev access from other devices (opt-in) | ✅ (`7-5-fix-1.md`) | `7-5-dev-lan-optin.md`: `DEV_WEB_BIND` adds port 5173 on one LAN IP through `compose.dev.lan.yaml` (`127.0.0.1` is always kept), and `COMPOSE_DEV` uses `--env-file .env.dev`. Fix-1: Tailscale Serve on the host, and `DEV_EXTRA_ORIGINS` (a list) feeds both the API origin check and Vite `allowedHosts` (D-034) |
-| 8 | Polish | ⬜ | States, micro-interactions, consistency |
+| 8-1 | Case polish | ✅ (`4fc838b`) | `8-1-case-polish.md`: marker line fades at the reveal, no overlay scroll at 1280×800, option monogram (`OptionGlyph`), no scroll on initial focus (D-035) |
+| 8-2 | Interaction states | ✅ (`ae4d957`, owner fix) | `8-2-interaction-states.md`: hover/pressed on every interactive surface, loading that keeps space, focused error field, case focus after the reveal and at a respin (D-035) |
+| 8-3 | Consistency + layout | ✅ (architect cleanup) | `8-3-consistency-layout.md`: empty/not-found CTAs, History empty alignment, sidebar "Gần đây" on error, active styles, sticky preview CTA on phones, scroll the active sidebar row into view, "Sổ tay" rows without an emoji (D-035) |
+| 8-4 | Case arrows + centring | ✅ (`53ce766`) | `8-4-case-marker-centering.md`: inward arrows that follow the winner's edges (marker moved out of the clip), the case vertically centred on desktop and phones with the revealed footer reserved so the strip never moves |
 | 9 | First prod release | ⬜ | Deploy `v0.1.0` to VPS, verify backup/rollback |
 | — | Final engineering review | ⬜ | Format per master prompt §47–48 |
 | R | Realtime: live viewing + Couple/Squad | ⬜ | After `v0.1.0` (D-031). One design for rooms, presence, viewer/participant identity, anti-spam and server-ordered spins; live viewing of shared links (from D-030) is its first consumer. Couple/Squad still need their own approval (CLAUDE.md rule 9). |
@@ -829,6 +832,123 @@
   - **7-5 accepted.** `fix/dev-lan-access` merged into `feat/phase-7-responsive`.
 - **Phase 7 closed (2026-10-10):** the owner did the browser walk-through and approved it. `feat/phase-7-responsive` was merged into `main` with `--no-ff`. `TOPOLOGY.md` already covers 7-5 (D-034); closing the phase changes nothing else.
   - Carried into Phase 8: emoji-less row alignment, scrolling the active sidebar row into view, and the 1280×500 focus scroll that hides the strip's top.
+- **Phase 8 kickoff (2026-10-10):** integration branch `feat/phase-8-polish` created from `main` (`274c3d9`).
+  - **Architect audit** (360×740 and 1280×800; Home, History, builder, presets, saved decision, case ready/spinning/revealed/"Không phải hôm nay"/"Đi thôi", share, bad link, 404; API delayed 3 s; API refused; Tab navigation):
+    - no horizontal overflow, no console errors, and the app stays usable with the API down (rule 5 holds)
+    1. the marker line crosses the winner's emoji and label after the reveal
+    2. the overlay scrolls inside at 1280×800 when a status line shows under the actions ("Chưa lưu được…", "Chỉ còn 2 lựa chọn cuối.")
+    3. options without an emoji: the strip label sits higher, the winner panel has no icon, preview labels are indented differently
+    4. `Button` has no hover; `Card`, `Chip`, `Switch` and the builder controls have no hover or pressed state
+    5. loading is a bare "Đang tải…" and the content then pushes the layout; the sidebar shows a lone "Của bạn" heading
+    6. "Về trang chủ" is coral on the empty History page but teal on not-found and the unavailable share page
+    7. History empty on desktop: the message and button are centred under left-aligned headings
+    8. sidebar "Gần đây" is hidden when empty but appears on error with a "Xem tất cả" link
+    9. active styles differ: "Lịch sử" uses a teal underline, list rows a lemon fill
+    10. the preview "MỞ CASE" sits below every option on phones (8 rows for a preset)
+    11. a focused field with an error shows the teal focus ring around the red error border
+    12. carried from 7-4: scrolling the active sidebar row into view; at 1280×500 the initial focus scrolls the strip's top out of view
+  - **Owner choices (D-035):** monogram for emoji-less options, sticky preview CTA on phones, loading keeps space (no skeletons), "Gần đây" stays hidden while empty, three tasks.
+  - → `8-1-case-polish.md` (1, 2, 3, 12b). 8-2 gets 4, 5, 11. 8-3 gets 6–10 and 12a.
+- **8-1 review (2026-10-10):** reviewed `c7512fb`, `d58cba6`, `c7ca5ca` (15 files, +170/−50). `make check` passes (domain 48, api 50, 0 lint warnings); lockfile unchanged; the literal grep is empty.
+  - **Browser, re-measured by the architect:**
+    - **Marker:** the line goes to opacity 0 at the reveal and is back at once on "Mở lại". The arrow heads stay.
+    - **Overlay at 1280×800** (scrollHeight/clientHeight):
+      - normal 642/642
+      - hint 671/671
+      - hint + error 692/692
+      - no inner scroll in any state
+    - **Overlay position:** the top stays at 64 px and the strip at 187 px before and after the reveal.
+    - **360×740:** 740/740.
+    - **1280×500:** `scrollTop` 0 on open, and focus is on "Mở case".
+    - **Monogram:** "ẩm thực" → "Ẩ" as one character. It shows in the strip, the winner panel, the preview (labels at one x), History and the sidebar "Gần đây".
+  - **Cleanup by the architect (owner asked for review + cleanup), `4fc838b`:**
+    - The marker keeps its own geometry and the line just fills it (`inset: 0`), which removes the duplicated positioning.
+    - "Đã lưu" no longer reserves a status row. It is announced visually hidden, so the status counts only the hint or an error. The saved state is now 642, like normal; it was 650.
+    - From `48rem`, `.secondaryActions` uses the same `--space-2` as `.actions`. Before, the vertical gap was 8 px and the horizontal gap 12 px.
+    - The per-site `flex: 0 0 auto` is removed, because `OptionGlyph` owns its box.
+    - The sidebar glyph uses `--text-lg`, so the monogram letter is readable. At 14 px it was about 8 px.
+    - `emoji ?? monogram`: the schema guarantees a non-empty emoji.
+    - The rest of the repo was scanned: no dead files, unused dependencies, unused i18n keys or debug code. The flagged CSS classes are dynamic `styles[variant]` lookups, and the API `console.log`s are operational logs.
+  - **Found, not caused by 8-1 (pre-existing):**
+    - Focus falls to `<body>` at the reveal and at "Mở lại", because the focused button unmounts → 8-2.
+    - Sidebar "Của bạn" rows of a decision with no emoji have no icon, so their labels start left of the "Gần đây" rows → 8-3.
+  - **8-1 accepted.** Fast-forwarded into `feat/phase-8-polish`.
+- **8-2 handoff (2026-10-10):** `8-2-interaction-states.md`.
+  - **H: hover and pressed.**
+    - Two tokens: `--hover-lift`, `--hover-lift-sm`.
+    - Every hover sits in `@media (hover: hover)`, and none applies when disabled.
+    - Movement and the existing backgrounds only, no new colours.
+  - **L: `LoadingText`.**
+    - It fades in after `--duration-slow`, so fast loads do not flash.
+    - It is used at 5 sites, plus the sidebar "Của bạn".
+    - `DecisionLoadState` loads in the final layout with the back link.
+  - **E:** a red focus ring on fields with an error.
+  - **F: focus stays in the case dialog.**
+    - spin → the title (`tabIndex -1`)
+    - reveal → "Đi thôi"
+    - saved → "Mở lại"
+- **8-2 review (2026-10-10):** reviewed `49c2989`, `ea58662`, `ab4a73d`, `c3e6e61` (33 files, +263/−39). `make check` passes (domain 48, api 50, 0 lint warnings); lockfile unchanged.
+  - **MUST, found by the owner in the browser** ("hover affects the `type=button` controls"):
+    - **Cause:** `Switch` moved the checked offset into `--switch-thumb-offset`, but `.thumb` itself no longer used it. Only the hover and pressed rules did.
+    - **Effect:** every checked switch showed its thumb on the left, and it jumped right on hover.
+    - **Fix:** `.thumb { transform: translateX(var(--switch-thumb-offset)) }`. Re-measured: 36 px when on, 0 when off.
+  - **Verified:**
+    - **Case focus:** "Mở case" → title during the spin → "Đi thôi" at the reveal → "Mở lại" after the save. It never falls to `<body>`.
+    - **Hover:** every hover rule sits in `@media (hover: hover)` and none applies when disabled. This was checked by reading the CSS: headless Chrome reports `hover: none` and cannot emulate it, so the owner checks it in a real browser.
+    - **Extra surfaces, accepted:** the logo underline, the "Thêm từ có sẵn" group summary, the share lifetime options.
+  - **Cleanup by the architect (`ae4d957`):**
+    - removed the dead `.muted` in `SharedCasePage.module.css`
+    - inlined a one-line `useCallback`
+    - renamed `DecisionLoadState`'s `align` to `textAlign`, because it clashed with `Screen.align`, which is vertical
+  - **Owner request (D-035 amendment):** "Của bạn" → "Sổ tay" everywhere, and the sidebar section is hidden while loading/empty. This makes the 8-2 sidebar loading line moot, so it is removed (`noDecisionsYet` too).
+  - **8-2 accepted.** Fast-forwarded into `feat/phase-8-polish`.
+- **8-3 handoff (2026-10-10):** `8-3-consistency-layout.md`, C1–C7.
+  - **C1:** "Về trang chủ" becomes a primary link-button. A `buttonClassName()` helper is exported from `Button` and applied to a router `Link`; `.backHome` is removed. This is an architect default: coral, because it is the only action on those screens.
+  - **C2:** History states start-aligned.
+  - **C3:** no "Xem tất cả" on a failed list.
+  - **C4:** from `64rem` the current "Lịch sử" uses the lemon row style.
+  - **C5:** sticky "MỞ CASE" below `48rem`.
+  - **C6:** the current "Sổ tay" row is scrolled into view.
+  - **C7:** `OptionGlyph` for decisions without an emoji.
+- **8-3 review (2026-10-10):** reviewed `207a722`, `d2ddbd8`, `9ef849d` (12 files). `make check` passes (domain 48, api 50, 0 lint warnings); lockfile unchanged; both greps are empty.
+  - **Browser, re-measured by the architect:**
+    - **360×740** (`/presets/food` and a saved decision with 8 options): "MỞ CASE" is pinned at 670–728 (full width). At the end of the page the bar settles above "Sửa / Xóa" / "Tùy chỉnh" (bottom 676), and the last row ends at 486.
+    - **1280:** the button is static at its natural width (152).
+    - **Sidebar:** with 20 decisions, opening the oldest scrolls the list (`scrollTop` 427) so its lemon row is visible. Rows without an emoji show a monogram.
+    - **Current styles:** at 1280 the current "Lịch sử" has the lemon fill with no underline.
+    - **"Về trang chủ":** a coral link-button, start-aligned with "Đã chọn" (x 528) on the empty History page, and coral on not-found.
+  - **Cleanup by the architect:**
+    - `buttonClassName` moves to `components/ui/buttonClassName.ts` (with the `ButtonVariant`/`ButtonSize` types), so the `eslint-disable react-refresh/only-export-components` is gone. The handoff had asked for the export from `Button.tsx`.
+    - It is called as `buttonClassName()`, not `({})`.
+    - The preview action bar is written mobile-first (sticky by default, static from `48rem`). It was the repo's only `max-width` media query.
+    - Hovering the current "Lịch sử" keeps its lemon fill (`:not([aria-current='page'])`), like the sidebar rows.
+  - **Locked-on switch (owner chose to fix in Phase 8):** a disabled but checked `Switch` (minimum options reached) had a grey track like an off switch. It now keeps the teal track, with the slate disabled border (`.checked:disabled .track`, done by the architect on owner request).
+  - **8-3 accepted.** Fast-forwarded into `feat/phase-8-polish`. **Phase 8 is ready for the owner's walk-through.**
+  - **Owner (HITL):** keep coral for "Về trang chủ". After Phase 8, the **final engineering review** comes before Phase 9.
+- **Phase 8 walk-through (owner, 2026-10-10):** everything passes except two case issues.
+  1. The arrows point outward. The owner wants one tip pointing in. At the reveal the winner rises and scales, so its top edge covers the top arrow. Measured: the winner goes from 199–359 to 189.0–361.8 at 1280, and from 104–232 to 94.9–233.1 at 360. The arrows are clipped by the viewport's `overflow: hidden`.
+  2. The case sits high:
+     - desktop: anchored at 64 px; 368 px empty below at 1920×1080
+     - phone: 278 px (ready) / 152 px (revealed) empty below at 360×740
+  - **Architect defaults:**
+    - Arrows keep a `--space-1` gap to the cells and follow the winner's edges, using the same tokens.
+    - The case is centred, with the revealed footer plus one status line reserved, so the strip does not move at the reveal (keeps the 7-4 goal).
+    - On phones the header stays at the top.
+  - → `8-4-case-marker-centering.md`.
+- **8-4 review (2026-10-12):** reviewed `1158754`, `ba5819e` (4 files, +184/−105). `make check` passes (domain 48, api 50, 0 lint warnings); the literal grep is empty.
+  - **Browser, re-measured by the architect:**
+    - **Arrows:** they point inward. Each tip is 4.0 px from the cell edge before the reveal, and 4.0 px from the scaled winner's edge after it (for example 182.5 vs 186.5 at 1280). They are back at rest on "Mở lại".
+    - **Centring on desktop:** 62/62 at 1280×800 and 202/202 at 1920×1080.
+    - **Centring on phones:** under the header, 79/71 at 360×740 and 131/123 at 390×844.
+    - **The strip does not move** between ready and revealed, for a preset and for a 2-option decision, at all four sizes.
+    - **Short heights:** at 1280×500 and 740×360 the dialog scrolls inside, opens at `scrollTop` 0, and focus is on "Mở case".
+  - **Fix by the architect (`53ce766`):**
+    - On phones `.content` had `gap: 0`, so at 740×360 the block touched the header and the revealed top arrow moved toward the title. It now keeps `--space-5` as the minimum header gap (24 px).
+    - The duplicate desktop `gap` is removed.
+  - **Accepted as is:** the footer's reserved `min-height` is derived from tokens (button line heights, padding, borders, gaps, one status line). It holds the strip still at every measured size.
+  - **8-4 accepted.**
+- **Phase 8 closed (2026-10-12):** the owner did the browser walk-through ("khá ổn") and approved it. `feat/phase-8-polish` was merged into `main` with `--no-ff`. No topology change.
+  - Next: the **final engineering review** (owner choice), then Phase 9.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.

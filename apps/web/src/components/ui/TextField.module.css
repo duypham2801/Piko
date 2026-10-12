@@ -33,6 +33,11 @@
   border-color: var(--color-danger);
 }
 
+.input.error:focus-visible {
+  outline: var(--border-width) solid var(--color-danger);
+  outline-offset: var(--border-width);
+}
+
 .hint,
 .errorMessage {
   font-size: var(--text-sm);

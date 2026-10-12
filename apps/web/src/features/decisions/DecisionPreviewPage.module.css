@@ -27,6 +27,14 @@
   color: var(--color-danger);
 }
 
+@media (hover: hover) {
+  .actions a:hover,
+  .actions button:hover {
+    text-decoration: underline;
+    text-underline-offset: var(--space-1);
+  }
+}
+
 .confirmRow {
   display: grid;
   justify-items: center;

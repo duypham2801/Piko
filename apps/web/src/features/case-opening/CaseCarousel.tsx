@@ -20,25 +20,29 @@ export default function CaseCarousel({
   stripRef,
 }: CaseCarouselProps) {
   return (
-    <div aria-hidden="true" className={styles.viewport} ref={viewportRef}>
-      <div className={styles.strip} ref={stripRef}>
-        {plan.strip.map((id, index) => {
-          const option = optionsById.get(id);
-          if (!option) {
-            return null;
-          }
+    <div aria-hidden="true" className={styles.carousel}>
+      <div className={styles.viewport} ref={viewportRef}>
+        <div className={styles.strip} ref={stripRef}>
+          {plan.strip.map((id, index) => {
+            const option = optionsById.get(id);
+            if (!option) {
+              return null;
+            }
 
-          return (
-            <CaseItem
-              isWinner={index === plan.winnerIndex}
-              key={`${id}-${index}`}
-              option={option}
-              revealed={revealed}
-            />
-          );
-        })}
+            return (
+              <CaseItem
+                isWinner={index === plan.winnerIndex}
+                key={`${id}-${index}`}
+                option={option}
+                revealed={revealed}
+              />
+            );
+          })}
+        </div>
       </div>
-      <span className={styles.marker} />
+      <span className={styles.marker} data-revealed={revealed}>
+        <span aria-hidden="true" className={styles.markerLine} />
+      </span>
     </div>
   );
 }

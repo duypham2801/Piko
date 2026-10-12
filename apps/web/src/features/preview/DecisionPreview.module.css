@@ -35,10 +35,6 @@
   gap: var(--space-3);
 }
 
-.optionRow[data-no-emoji] {
-  grid-template-columns: minmax(0, 1fr) auto;
-}
-
 .optionEmoji {
   font-size: var(--text-xl);
   line-height: var(--leading-tight);
@@ -61,12 +57,33 @@
   text-align: center;
 }
 
+.actionBar {
+  position: sticky;
+  bottom: 0;
+  z-index: var(--z-raised);
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3) 0 calc(var(--space-3) + env(safe-area-inset-bottom));
+  background: var(--color-bg);
+}
+
 .openButton {
   justify-self: center;
+  width: 100%;
 }
 
 @media (min-width: 48rem) {
   .optionList {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .actionBar {
+    position: static;
+    padding: 0;
+    background: none;
+  }
+
+  .openButton {
+    width: auto;
   }
 }

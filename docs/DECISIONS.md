@@ -541,3 +541,22 @@ Format: Decision · Reason · Alternatives · Tradeoffs · Phase/Date
   - In dev, every device reaches the API through the same proxy, so all of them share one guest rate-limit bucket.
 - **Topology:** dev web exposure (LAN bind + Tailscale Serve on the host). API, DB and prod are unchanged.
 - **Phase:** 7 (7-5, 7-5-fix-1) · 2026-10-10 · approved by user
+
+## D-035 — Phase 8 polish choices
+- **Choice (owner, after the architect's browser audit on 2026-10-10):**
+  - **Options without an emoji show a monogram:** the first letter of the label, upper-cased, in a teal circle with navy text, sized like an emoji in the same place. It is used wherever an option's emoji stands as an icon: case strip cells, the winner panel, preview option rows, the public page's option list, and the winner rows in History and the sidebar. Labels then line up whether or not an option has an emoji.
+  - **Preview "Mở case" is sticky on phones:** on preset and saved-decision previews, below `48rem`, the primary action sits in a bar pinned to the bottom of the screen, like the builder's. Desktop keeps it in the flow.
+  - **Loading keeps space, no skeletons:** loading states reserve the final layout's space and show "Đang tải…", so content does not push the layout when it arrives. No shimmer or skeleton blocks.
+  - **The sidebar "Gần đây" stays hidden while empty.** Its "Xem tất cả" link is not shown when the list failed to load.
+- **Architect defaults:**
+  - The marker line fades out at the reveal so it no longer crosses the winner cell; the arrow heads stay. It returns on the next spin.
+  - Every interactive surface gets hover and pressed states from motion tokens, with hover limited to `(hover: hover)` devices.
+- **Amendment (owner, 8-2 browser review, 2026-10-10):**
+  - The saved-decisions section is renamed **"Sổ tay"** (was "Của bạn") everywhere the label appears: the sidebar, Home and the builder's "Thêm từ có sẵn".
+  - **The sidebar "Sổ tay" is hidden while loading and while empty**, like "Gần đây". It shows on error with its failure line. Home keeps the section, because it holds the "Tạo quyết định" card. The builder panel is unchanged.
+  - `noDecisionsYet` ("Chưa có quyết định nào.") is removed. Nothing uses it any more.
+- **Amendment (owner walk-through, 2026-10-10):**
+  - The marker arrows point **inward** (one tip each, at the strip) and follow the winner's edges at the reveal.
+  - The case is **vertically centred** on desktop and phones. This supersedes the 7-4 top anchor; the strip still must not move at the reveal, so the revealed footer is reserved.
+- **Split:** 8-1 case polish, 8-2 interaction states (hover, pressed, loading, focused error field), 8-3 consistency and layout.
+- **Phase:** 8 · 2026-10-10 · approved by user

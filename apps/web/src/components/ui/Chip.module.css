@@ -26,6 +26,12 @@
   box-shadow: var(--shadow-chunky-sm);
 }
 
+@media (hover: hover) {
+  .chip:hover:not(:disabled) {
+    transform: translateY(var(--hover-lift-sm));
+  }
+}
+
 .chip:active:not(:disabled) {
   transform: translateY(var(--shadow-offset-sm));
   box-shadow: none;

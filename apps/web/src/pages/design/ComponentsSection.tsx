@@ -1,11 +1,14 @@
 import { useState } from 'react';
-import { MemoryRouter } from 'react-router';
+import { Link, MemoryRouter } from 'react-router';
 
 import BackLink from '../../components/ui/BackLink';
 import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
+import { buttonClassName } from '../../components/ui/buttonClassName';
 import Card from '../../components/ui/Card';
 import Chip from '../../components/ui/Chip';
+import LoadingText from '../../components/ui/LoadingText';
+import OptionGlyph from '../../components/ui/OptionGlyph';
 import Switch from '../../components/ui/Switch';
 import TextField from '../../components/ui/TextField';
 
@@ -67,6 +70,14 @@ export default function ComponentsSection() {
           <span className={styles.demoLabel}>router link</span>
           <MemoryRouter>
             <BackLink to="/">Trở về</BackLink>
+          </MemoryRouter>
+        </div>
+        <div className={styles.demoCell}>
+          <span className={styles.demoLabel}>button-styled link</span>
+          <MemoryRouter>
+            <Link className={buttonClassName()} to="/">
+              Về trang chủ
+            </Link>
           </MemoryRouter>
         </div>
       </div>
@@ -159,6 +170,31 @@ export default function ComponentsSection() {
             label="Nhãn ẩn của switch"
             onCheckedChange={setSwitchHidden}
           />
+        </div>
+      </div>
+
+      <div className={styles.group}>
+        <h3>OptionGlyph</h3>
+        <div className={styles.glyphExamples}>
+          <div className={styles.glyphItem}>
+            <OptionGlyph emoji="🍜" label="Phở" />
+            <span>Phở</span>
+          </div>
+          <div className={styles.glyphItem}>
+            <OptionGlyph label="lẩu" />
+            <span>lẩu</span>
+          </div>
+          <div className={styles.glyphItem}>
+            <OptionGlyph label="Ẩm thực" />
+            <span>Ẩm thực</span>
+          </div>
+        </div>
+      </div>
+
+      <div className={styles.group}>
+        <h3>LoadingText</h3>
+        <div className={styles.demoCell}>
+          <LoadingText />
         </div>
       </div>
     </section>

@@ -2,6 +2,7 @@ import { Link } from 'react-router';
 import type { HistoryEntryData } from '@piko/domain';
 
 import Card from '../../components/ui/Card';
+import OptionGlyph from '../../components/ui/OptionGlyph';
 import { historyEntryHref } from './historyEntryHref';
 import { formatHistoryTime } from './historyTime';
 import styles from './HistoryList.module.css';
@@ -19,11 +20,11 @@ export default function HistoryList({ entries, now }: HistoryListProps) {
           const href = historyEntryHref(entry);
           const row = (
             <>
-              {entry.winner.emoji && (
-                <span aria-hidden="true" className={styles.winnerEmoji}>
-                  {entry.winner.emoji}
-                </span>
-              )}
+              <OptionGlyph
+                className={styles.winnerEmoji}
+                emoji={entry.winner.emoji}
+                label={entry.winner.label}
+              />
               <span className={styles.details}>
                 <span className={styles.winnerLabel}>{entry.winner.label}</span>
                 <span className={styles.meta}>

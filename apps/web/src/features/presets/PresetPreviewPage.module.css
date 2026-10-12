@@ -9,6 +9,9 @@
   text-decoration: none;
 }
 
-.customize:hover {
-  text-decoration: underline;
+@media (hover: hover) {
+  .customize:hover {
+    text-decoration: underline;
+    text-underline-offset: var(--space-1);
+  }
 }

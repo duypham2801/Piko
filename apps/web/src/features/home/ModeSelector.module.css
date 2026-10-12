@@ -33,6 +33,7 @@
   background: var(--color-surface);
   color: var(--color-text);
   cursor: pointer;
+  transition: transform var(--duration-fast) var(--ease-standard);
   text-align: center;
 }
 
@@ -63,4 +64,10 @@
   font-weight: var(--font-weight-bold);
   line-height: var(--leading-tight);
   overflow-wrap: anywhere;
+}
+
+@media (hover: hover) {
+  .option:not(:has(input:checked)):has(input:not(:disabled)):hover {
+    transform: translateY(var(--hover-lift-sm));
+  }
 }

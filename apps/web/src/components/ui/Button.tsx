@@ -1,10 +1,10 @@
 import type { ComponentPropsWithoutRef } from 'react';
 
-import styles from './Button.module.css';
+import { type ButtonSize, type ButtonVariant, buttonClassName } from './buttonClassName';
 
 type ButtonProps = ComponentPropsWithoutRef<'button'> & {
-  variant?: 'primary' | 'secondary' | 'outline' | 'danger';
-  size?: 'md' | 'lg';
+  variant?: ButtonVariant;
+  size?: ButtonSize;
   fullWidth?: boolean;
 };
 
@@ -16,15 +16,11 @@ export default function Button({
   type = 'button',
   ...props
 }: ButtonProps) {
-  const classes = [
-    styles.button,
-    styles[variant],
-    styles[size],
-    fullWidth && styles.fullWidth,
-    className,
-  ]
-    .filter(Boolean)
-    .join(' ');
-
-  return <button {...props} className={classes} type={type} />;
+  return (
+    <button
+      {...props}
+      className={buttonClassName({ className, fullWidth, size, variant })}
+      type={type}
+    />
+  );
 }

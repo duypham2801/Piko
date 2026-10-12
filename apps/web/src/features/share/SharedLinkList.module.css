@@ -46,6 +46,13 @@
   outline-offset: var(--border-width);
 }
 
+@media (hover: hover) {
+  .title:hover {
+    text-decoration: underline;
+    text-underline-offset: var(--space-1);
+  }
+}
+
 .meta,
 .error,
 .confirm p {
