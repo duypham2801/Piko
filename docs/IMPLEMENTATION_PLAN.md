@@ -45,7 +45,7 @@
 | 8-4 | Case arrows + centring | ✅ (`53ce766`) | `8-4-case-marker-centering.md`: inward arrows that follow the winner's edges (marker moved out of the clip), the case vertically centred on desktop and phones with the revealed footer reserved so the strip never moves |
 | 9 | First prod release | ⬜ | Deploy `v0.1.0` to VPS, verify backup/rollback |
 | — | Final engineering review | 🟡 fixes in progress (D-036) | `docs/FINAL_ENGINEERING_REVIEW.md`: 7.8/10. MUST before Phase 9: deploy backup, safe restore, a reliable test gate, the session retry race, a local prod rehearsal |
-| FR-1 | Release safety + session single-flight | ⬜ | `FR-1-release-safety.md`: deploy backup when the volume exists, a safe restore, the api vitest timeout, the `CHANGE_ME` guard, the session retry race, `withSession` owns `ensureSession` |
+| FR-1 | Release safety + session single-flight | ⬜ (handed off) | `FR-1-release-safety.md`: deploy backup when the volume exists, a safe restore, the api vitest timeout, the `CHANGE_ME` guard, the session retry race, `withSession` owns `ensureSession` |
 | FR-2 | Case plays a result + list store | ⬜ | `play(result)` vs `open()`, exact `/s/:id` replay, a shared decisions/history store with invalidation, `useHistorySave` out of `CaseOpening` |
 | FR-3 | "Đi thôi" closes + result card, mode selector in nav, "Random" title | ⬜ | D-036 P2–P4 (needs the FR-2 store for an instant sidebar update) |
 | FR-4 | Accessibility + ops hardening | ⬜ | Skip link, focus loss (share page, "Tạo link", delete), live regions, load-state titles, emoji picker focus; IPv6 /64 rate limit, pruning expired rows |
