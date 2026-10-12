@@ -1,9 +1,9 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Phase 8 — Polish (D-035). Walk-through found 2 case issues → 8-4 handed off; then merge into `main`. Phase 7 merged into `main` on 2026-10-10.
-- **Integration branch:** `feat/phase-8-polish`
-- **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`); Phase 4 (4-1, 4-2: router, Home, presets, preview, merged into `main`); Phase 5 (5-1…5-4: decisions API, builder, saved decisions, reuse options, merged into `main`); Phase 6 (6-1…6-5b: history, result actions, share links, merged into `main`); Phase 7 (7-1…7-5: navigation shell, sidebar, case overlay, responsive pass, dev access from other devices, merged into `main`)
+- **Current phase:** Final engineering review (next). Phase 8 merged into `main` on 2026-10-12. Phase 7 merged into `main` on 2026-10-10.
+- **Integration branch:** none (the final review starts from `main`)
+- **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`); Phase 4 (4-1, 4-2: router, Home, presets, preview, merged into `main`); Phase 5 (5-1…5-4: decisions API, builder, saved decisions, reuse options, merged into `main`); Phase 6 (6-1…6-5b: history, result actions, share links, merged into `main`); Phase 7 (7-1…7-5: navigation shell, sidebar, case overlay, responsive pass, dev access from other devices, merged into `main`); Phase 8 (8-1…8-4: case polish, interaction states, consistency, case arrows + centring, merged into `main`)
 
 ## Phases
 
@@ -42,7 +42,7 @@
 | 8-1 | Case polish | ✅ (`4fc838b`) | `8-1-case-polish.md`: marker line fades at the reveal, no overlay scroll at 1280×800, option monogram (`OptionGlyph`), no scroll on initial focus (D-035) |
 | 8-2 | Interaction states | ✅ (`ae4d957`, owner fix) | `8-2-interaction-states.md`: hover/pressed on every interactive surface, loading that keeps space, focused error field, case focus after the reveal and at a respin (D-035) |
 | 8-3 | Consistency + layout | ✅ (architect cleanup) | `8-3-consistency-layout.md`: empty/not-found CTAs, History empty alignment, sidebar "Gần đây" on error, active styles, sticky preview CTA on phones, scroll the active sidebar row into view, "Sổ tay" rows without an emoji (D-035) |
-| 8-4 | Case arrows + centring | ⬜ | `8-4-case-marker-centering.md`: inward arrows that follow the winner's edges (marker moved out of the clip), the case vertically centred on desktop and phones with the revealed footer reserved so the strip never moves |
+| 8-4 | Case arrows + centring | ✅ (`53ce766`) | `8-4-case-marker-centering.md`: inward arrows that follow the winner's edges (marker moved out of the clip), the case vertically centred on desktop and phones with the revealed footer reserved so the strip never moves |
 | 9 | First prod release | ⬜ | Deploy `v0.1.0` to VPS, verify backup/rollback |
 | — | Final engineering review | ⬜ | Format per master prompt §47–48 |
 | R | Realtime: live viewing + Couple/Squad | ⬜ | After `v0.1.0` (D-031). One design for rooms, presence, viewer/participant identity, anti-spam and server-ordered spins; live viewing of shared links (from D-030) is its first consumer. Couple/Squad still need their own approval (CLAUDE.md rule 9). |
@@ -935,6 +935,20 @@
     - The case is centred, with the revealed footer plus one status line reserved, so the strip does not move at the reveal (keeps the 7-4 goal).
     - On phones the header stays at the top.
   - → `8-4-case-marker-centering.md`.
+- **8-4 review (2026-10-12):** reviewed `1158754`, `ba5819e` (4 files, +184/−105). `make check` passes (domain 48, api 50, 0 lint warnings); the literal grep is empty.
+  - **Browser, re-measured by the architect:**
+    - **Arrows:** they point inward. Each tip is 4.0 px from the cell edge before the reveal, and 4.0 px from the scaled winner's edge after it (for example 182.5 vs 186.5 at 1280). They are back at rest on "Mở lại".
+    - **Centring on desktop:** 62/62 at 1280×800 and 202/202 at 1920×1080.
+    - **Centring on phones:** under the header, 79/71 at 360×740 and 131/123 at 390×844.
+    - **The strip does not move** between ready and revealed, for a preset and for a 2-option decision, at all four sizes.
+    - **Short heights:** at 1280×500 and 740×360 the dialog scrolls inside, opens at `scrollTop` 0, and focus is on "Mở case".
+  - **Fix by the architect (`53ce766`):**
+    - On phones `.content` had `gap: 0`, so at 740×360 the block touched the header and the revealed top arrow moved toward the title. It now keeps `--space-5` as the minimum header gap (24 px).
+    - The duplicate desktop `gap` is removed.
+  - **Accepted as is:** the footer's reserved `min-height` is derived from tokens (button line heights, padding, borders, gaps, one status line). It holds the strip still at every measured size.
+  - **8-4 accepted.**
+- **Phase 8 closed (2026-10-12):** the owner did the browser walk-through ("khá ổn") and approved it. `feat/phase-8-polish` was merged into `main` with `--no-ff`. No topology change.
+  - Next: the **final engineering review** (owner choice), then Phase 9.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
