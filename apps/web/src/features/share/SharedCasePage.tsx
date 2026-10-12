@@ -38,7 +38,7 @@ function ErrorPage({ onRetry }: { onRetry: () => void }) {
 
 function SharedCaseContent({ share }: { share: SharedCaseData }) {
   const [revealLabel, setRevealLabel] = useState<RevealLabel>('winner');
-  const { state, plan, open, viewportRef, stripRef } = useCaseOpening(share.options);
+  const { state, plan, open, play, viewportRef, stripRef } = useCaseOpening(share.options);
   const optionsById = useMemo(
     () => new Map(share.options.map((option) => [option.id, option] as const)),
     [share.options],
@@ -58,7 +58,7 @@ function SharedCaseContent({ share }: { share: SharedCaseData }) {
     }
 
     setRevealLabel('winner');
-    open(share.options, share.result.seed);
+    play(share.result, share.options);
   };
 
   const trySpin = () => {
