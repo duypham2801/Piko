@@ -153,7 +153,7 @@ Sau đó tải lại trang.
   2. Tạo **backup an toàn** của dữ liệu hiện tại. Nếu bước này lỗi thì dừng, API không bị tắt.
   3. Tắt `api`, rồi restore trong **một transaction** (`--single-transaction --exit-on-error`).
   4. Restore thành công thì bật lại `api`.
-  5. Restore lỗi thì dữ liệu cũ vẫn còn nguyên và `api` **vẫn tắt**. Lệnh in ra tên file backup an toàn và lệnh để khôi phục nó. Kiểm tra lại, rồi chạy `make prod-up` hoặc restore file backup an toàn.
+  5. Restore lỗi thì dữ liệu cũ vẫn còn nguyên và `api` **vẫn tắt**. Lệnh in ra tên file backup an toàn và lệnh để khôi phục nó. Kiểm tra lại, rồi restore file backup an toàn (`make prod-restore FILE=<file backup an toàn>`), hoặc bật lại API bằng `docker compose -f compose.prod.yaml --env-file .env.prod up -d --wait api` (cần `APP_VERSION=<tag đang chạy>`).
   - **Chỉ restore một dump bằng đúng phiên bản image đã tạo ra dump đó.** Trên tên file có ghi version.
 - **Thư mục `backups/` không được commit.** Nên định kỳ chép backup ra nơi khác (máy khác hoặc cloud storage).
 
