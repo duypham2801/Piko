@@ -32,6 +32,7 @@
   display: grid;
   width: 100%;
   min-width: 0;
+  justify-items: center;
   align-self: safe center;
   gap: var(--space-6);
 }
