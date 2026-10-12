@@ -10,8 +10,8 @@ import styles from './NavLists.module.css';
 
 export default function NavLists() {
   const { pathname } = useLocation();
-  const decisionState = useDecisionList(pathname);
-  const historyState = useHistoryList(5, pathname);
+  const decisionState = useDecisionList();
+  const historyState = useHistoryList(5);
   const decisionListRef = useRef<HTMLUListElement>(null);
 
   useEffect(() => {

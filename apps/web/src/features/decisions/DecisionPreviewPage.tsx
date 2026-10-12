@@ -7,6 +7,7 @@ import DecisionPreview from '../preview/DecisionPreview';
 import DecisionLoadState from './DecisionLoadState';
 import { deleteDecision } from '../../lib/api/decisions';
 import { ApiClientError } from '../../lib/api/client';
+import { invalidateDecisions } from './useDecisionList';
 import { t } from '../../i18n';
 import { useDecisionRecord } from './useDecisionRecord';
 import styles from './DecisionPreviewPage.module.css';
@@ -45,6 +46,7 @@ export default function DecisionPreviewPage() {
     setDeleteError(false);
     try {
       await deleteDecision(id);
+      invalidateDecisions();
       navigate('/', { replace: true });
     } catch (error: unknown) {
       if (error instanceof ApiClientError && error.status === 404) {

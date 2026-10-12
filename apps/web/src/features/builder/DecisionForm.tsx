@@ -9,6 +9,7 @@ import Screen from '../../app/Screen';
 import { t } from '../../i18n';
 import { ApiClientError } from '../../lib/api/client';
 import { createDecision, updateDecision } from '../../lib/api/decisions';
+import { invalidateDecisions } from '../decisions/useDecisionList';
 import CaseOpening from '../case-opening/CaseOpening';
 import { draftOf, emptyOption, optionInputId } from './draft';
 import ExistingOptionsPanel, { existingOptionsToggleId } from './ExistingOptionsPanel';
@@ -125,6 +126,7 @@ export default function DecisionForm({ backTo, decisionId, initial }: DecisionFo
       const record = decisionId
         ? await updateDecision(decisionId, validDraft)
         : await createDecision(validDraft);
+      invalidateDecisions();
 
       const destination = decisionId
         ? `/decisions/${record.decision.id}/edit${location.search}`

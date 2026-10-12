@@ -1,32 +1,21 @@
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 import type { DecisionRecordData } from '@piko/domain';
 
 import { listDecisions } from '../../lib/api/decisions';
+import { createListStore } from '../../lib/listStore';
 
 type DecisionListState =
   | { status: 'loading'; decisions: readonly DecisionRecordData[] }
   | { status: 'loaded'; decisions: readonly DecisionRecordData[] }
   | { status: 'error'; decisions: readonly DecisionRecordData[] };
 
-export function useDecisionList(reloadKey?: string): DecisionListState {
-  const [state, setState] = useState<DecisionListState>({ decisions: [], status: 'loading' });
+const decisionStore = createListStore(() => listDecisions());
 
-  useEffect(() => {
-    const controller = new AbortController();
-    void listDecisions(controller.signal)
-      .then((decisions) => {
-        if (!controller.signal.aborted) {
-          setState({ decisions, status: 'loaded' });
-        }
-      })
-      .catch(() => {
-        if (!controller.signal.aborted) {
-          setState({ decisions: [], status: 'error' });
-        }
-      });
+export function useDecisionList(): DecisionListState {
+  const snapshot = useSyncExternalStore(decisionStore.subscribe, decisionStore.getSnapshot);
+  return { decisions: snapshot.items, status: snapshot.status };
+}
 
-    return () => controller.abort();
-  }, [reloadKey]);
-
-  return state;
+export function invalidateDecisions(): void {
+  decisionStore.invalidate();
 }
