@@ -578,4 +578,8 @@ Format: Decision · Reason · Alternatives · Tradeoffs · Phase/Date
   - **Rule 1 is kept.** The case can also **play** a given `SelectionResult`, so `/s/:id` replays the stored result exactly. Solo still selects on the client. Couple/Group will pass a server-decided result.
   - **`SelectionResult.algorithm` becomes a union** when a second algorithm ships. `buildAnimationPlan` checks the candidates and the winner, not the algorithm name. No schema change now.
   - **List data:** a small module-level store per resource (decisions, recent history), with shared in-flight requests and `invalidate()` after mutations. No React Query.
+- **Amendment (2026-10-14, owner HITL after the FR-3 browser check):**
+  - **Card position:** the result card sits in the bottom action bar, above "Mở case" (sticky on phones), not under the header. The card and the toast are both kept.
+  - **Toast position:** bottom centre on phones, bottom right on desktop.
+  - **Desktop mode selector:** an emoji-only segmented bar with a lock on Couple/Squad. Names come from the tooltip and the accessible name.
 - **Phase:** final review · 2026-10-12 · approved by user

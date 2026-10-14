@@ -47,7 +47,7 @@
 | — | Final engineering review | 🟡 fixes in progress (D-036) | `docs/FINAL_ENGINEERING_REVIEW.md`: 7.8/10. MUST before Phase 9: deploy backup, safe restore, a reliable test gate, the session retry race, a local prod rehearsal |
 | FR-1 | Release safety + session single-flight | ✅ (`d0414fd`) | `FR-1-release-safety.md`: deploy backup when the volume exists, a safe restore, the api vitest timeout, the `CHANGE_ME` guard, the session retry race, `withSession` owns `ensureSession` |
 | FR-2 | Case plays a result + list store | ✅ (architect cleanup) | `play(result)` vs `open()`, exact `/s/:id` replay, a shared decisions/history store with invalidation, `useHistorySave` out of `CaseOpening` |
-| FR-3 | "Đi thôi" closes + result card, mode selector in nav, "Random" title | ⬜ (handed off, `FR-3-go-closes-mode-nav-title.md`) | D-036 P2–P4 (needs the FR-2 store for an instant sidebar update) |
+| FR-3 | "Đi thôi" closes + result card, mode selector in nav, "Random" title | ✅ (`405d30f`…`6b787cd`, owner-requested layout fixes `93c9c14`) | D-036 P2–P4 (needs the FR-2 store for an instant sidebar update) |
 | FR-4 | Accessibility + ops hardening | ⬜ | Skip link, focus loss (share page, "Tạo link", delete), live regions, load-state titles, emoji picker focus; IPv6 /64 rate limit, pruning expired rows |
 | R | Realtime: live viewing + Couple/Squad | ⬜ | After `v0.1.0` (D-031). One design for rooms, presence, viewer/participant identity, anti-spam and server-ordered spins; live viewing of shared links (from D-030) is its first consumer. Couple/Squad still need their own approval (CLAUDE.md rule 9). |
 
@@ -992,6 +992,14 @@
     - `createDecisionSnapshot` lives in `useHistorySave.ts` and is shared by the share dialog.
     - The snapshot is rebuilt per render; `ShareDialog` reads it only on submit.
   - **FR-2 accepted.** Fast-forwarded into `feat/final-review`.
+- **FR-3 review (2026-10-14):** reviewed `405d30f`, `8647686`, `99aaa90`, `6b787cd` (20 files, +536/−160). `make check` passes (domain 48, api 52, 0 lint warnings); lockfile unchanged; `useHistorySave` is gone.
+  - **Browser, re-checked by the architect (desktop 1280, phone 375, preset and draft):** "Đi thôi" closes the case; the card appears with the winner, the time and "Xem lịch sử"; the toast follows the save; the sidebar "Gần đây" updates; focus lands on the card; no horizontal overflow. A full reload drops the card (memory only, by design).
+  - **Owner feedback after a browser check → fixes by the architect (`93c9c14`, owner HITL):**
+    - **Result card position:** moved from under the page header into the bottom action bar (preview and builder), above "Mở case". It is more compact (one heading row plus a meta row). The focus ring shows only on `:focus-visible` and follows the card radius, so a mouse user no longer sees a double frame.
+    - **Toast position:** bottom centre on phones, bottom right from 64rem. `pointer-events: none`, so on phones it never blocks the sticky "Mở case" while it covers it (~3 s).
+    - **Desktop mode selector:** an emoji-only segmented bar (🙋 / 👫🔒 / 👥🔒) in one pill. The accessible name and the tooltip are the full label ("Cặp đôi · Sắp có"). The three cramped circles with wrapped labels are gone, and so are the `modeCoupleShort`/`modeSquadShort` strings.
+    - **Toast timer:** `onDone` is now a stable callback. An inline arrow restarted the 3 s timer on every parent render (for example while typing in the builder).
+  - **FR-3 accepted.** Merged into `feat/final-review`.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
