@@ -14,7 +14,7 @@ export default function WinnerPanel({ option, label }: WinnerPanelProps) {
     <Card className={styles.winnerPanel} tone="accent">
       <OptionGlyph className={styles.winnerEmoji} emoji={option.emoji} label={option.label} />
       <span className={styles.winnerDetails}>
-        <span className={styles.winnerLabel}>{label}</span>
+        <span className={styles.winnerLabel}>{label}</span>{' '}
         <span className={styles.winnerName}>{option.label}</span>
       </span>
     </Card>

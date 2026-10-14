@@ -45,8 +45,10 @@ export default function NavLists() {
   return (
     <div className={styles.lists}>
       {(decisionState.status === 'error' || decisionState.decisions.length > 0) && (
-        <section className={styles.decisionsSection}>
-          <h2 className={styles.heading}>{t('yourDecisions')}</h2>
+        <section aria-labelledby="nav-decisions-heading" className={styles.decisionsSection}>
+          <p className={styles.heading} id="nav-decisions-heading">
+            {t('yourDecisions')}
+          </p>
           {decisionState.status === 'error' ? (
             <p className={styles.muted}>{t('listFailed')}</p>
           ) : (
@@ -79,9 +81,11 @@ export default function NavLists() {
 
       {(historyState.status === 'error' ||
         (historyState.status === 'loaded' && historyState.entries.length > 0)) && (
-        <section className={styles.recentSection}>
+        <section aria-labelledby="nav-recent-heading" className={styles.recentSection}>
           <header className={styles.sectionHeader}>
-            <h2 className={styles.heading}>{t('recent')}</h2>
+            <p className={styles.heading} id="nav-recent-heading">
+              {t('recent')}
+            </p>
             {historyState.status !== 'error' && (
               <Link className={styles.seeAll} to="/history">
                 {t('seeAll')}
@@ -102,7 +106,7 @@ export default function NavLists() {
                       label={entry.winner.label}
                     />
                     <span className={styles.details}>
-                      <span className={styles.label}>{entry.winner.label}</span>
+                      <span className={styles.label}>{entry.winner.label}</span>{' '}
                       <span className={styles.meta}>{entry.title}</span>
                     </span>
                   </>

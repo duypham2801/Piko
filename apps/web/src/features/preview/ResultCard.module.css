@@ -13,6 +13,11 @@
   outline: none;
 }
 
+/* Holds only the fixed toast; out of flow so it never adds a gap to the action bar. */
+.toastRegion {
+  position: absolute;
+}
+
 .focusTarget:focus-visible {
   outline: var(--border-width) solid var(--color-focus-ring);
   outline-offset: var(--space-1);

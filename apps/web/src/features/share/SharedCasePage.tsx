@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router';
 import type { SharedCaseData } from '@piko/domain';
 
@@ -22,6 +22,7 @@ type RevealLabel = 'winner' | 'try';
 function LoadingPage() {
   return (
     <Screen align="center" className={styles.content}>
+      <h1 className="visually-hidden">{t('loading')}</h1>
       <LoadingText />
     </Screen>
   );
@@ -30,7 +31,7 @@ function LoadingPage() {
 function ErrorPage({ onRetry }: { onRetry: () => void }) {
   return (
     <Screen align="center" className={styles.content}>
-      <p className={styles.error}>{t('shareLoadFailed')}</p>
+      <h1 className={styles.error}>{t('shareLoadFailed')}</h1>
       <Button onClick={onRetry}>{t('retry')}</Button>
     </Screen>
   );
@@ -38,6 +39,7 @@ function ErrorPage({ onRetry }: { onRetry: () => void }) {
 
 function SharedCaseContent({ share }: { share: SharedCaseData }) {
   const [revealLabel, setRevealLabel] = useState<RevealLabel>('winner');
+  const titleRef = useRef<HTMLHeadingElement>(null);
   const { state, plan, open, play, viewportRef, stripRef } = useCaseOpening(share.options);
   const optionsById = useMemo(
     () => new Map(share.options.map((option) => [option.id, option] as const)),
@@ -51,6 +53,18 @@ function SharedCaseContent({ share }: { share: SharedCaseData }) {
   const latestWinner = latestResult
     ? share.options.find((option) => option.id === latestResult.winnerId)
     : undefined;
+
+  useEffect(() => {
+    if (state.status === 'spinning') {
+      titleRef.current?.focus({ preventScroll: true });
+      return;
+    }
+
+    if (state.status === 'revealed') {
+      const buttonId = revealLabel === 'winner' ? 'shared-replay-button' : 'shared-try-button';
+      document.getElementById(buttonId)?.focus({ preventScroll: true });
+    }
+  }, [revealLabel, state.status]);
 
   const replay = () => {
     if (!share.result) {
@@ -69,7 +83,9 @@ function SharedCaseContent({ share }: { share: SharedCaseData }) {
   return (
     <Screen className={styles.content} width="wide">
       <p className={styles.brand}>{t('title')}</p>
-      <h1>{share.title}</h1>
+      <h1 ref={titleRef} tabIndex={-1}>
+        {share.title}
+      </h1>
 
       <p className={styles.latestResult}>
         {latestResult && latestWinner && share.spunAt ? (
@@ -108,13 +124,20 @@ function SharedCaseContent({ share }: { share: SharedCaseData }) {
 
       <div className={styles.actions}>
         {share.result && (
-          <Button disabled={spinning} fullWidth size="lg" onClick={replay}>
+          <Button
+            disabled={spinning}
+            fullWidth
+            id="shared-replay-button"
+            size="lg"
+            onClick={replay}
+          >
             {t('replaySpin')}
           </Button>
         )}
         <Button
           disabled={spinning}
           fullWidth
+          id="shared-try-button"
           size={share.result ? 'md' : 'lg'}
           variant={share.result ? 'outline' : 'primary'}
           onClick={trySpin}
@@ -153,7 +176,14 @@ function SharedCaseContent({ share }: { share: SharedCaseData }) {
 export default function SharedCasePage() {
   const { id } = useParams();
   const state = usePublicShare(id);
-  const pageTitle = state.status === 'loaded' ? `${state.share.title} · ${t('title')}` : t('title');
+  const pageTitle =
+    state.status === 'loaded'
+      ? `${state.share.title} · ${t('title')}`
+      : state.status === 'loading'
+        ? `${t('loading')} · ${t('title')}`
+        : state.status === 'error'
+          ? `${t('loadErrorTitle')} · ${t('title')}`
+          : t('title');
 
   return (
     <>

@@ -60,6 +60,7 @@ function SavedDecisionsSection() {
                       label={decision.title}
                     />
                     <span className={styles.presetTitle}>{decision.title}</span>
+                    <span className="visually-hidden">,</span>
                     <span className={styles.presetHint}>
                       {optionHint}
                       {decision.options.length > 3 ? '…' : ''}
@@ -142,6 +143,7 @@ export default function HomePage() {
                       {preset.emoji}
                     </span>
                     <span className={styles.presetTitle}>{preset.decision.title}</span>
+                    <span className="visually-hidden">,</span>
                     <span className={styles.presetHint}>
                       {preset.decision.options
                         .slice(0, 3)

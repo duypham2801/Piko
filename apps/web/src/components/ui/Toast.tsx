@@ -15,9 +15,5 @@ export default function Toast({ message, onDone }: ToastProps) {
     return () => window.clearTimeout(timeout);
   }, [onDone]);
 
-  return (
-    <div className={styles.toast} role="status">
-      {message}
-    </div>
-  );
+  return <div className={styles.toast}>{message}</div>;
 }

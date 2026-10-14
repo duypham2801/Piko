@@ -13,6 +13,8 @@ import ResultCard from './ResultCard';
 import { formatOff, parseOff } from './off';
 import styles from './DecisionPreview.module.css';
 
+const minOptionsHintId = 'preview-min-options-hint';
+
 export type DecisionPreviewProps = {
   title: string;
   emoji?: string;
@@ -95,6 +97,7 @@ export default function DecisionPreview({
                 />
                 <span className={styles.optionLabel}>{option.label}</span>
                 <Switch
+                  aria-describedby={minimumReached && checked ? minOptionsHintId : undefined}
                   checked={checked}
                   disabled={minimumReached && checked}
                   hideLabel
@@ -109,7 +112,11 @@ export default function DecisionPreview({
 
       <div className={styles.actionBar}>
         <ResultCard source={source} />
-        {minimumReached && <p className={styles.hint}>{t('minOptionsHint')}</p>}
+        {minimumReached && (
+          <p className={styles.hint} id={minOptionsHintId}>
+            {t('minOptionsHint')}
+          </p>
+        )}
         <Button className={styles.openButton} size="lg" onClick={openCase}>
           {t('openCase')}
         </Button>

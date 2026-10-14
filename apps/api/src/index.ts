@@ -3,6 +3,7 @@ import { serve } from '@hono/node-server';
 import { createApp } from './app.js';
 import { createDb } from './db/client.js';
 import { loadEnv } from './env.js';
+import { PRUNE_INTERVAL_MS, pruneExpiredData } from './services/maintenance.service.js';
 
 async function main(): Promise<void> {
   let env;
@@ -36,6 +37,29 @@ async function main(): Promise<void> {
 
   console.log(`API listening on http://0.0.0.0:${env.API_PORT}`);
 
+  let pruneTimer: ReturnType<typeof setInterval> | undefined;
+  if (env.NODE_ENV !== 'test') {
+    const runPrune = async (): Promise<void> => {
+      try {
+        const result = await pruneExpiredData(db);
+        if (result.sessions > 0 || result.guests > 0 || result.shares > 0) {
+          console.log(
+            `Pruned expired data: sessions=${result.sessions} guests=${result.guests} shares=${result.shares}`,
+          );
+        }
+      } catch (error) {
+        console.error(
+          'Data pruning failed:',
+          error instanceof Error ? error.message : 'Unknown pruning error.',
+        );
+      }
+    };
+
+    void runPrune();
+    pruneTimer = setInterval(() => void runPrune(), PRUNE_INTERVAL_MS);
+    pruneTimer.unref();
+  }
+
   let shuttingDown = false;
   const shutdown = async (signal: string): Promise<void> => {
     if (shuttingDown) return;
@@ -44,6 +68,7 @@ async function main(): Promise<void> {
 
     const forceExit = setTimeout(() => process.exit(1), 10_000);
     forceExit.unref();
+    if (pruneTimer) clearInterval(pruneTimer);
 
     await new Promise<void>((resolve) => {
       server.close(() => resolve());
