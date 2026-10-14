@@ -48,7 +48,7 @@
 | FR-1 | Release safety + session single-flight | ✅ (`d0414fd`) | `FR-1-release-safety.md`: deploy backup when the volume exists, a safe restore, the api vitest timeout, the `CHANGE_ME` guard, the session retry race, `withSession` owns `ensureSession` |
 | FR-2 | Case plays a result + list store | ✅ (architect cleanup) | `play(result)` vs `open()`, exact `/s/:id` replay, a shared decisions/history store with invalidation, `useHistorySave` out of `CaseOpening` |
 | FR-3 | "Đi thôi" closes + result card, mode selector in nav, "Random" title | ✅ (`405d30f`…`6b787cd`, owner-requested layout fixes `93c9c14`) | D-036 P2–P4 (needs the FR-2 store for an instant sidebar update) |
-| FR-4 | Accessibility + ops hardening | ⬜ (handed off, `FR-4-a11y-ops-hardening.md`) | Skip link, focus loss (share page, "Tạo link", delete), live regions, load-state titles, emoji picker focus; IPv6 /64 rate limit, pruning expired rows |
+| FR-4 | Accessibility + ops hardening | ✅ (`523d8d7`…`a8efedd`, architect cleanup `566a346`) | Skip link, focus loss (share page, "Tạo link", delete), live regions, load-state titles, emoji picker focus; IPv6 /64 rate limit, pruning expired rows |
 | R | Realtime: live viewing + Couple/Squad | ⬜ | After `v0.1.0` (D-031). One design for rooms, presence, viewer/participant identity, anti-spam and server-ordered spins; live viewing of shared links (from D-030) is its first consumer. Couple/Squad still need their own approval (CLAUDE.md rule 9). |
 
 ## Next tasks (Phase 1a)
@@ -1000,6 +1000,22 @@
     - **Desktop mode selector:** an emoji-only segmented bar (🙋 / 👫🔒 / 👥🔒) in one pill. The accessible name and the tooltip are the full label ("Cặp đôi · Sắp có"). The three cramped circles with wrapped labels are gone, and so are the `modeCoupleShort`/`modeSquadShort` strings.
     - **Toast timer:** `onDone` is now a stable callback. An inline arrow restarted the 3 s timer on every parent render (for example while typing in the builder).
   - **FR-3 accepted.** Merged into `feat/final-review`.
+- **FR-4 review (2026-10-14):** reviewed `523d8d7` … `a8efedd` (7 commits, 29 files, +610/−52). `make check` passes (domain 48, api 65, 0 lint warnings); lockfile unchanged; no migration or dependency.
+  - **Browser, checked by the architect (CDP, 1280 and 375):**
+    - Tab on `/` → the skip link appears top left; Enter → focus on `main#main`; the next Tab goes into the content.
+    - Share dialog: "Tạo link" → focus on "Sao chép link".
+    - `/s/:id`: the h1 while spinning, then "Xem lại lượt quay" or "Tự quay thử" after the reveal.
+    - "Đi thôi": the toast is announced ("Đã lưu vào Lịch sử") and the action bar keeps its height.
+    - Load errors (API 500): titles "Không tải được · PIKO", visible h1.
+  - **Architect cleanup (`566a346`):**
+    - **Error headings:** the new error h1s inherited the display size (red, ~43 px on `/s/:id`). They now use `--text-xl`.
+    - **Toast live region:** the wrapper took a grid slot in the action bar while the toast showed. It is now `position: absolute` (it holds only the fixed toast).
+    - **One live-region utility:** `.live-region:empty` in `global.css` shares the `.visually-hidden` rule. It replaces three copied blocks (builder status, share dialog ×2).
+    - **API:** removed a dead session query in the prune and the validation in `expandIPv6` that `isIP` already does.
+  - **Accepted:**
+    - Comma separators (visually hidden) in the logo and Home cards instead of spaces. They give a pause in the name.
+    - The prune also counts cascaded sessions and shares in its totals.
+  - **FR-4 accepted.** Merged into `feat/final-review`.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
