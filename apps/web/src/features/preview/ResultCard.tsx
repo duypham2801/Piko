@@ -89,9 +89,9 @@ export default function ResultCard({ source }: ResultCardProps) {
           )}
         </Card>
       </div>
-      {toastVisible && (
-        <Toast message={t('historySavedToast')} onDone={hideToast} />
-      )}
+      <div className={styles.toastRegion} role="status">
+        {toastVisible && <Toast message={t('historySavedToast')} onDone={hideToast} />}
+      </div>
     </>
   );
 }
