@@ -47,7 +47,7 @@
 | — | Final engineering review | 🟡 fixes in progress (D-036) | `docs/FINAL_ENGINEERING_REVIEW.md`: 7.8/10. MUST before Phase 9: deploy backup, safe restore, a reliable test gate, the session retry race, a local prod rehearsal |
 | FR-1 | Release safety + session single-flight | ✅ (`d0414fd`) | `FR-1-release-safety.md`: deploy backup when the volume exists, a safe restore, the api vitest timeout, the `CHANGE_ME` guard, the session retry race, `withSession` owns `ensureSession` |
 | FR-2 | Case plays a result + list store | ✅ (architect cleanup) | `play(result)` vs `open()`, exact `/s/:id` replay, a shared decisions/history store with invalidation, `useHistorySave` out of `CaseOpening` |
-| FR-3 | "Đi thôi" closes + result card, mode selector in nav, "Random" title | ⬜ | D-036 P2–P4 (needs the FR-2 store for an instant sidebar update) |
+| FR-3 | "Đi thôi" closes + result card, mode selector in nav, "Random" title | ⬜ (handed off, `FR-3-go-closes-mode-nav-title.md`) | D-036 P2–P4 (needs the FR-2 store for an instant sidebar update) |
 | FR-4 | Accessibility + ops hardening | ⬜ | Skip link, focus loss (share page, "Tạo link", delete), live regions, load-state titles, emoji picker focus; IPv6 /64 rate limit, pruning expired rows |
 | R | Realtime: live viewing + Couple/Squad | ⬜ | After `v0.1.0` (D-031). One design for rooms, presence, viewer/participant identity, anti-spam and server-ordered spins; live viewing of shared links (from D-030) is its first consumer. Couple/Squad still need their own approval (CLAUDE.md rule 9). |
 
