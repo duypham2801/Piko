@@ -11,6 +11,7 @@ import { ApiClientError } from '../../lib/api/client';
 import { createDecision, updateDecision } from '../../lib/api/decisions';
 import { invalidateDecisions } from '../decisions/useDecisionList';
 import CaseOpening from '../case-opening/CaseOpening';
+import ResultCard from '../preview/ResultCard';
 import { draftOf, emptyOption, optionInputId } from './draft';
 import ExistingOptionsPanel, { existingOptionsToggleId } from './ExistingOptionsPanel';
 import { getFormErrors, type FormErrors } from './formErrors';
@@ -43,7 +44,11 @@ export default function DecisionForm({ backTo, decisionId, initial }: DecisionFo
   const caseBackTo = `${location.pathname}${
     caseBackSearchParams.toString() ? `?${caseBackSearchParams.toString()}` : ''
   }`;
-  const parsed = useMemo(() => DecisionDraft.safeParse(draft), [draft]);
+  const draftForValidation = useMemo(
+    () => (draft.title.trim() ? draft : { ...draft, title: t('defaultDecisionTitle') }),
+    [draft],
+  );
+  const parsed = useMemo(() => DecisionDraft.safeParse(draftForValidation), [draftForValidation]);
   const caseOptions = useMemo(() => (parsed.success ? parsed.data.options : []), [parsed]);
   const errors = useMemo(() => {
     if (!submitted || parsed.success) {
@@ -219,8 +224,11 @@ export default function DecisionForm({ backTo, decisionId, initial }: DecisionFo
         <form className={styles.form} onSubmit={handleSave}>
           <h1>{decisionId ? t('builderEditTitle') : t('builderNewTitle')}</h1>
 
+          <ResultCard source={{ kind: 'draft' }} />
+
           <TextField
             error={errors.title}
+            hint={t('emptyTitleHint')}
             id="decision-title"
             label={t('decisionTitleLabel')}
             maxLength={DECISION_LIMITS.titleMaxLength}
