@@ -17,7 +17,7 @@ import { recordShareSpin } from '../../lib/api/shares';
 import CaseCarousel from './CaseCarousel';
 import styles from './CaseOpening.module.css';
 import Confetti from './Confetti';
-import { createDecisionSnapshot, useHistorySave } from './useHistorySave';
+import { createDecisionSnapshot, startPick } from './pickStore';
 import { useCaseOpening } from './useCaseOpening';
 import WinnerPanel from './WinnerPanel';
 import ShareDialog from '../share/ShareDialog';
@@ -58,11 +58,6 @@ export default function CaseOpening({
   const [shareOpen, setShareOpen] = useState(false);
   const pool = useMemo(() => excludeOptions(options, excludedIds), [excludedIds, options]);
   const { state, plan, open, viewportRef, stripRef } = useCaseOpening(pool);
-  const {
-    reset: resetHistorySave,
-    save: saveHistory,
-    status: historySaveStatus,
-  } = useHistorySave({ category, source, title });
   const decision =
     state.status === 'revealed' ? createDecisionSnapshot(category, title, state.options) : null;
   const recordSpin = useCallback(
@@ -76,9 +71,8 @@ export default function CaseOpening({
     [share],
   );
   const spin = useCallback(() => {
-    resetHistorySave();
     recordSpin(open());
-  }, [open, recordSpin, resetHistorySave]);
+  }, [open, recordSpin]);
   const rejectWinner = useCallback(() => {
     if (state.status !== 'revealed') {
       return;
@@ -91,10 +85,9 @@ export default function CaseOpening({
       return;
     }
 
-    resetHistorySave();
     setExcludedIds(nextExcludedIds);
     recordSpin(open(nextPool));
-  }, [excludedIds, open, options, recordSpin, resetHistorySave, state]);
+  }, [excludedIds, open, options, recordSpin, state]);
   const openShareDialog = useCallback(() => {
     if (decision) setShareOpen(true);
   }, [decision]);
@@ -102,13 +95,26 @@ export default function CaseOpening({
     setShareOpen(false);
     requestAnimationFrame(() => document.getElementById(shareToggleId)?.focus());
   }, []);
-  const saveResult = useCallback(() => {
+  const pickResult = useCallback(() => {
     if (!decision || state.status !== 'revealed') {
       return;
     }
 
-    void saveHistory({ options: decision.options, result: state.result });
-  }, [decision, saveHistory, state]);
+    const pickedWinner = state.options.find((option) => option.id === state.result.winnerId);
+    if (!pickedWinner) {
+      return;
+    }
+
+    startPick(
+      {
+        source,
+        decision,
+        result: state.result,
+      },
+      pickedWinner,
+    );
+    dialogRef.current?.close();
+  }, [decision, source, state]);
   const optionsById = useMemo(
     () => new Map(options.map((option) => [option.id, option] as const)),
     [options],
@@ -117,13 +123,7 @@ export default function CaseOpening({
   const winner = revealed ? optionsById.get(state.result.winnerId) : undefined;
   const notTodayDisabled =
     !revealed || state.result.candidateIds.length <= DECISION_LIMITS.minEnabledOptions;
-  const historyStatusMessage =
-    historySaveStatus === 'saved'
-      ? t('historySaved')
-      : historySaveStatus === 'error'
-        ? t('historySaveFailed')
-        : '';
-  const hasVisibleStatus = notTodayDisabled || historySaveStatus === 'error';
+  const hasVisibleStatus = notTodayDisabled;
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -146,19 +146,6 @@ export default function CaseOpening({
         ?.focus({ preventScroll: true });
     }
   }, [state.status]);
-
-  useEffect(() => {
-    if (historySaveStatus === 'saving') {
-      titleRef.current?.focus({ preventScroll: true });
-      return;
-    }
-
-    if (historySaveStatus === 'saved') {
-      dialogRef.current
-        ?.querySelector<HTMLElement>('[data-post-save-focus]')
-        ?.focus({ preventScroll: true });
-    }
-  }, [historySaveStatus]);
 
   const handleClose = (event: SyntheticEvent<HTMLDialogElement>) => {
     // React propagates close events from nested dialogs.
@@ -210,21 +197,11 @@ export default function CaseOpening({
           <div className={styles.footer}>
             {revealed ? (
               <div className={styles.actions}>
-                <Button
-                  data-reveal-focus
-                  disabled={historySaveStatus === 'saving' || historySaveStatus === 'saved'}
-                  fullWidth
-                  size="lg"
-                  onClick={saveResult}
-                >
-                  {historySaveStatus === 'saving'
-                    ? t('saving')
-                    : historySaveStatus === 'saved'
-                      ? t('saved')
-                      : t('goNow')}
+                <Button data-reveal-focus fullWidth size="lg" onClick={pickResult}>
+                  {t('goNow')}
                 </Button>
                 <div className={styles.secondaryActions}>
-                  <Button data-post-save-focus fullWidth variant="outline" onClick={spin}>
+                  <Button fullWidth variant="outline" onClick={spin}>
                     {t('spinAgain')}
                   </Button>
                   <Button
@@ -255,18 +232,6 @@ export default function CaseOpening({
                       {t('lastTwoOptionsHint')}
                     </p>
                   )}
-                  <p
-                    aria-live="polite"
-                    className={
-                      historySaveStatus === 'saved'
-                        ? 'visually-hidden'
-                        : historySaveStatus === 'error'
-                          ? styles.historyStatusError
-                          : ''
-                    }
-                  >
-                    {historyStatusMessage}
-                  </p>
                 </div>
               </div>
             ) : (

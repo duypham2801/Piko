@@ -108,6 +108,7 @@ export default function DecisionPreviewPage() {
         backTo="/"
         openTo={`/decisions/${id}/open`}
         options={decision.options}
+        source={{ kind: 'decision', decisionId: id }}
         title={decision.title}
       >
         {actions}

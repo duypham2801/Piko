@@ -22,6 +22,7 @@ export default function PresetPreviewPage() {
         emoji={preset.emoji}
         openTo={`/presets/${preset.slug}/open`}
         options={preset.decision.options}
+        source={{ kind: 'preset', slug: preset.slug }}
         title={preset.decision.title}
       >
         <Link className={styles.customize} to={`/decisions/new?from=${preset.slug}`}>

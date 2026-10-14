@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 import { DECISION_LIMITS } from '@piko/domain';
-import type { DecisionOptionData } from '@piko/domain';
+import type { DecisionOptionData, HistorySourceInputData } from '@piko/domain';
 
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
@@ -9,6 +9,7 @@ import OptionGlyph from '../../components/ui/OptionGlyph';
 import Switch from '../../components/ui/Switch';
 import Screen from '../../app/Screen';
 import { t } from '../../i18n';
+import ResultCard from './ResultCard';
 import { formatOff, parseOff } from './off';
 import styles from './DecisionPreview.module.css';
 
@@ -18,6 +19,7 @@ export type DecisionPreviewProps = {
   options: readonly DecisionOptionData[];
   backTo: string;
   openTo: string;
+  source: HistorySourceInputData;
   children?: ReactNode;
 };
 
@@ -27,6 +29,7 @@ export default function DecisionPreview({
   options,
   backTo,
   openTo,
+  source,
   children,
 }: DecisionPreviewProps) {
   const navigate = useNavigate();
@@ -73,6 +76,8 @@ export default function DecisionPreview({
         <h1>{title}</h1>
         <p>{t('previewLead')}</p>
       </header>
+
+      <ResultCard source={source} />
 
       <ul className={styles.optionList}>
         {options.map((option, index) => {
