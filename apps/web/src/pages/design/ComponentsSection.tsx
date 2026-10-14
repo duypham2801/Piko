@@ -11,6 +11,8 @@ import LoadingText from '../../components/ui/LoadingText';
 import OptionGlyph from '../../components/ui/OptionGlyph';
 import Switch from '../../components/ui/Switch';
 import TextField from '../../components/ui/TextField';
+import Toast from '../../components/ui/Toast';
+import ModeSelector from '../../features/home/ModeSelector';
 
 import pageStyles from './DesignPage.module.css';
 import styles from './ComponentsSection.module.css';
@@ -25,6 +27,7 @@ export default function ComponentsSection() {
   const [switchOff, setSwitchOff] = useState(false);
   const [switchOn, setSwitchOn] = useState(true);
   const [switchHidden, setSwitchHidden] = useState(false);
+  const [toastVisible, setToastVisible] = useState(false);
 
   return (
     <section className={pageStyles.section} id="components">
@@ -156,6 +159,19 @@ export default function ComponentsSection() {
           <TextField defaultValue="Không thể chỉnh sửa" disabled label="Lựa chọn bị khóa" />
           <TextField hideLabel label="Nhãn ẩn" placeholder="Nhãn vẫn được đọc bởi screen reader" />
         </div>
+      </div>
+
+      <div className={styles.group}>
+        <h3>Toast</h3>
+        <Button onClick={() => setToastVisible(true)}>Show toast</Button>
+        {toastVisible && (
+          <Toast message="Đã lưu vào Lịch sử" onDone={() => setToastVisible(false)} />
+        )}
+      </div>
+
+      <div className={styles.group}>
+        <h3>Mode selector</h3>
+        <ModeSelector variant="compact" />
       </div>
 
       <div className={styles.group}>
