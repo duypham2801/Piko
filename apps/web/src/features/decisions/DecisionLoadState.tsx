@@ -29,16 +29,23 @@ export default function DecisionLoadState({
       .join(' ');
 
     return (
-      <Screen align="start" backTo={backTo} className={contentClassName} width={width}>
-        <LoadingText />
-      </Screen>
+      <>
+        <title>{`${t('loading')} · ${t('title')}`}</title>
+        <Screen align="start" backTo={backTo} className={contentClassName} width={width}>
+          <h1 className="visually-hidden">{t('loading')}</h1>
+          <LoadingText />
+        </Screen>
+      </>
     );
   }
 
   return (
-    <Screen align="center" className={styles.content}>
-      <p className={styles.error}>{t('loadFailed')}</p>
-      <Button onClick={state.retry}>{t('retry')}</Button>
-    </Screen>
+    <>
+      <title>{`${t('loadErrorTitle')} · ${t('title')}`}</title>
+      <Screen align="center" className={styles.content}>
+        <h1 className={styles.error}>{t('loadFailed')}</h1>
+        <Button onClick={state.retry}>{t('retry')}</Button>
+      </Screen>
+    </>
   );
 }
