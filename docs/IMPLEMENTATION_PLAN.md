@@ -46,7 +46,7 @@
 | 9 | First prod release | ⬜ | Deploy `v0.1.0` to VPS, verify backup/rollback |
 | — | Final engineering review | 🟡 fixes in progress (D-036) | `docs/FINAL_ENGINEERING_REVIEW.md`: 7.8/10. MUST before Phase 9: deploy backup, safe restore, a reliable test gate, the session retry race, a local prod rehearsal |
 | FR-1 | Release safety + session single-flight | ✅ (`d0414fd`) | `FR-1-release-safety.md`: deploy backup when the volume exists, a safe restore, the api vitest timeout, the `CHANGE_ME` guard, the session retry race, `withSession` owns `ensureSession` |
-| FR-2 | Case plays a result + list store | ⬜ (handed off, `FR-2-case-play-list-store.md`) | `play(result)` vs `open()`, exact `/s/:id` replay, a shared decisions/history store with invalidation, `useHistorySave` out of `CaseOpening` |
+| FR-2 | Case plays a result + list store | ✅ (architect cleanup) | `play(result)` vs `open()`, exact `/s/:id` replay, a shared decisions/history store with invalidation, `useHistorySave` out of `CaseOpening` |
 | FR-3 | "Đi thôi" closes + result card, mode selector in nav, "Random" title | ⬜ | D-036 P2–P4 (needs the FR-2 store for an instant sidebar update) |
 | FR-4 | Accessibility + ops hardening | ⬜ | Skip link, focus loss (share page, "Tạo link", delete), live regions, load-state titles, emoji picker focus; IPv6 /64 rate limit, pruning expired rows |
 | R | Realtime: live viewing + Couple/Squad | ⬜ | After `v0.1.0` (D-031). One design for rooms, presence, viewer/participant identity, anti-spam and server-ordered spins; live viewing of shared links (from D-030) is its first consumer. Couple/Squad still need their own approval (CLAUDE.md rule 9). |
@@ -974,6 +974,24 @@
   - **Docs by the architect:** `ENVIRONMENTS.md` §7 now documents deploy and restore exactly, including "restore only with the image version that made the dump", and §8 the `CHANGE_ME` guard. The matching technical-debt items are marked resolved.
   - **Not changed (accepted):** the API helpers keep their `async` wrappers; this is harmless.
   - **FR-1 accepted.** Fast-forwarded into `feat/final-review`.
+- **FR-2 review (2026-10-14):** reviewed `b35807c`, `51b2e71`, `48b6725` (10 files, +242/−154). `make check` passes (domain 48, api 52, 0 lint warnings); lockfile unchanged; `reloadKey` is gone.
+  - **Browser, re-checked by the architect:**
+    - **Requests:** after a cold desktop `/`, the route "decision → open → close → another decision → `/history` → `/`" sent no further list GETs. It sent only the two decision records, `/api/shares` and the full `/api/history` once.
+    - **Freshness:** "Đi thôi" updated the sidebar "Gần đây" without a reload.
+    - **Focus:** the sequence is unchanged (Mở case → title → Đi thôi → Mở lại).
+    - **`/s/:id` replay:** it plays the stored result (the implementer showed the same winner id stored and revealed).
+  - **Fixes by the architect:**
+    - **Regression: an errored store never refetched.** Before FR-2 every navigation refetched, so a transient failure healed itself. Now:
+      - `listStore` marks `needsFetch` after an error, so the next subscriber refetches.
+      - The always-mounted desktop sidebar calls `retry()` on the next navigation when a list is in error. It uses a last-path ref, not an `eslint-disable`.
+      - Verified: a failed cold load recovered on the first navigation, with no requests on the next.
+    - **Effect deps:** `CaseOpening` destructures `useHistorySave` (`reset`/`save`/`status`). The hook returns a fresh object, so the `useCallback`s depending on it were rebuilt every render.
+    - **`handleClose`:** restored as a plain function with its comment (why nested dialog close events are filtered). It had been compressed into a ternary to reach the line target. `CaseOpening.tsx` is 296 lines.
+    - `play()` returns nothing, instead of an explicit `undefined`.
+  - **Accepted:**
+    - `createDecisionSnapshot` lives in `useHistorySave.ts` and is shared by the share dialog.
+    - The snapshot is rebuilt per render; `ShareDialog` reads it only on submit.
+  - **FR-2 accepted.** Fast-forwarded into `feat/final-review`.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
