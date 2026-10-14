@@ -38,15 +38,10 @@ export async function pruneExpiredData(db: Database, now = new Date()): Promise<
     const unreachableGuestIds = unreachableGuests.map(({ id }) => id);
 
     if (unreachableGuestIds.length > 0) {
-      const cascadingSessions = await tx
-        .select({ id: sessions.id })
-        .from(sessions)
-        .where(inArray(sessions.userId, unreachableGuestIds));
       const cascadingShares = await tx
         .select({ id: sharedCases.id })
         .from(sharedCases)
         .where(inArray(sharedCases.userId, unreachableGuestIds));
-      sessionCount += cascadingSessions.length;
       shareCount += cascadingShares.length;
 
       const deletedGuests = await tx

@@ -11,5 +11,5 @@
 
 .error {
   color: var(--color-danger);
-  font-weight: var(--font-weight-bold);
+  font-size: var(--text-xl);
 }

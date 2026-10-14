@@ -21,9 +21,10 @@
   line-height: var(--leading-tight);
 }
 
-.error {
+/* Beats `.content h1`: the error heading stays message-sized, not display-sized. */
+.content .error {
   color: var(--color-danger);
-  font-weight: var(--font-weight-bold);
+  font-size: var(--text-xl);
 }
 
 .latestResult {

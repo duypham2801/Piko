@@ -171,7 +171,7 @@ export default function ShareDialog({
             >
               {status === 'creating' ? t('creatingShareLink') : t('createShareLink')}
             </Button>
-            <p className={`${styles.error} ${styles.liveRegion}`} role="status">
+            <p className={`${styles.error} live-region`} role="status">
               {status === 'error' || status === 'limit' ? createErrorMessage : ''}
             </p>
           </>
@@ -187,7 +187,7 @@ export default function ShareDialog({
             <Button fullWidth id={shareActionButtonId} onClick={() => void handleShare()}>
               {typeof navigator.share === 'function' ? t('sendLink') : t('copyLink')}
             </Button>
-            <p className={`${styles.status} ${styles.liveRegion}`} role="status">
+            <p className={`${styles.status} live-region`} role="status">
               {statusMessage}
             </p>
           </>

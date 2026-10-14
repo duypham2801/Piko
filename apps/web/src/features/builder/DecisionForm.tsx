@@ -294,10 +294,10 @@ export default function DecisionForm({ backTo, decisionId, initial }: DecisionFo
 
           <div className={styles.actionBar}>
             <ResultCard source={{ kind: 'draft' }} />
-            <p aria-live="polite" className={styles.status} role="status">
+            <p className={`${styles.status} live-region`} role="status">
               {statusIsError ? '' : statusMessage}
             </p>
-            <p className={`${styles.status} ${styles.statusError}`} role="alert">
+            <p className={`${styles.status} ${styles.statusError} live-region`} role="alert">
               {statusIsError ? statusMessage : ''}
             </p>
             <div className={styles.actionButtons}>

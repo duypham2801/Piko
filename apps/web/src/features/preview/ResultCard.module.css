@@ -13,16 +13,9 @@
   outline: none;
 }
 
-.toastRegion:empty {
+/* Holds only the fixed toast; out of flow so it never adds a gap to the action bar. */
+.toastRegion {
   position: absolute;
-  width: var(--border-width);
-  height: var(--border-width);
-  margin: calc(var(--border-width) * -1);
-  padding: 0;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  clip-path: inset(50%);
-  white-space: nowrap;
 }
 
 .focusTarget:focus-visible {
