@@ -58,7 +58,11 @@ export default function CaseOpening({
   const [shareOpen, setShareOpen] = useState(false);
   const pool = useMemo(() => excludeOptions(options, excludedIds), [excludedIds, options]);
   const { state, plan, open, viewportRef, stripRef } = useCaseOpening(pool);
-  const history = useHistorySave({ category, source, title });
+  const {
+    reset: resetHistorySave,
+    save: saveHistory,
+    status: historySaveStatus,
+  } = useHistorySave({ category, source, title });
   const decision =
     state.status === 'revealed' ? createDecisionSnapshot(category, title, state.options) : null;
   const recordSpin = useCallback(
@@ -72,9 +76,9 @@ export default function CaseOpening({
     [share],
   );
   const spin = useCallback(() => {
-    history.reset();
+    resetHistorySave();
     recordSpin(open());
-  }, [history, open, recordSpin]);
+  }, [open, recordSpin, resetHistorySave]);
   const rejectWinner = useCallback(() => {
     if (state.status !== 'revealed') {
       return;
@@ -87,10 +91,10 @@ export default function CaseOpening({
       return;
     }
 
-    history.reset();
+    resetHistorySave();
     setExcludedIds(nextExcludedIds);
     recordSpin(open(nextPool));
-  }, [excludedIds, history, open, options, recordSpin, state]);
+  }, [excludedIds, open, options, recordSpin, resetHistorySave, state]);
   const openShareDialog = useCallback(() => {
     if (decision) setShareOpen(true);
   }, [decision]);
@@ -103,8 +107,8 @@ export default function CaseOpening({
       return;
     }
 
-    void history.save({ options: decision.options, result: state.result });
-  }, [decision, history, state]);
+    void saveHistory({ options: decision.options, result: state.result });
+  }, [decision, saveHistory, state]);
   const optionsById = useMemo(
     () => new Map(options.map((option) => [option.id, option] as const)),
     [options],
@@ -114,12 +118,12 @@ export default function CaseOpening({
   const notTodayDisabled =
     !revealed || state.result.candidateIds.length <= DECISION_LIMITS.minEnabledOptions;
   const historyStatusMessage =
-    history.status === 'saved'
+    historySaveStatus === 'saved'
       ? t('historySaved')
-      : history.status === 'error'
+      : historySaveStatus === 'error'
         ? t('historySaveFailed')
         : '';
-  const hasVisibleStatus = notTodayDisabled || history.status === 'error';
+  const hasVisibleStatus = notTodayDisabled || historySaveStatus === 'error';
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -144,20 +148,26 @@ export default function CaseOpening({
   }, [state.status]);
 
   useEffect(() => {
-    if (history.status === 'saving') {
+    if (historySaveStatus === 'saving') {
       titleRef.current?.focus({ preventScroll: true });
       return;
     }
 
-    if (history.status === 'saved') {
+    if (historySaveStatus === 'saved') {
       dialogRef.current
         ?.querySelector<HTMLElement>('[data-post-save-focus]')
         ?.focus({ preventScroll: true });
     }
-  }, [history.status]);
+  }, [historySaveStatus]);
 
-  const handleClose = (event: SyntheticEvent<HTMLDialogElement>) =>
-    event.target === event.currentTarget ? navigate(backTo, { replace: true }) : undefined;
+  const handleClose = (event: SyntheticEvent<HTMLDialogElement>) => {
+    // React propagates close events from nested dialogs.
+    if (event.target !== event.currentTarget) {
+      return;
+    }
+
+    navigate(backTo, { replace: true });
+  };
 
   return (
     <dialog
@@ -202,14 +212,14 @@ export default function CaseOpening({
               <div className={styles.actions}>
                 <Button
                   data-reveal-focus
-                  disabled={history.status === 'saving' || history.status === 'saved'}
+                  disabled={historySaveStatus === 'saving' || historySaveStatus === 'saved'}
                   fullWidth
                   size="lg"
                   onClick={saveResult}
                 >
-                  {history.status === 'saving'
+                  {historySaveStatus === 'saving'
                     ? t('saving')
-                    : history.status === 'saved'
+                    : historySaveStatus === 'saved'
                       ? t('saved')
                       : t('goNow')}
                 </Button>
@@ -248,9 +258,9 @@ export default function CaseOpening({
                   <p
                     aria-live="polite"
                     className={
-                      history.status === 'saved'
+                      historySaveStatus === 'saved'
                         ? 'visually-hidden'
-                        : history.status === 'error'
+                        : historySaveStatus === 'error'
                           ? styles.historyStatusError
                           : ''
                     }

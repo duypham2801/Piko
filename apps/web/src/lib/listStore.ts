@@ -43,6 +43,7 @@ export function createListStore<T>(fetchList: () => Promise<T[]>): ListStore<T> 
           return;
         }
 
+        needsFetch = true;
         emit({ status: 'error', items: [] });
       });
   };

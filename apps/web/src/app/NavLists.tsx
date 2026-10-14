@@ -13,6 +13,18 @@ export default function NavLists() {
   const decisionState = useDecisionList();
   const historyState = useHistoryList(5);
   const decisionListRef = useRef<HTMLUListElement>(null);
+  const { retry: retryDecisions, status: decisionStatus } = decisionState;
+  const { retry: retryHistory, status: historyStatus } = historyState;
+
+  const retriedPathRef = useRef(pathname);
+
+  // The sidebar stays mounted, so a failed list retries on the next navigation.
+  useEffect(() => {
+    if (retriedPathRef.current === pathname) return;
+    retriedPathRef.current = pathname;
+    if (decisionStatus === 'error') retryDecisions();
+    if (historyStatus === 'error') retryHistory();
+  }, [decisionStatus, historyStatus, pathname, retryDecisions, retryHistory]);
 
   useEffect(() => {
     const list = decisionListRef.current;

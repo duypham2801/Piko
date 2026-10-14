@@ -11,9 +11,9 @@ type DecisionListState =
 
 const decisionStore = createListStore(() => listDecisions());
 
-export function useDecisionList(): DecisionListState {
+export function useDecisionList(): DecisionListState & { retry: () => void } {
   const snapshot = useSyncExternalStore(decisionStore.subscribe, decisionStore.getSnapshot);
-  return { decisions: snapshot.items, status: snapshot.status };
+  return { decisions: snapshot.items, retry: decisionStore.retry, status: snapshot.status };
 }
 
 export function invalidateDecisions(): void {
