@@ -16,6 +16,7 @@ export default function AppNav() {
     <nav aria-label={t('navLabel')} className={styles.nav}>
       <Link className={styles.logo} to="/">
         <span className={styles.wordmark}>{t('title')}</span>
+        <span className="visually-hidden">,</span>
         <span className={styles.tagline}>{t('tagline')}</span>
       </Link>
       {isDesktop ? (
