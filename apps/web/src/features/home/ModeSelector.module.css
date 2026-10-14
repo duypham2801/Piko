@@ -54,6 +54,12 @@
   outline-offset: var(--border-width);
 }
 
+.soon {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-regular);
+}
+
 .emoji {
   font-size: var(--text-xl);
   line-height: var(--leading-tight);
@@ -70,4 +76,41 @@
   .option:not(:has(input:checked)):has(input:not(:disabled)):hover {
     transform: translateY(var(--hover-lift-sm));
   }
+}
+
+.compact {
+  margin: 0;
+}
+
+.compact legend {
+  margin: 0;
+}
+
+.compact .options {
+  gap: var(--space-1);
+}
+
+.compact .option {
+  display: grid;
+  min-height: var(--tap-target-min);
+  align-items: center;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  border-radius: var(--radius-pill);
+}
+
+.compact .emoji {
+  grid-row: 1 / -1;
+  font-size: var(--text-md);
+}
+
+.compact .label {
+  font-size: var(--text-xs);
+}
+
+.compact .soon {
+  display: block;
+  font-size: var(--text-xs);
 }

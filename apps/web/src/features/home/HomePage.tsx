@@ -7,7 +7,6 @@ import { t } from '../../i18n';
 import { DESKTOP_QUERY, useMediaQuery } from '../../lib/useMediaQuery';
 import HistoryList from '../history/HistoryList';
 import { useHistoryList } from '../history/useHistoryList';
-import ModeSelector from './ModeSelector';
 import styles from './HomePage.module.css';
 import { useDecisionList } from '../decisions/useDecisionList';
 import { PRESETS } from '../presets/presets';
@@ -114,8 +113,6 @@ export default function HomePage() {
           <h1>{t('homeQuestion')}</h1>
           <p>{t('homeLead')}</p>
         </section>
-
-        <ModeSelector />
 
         {isDesktop ? (
           <ul className={styles.presetList}>
