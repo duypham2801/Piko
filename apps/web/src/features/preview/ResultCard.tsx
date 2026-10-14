@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router';
 import type { HistorySourceInputData } from '@piko/domain';
 
@@ -21,6 +21,7 @@ export default function ResultCard({ source }: ResultCardProps) {
   const previousPickRef = useRef<Pick | null>(null);
   const observedSavingRef = useRef(false);
   const [toastVisible, setToastVisible] = useState(false);
+  const hideToast = useCallback(() => setToastVisible(false), []);
 
   useEffect(() => {
     const previousPick = previousPickRef.current;
@@ -89,7 +90,7 @@ export default function ResultCard({ source }: ResultCardProps) {
         </Card>
       </div>
       {toastVisible && (
-        <Toast message={t('historySavedToast')} onDone={() => setToastVisible(false)} />
+        <Toast message={t('historySavedToast')} onDone={hideToast} />
       )}
     </>
   );

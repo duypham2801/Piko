@@ -224,8 +224,6 @@ export default function DecisionForm({ backTo, decisionId, initial }: DecisionFo
         <form className={styles.form} onSubmit={handleSave}>
           <h1>{decisionId ? t('builderEditTitle') : t('builderNewTitle')}</h1>
 
-          <ResultCard source={{ kind: 'draft' }} />
-
           <TextField
             error={errors.title}
             hint={t('emptyTitleHint')}
@@ -295,6 +293,7 @@ export default function DecisionForm({ backTo, decisionId, initial }: DecisionFo
           )}
 
           <div className={styles.actionBar}>
+            <ResultCard source={{ kind: 'draft' }} />
             <p
               aria-live={statusIsError ? 'assertive' : 'polite'}
               className={`${styles.status} ${statusIsError ? styles.statusError : ''}`}

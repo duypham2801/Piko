@@ -1,16 +1,21 @@
 .focusTarget {
   min-width: 0;
+  border-radius: var(--radius-lg);
 }
 
 .card {
   display: grid;
-  gap: var(--space-3);
-  padding: var(--space-4);
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
 }
 
 .focusTarget:focus {
+  outline: none;
+}
+
+.focusTarget:focus-visible {
   outline: var(--border-width) solid var(--color-focus-ring);
-  outline-offset: var(--space-2);
+  outline-offset: var(--space-1);
 }
 
 .result {
@@ -22,14 +27,14 @@
 
 .emoji {
   flex: 0 0 auto;
-  font-size: var(--text-3xl);
+  font-size: var(--text-2xl);
   line-height: var(--leading-tight);
 }
 
 .heading {
   min-width: 0;
   overflow: hidden;
-  font-size: var(--text-xl);
+  font-size: var(--text-lg);
   line-height: var(--leading-tight);
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -66,11 +71,7 @@
 }
 
 @media (min-width: 48rem) {
-  .card {
-    padding: var(--space-5);
-  }
-
   .heading {
-    font-size: var(--text-2xl);
+    font-size: var(--text-xl);
   }
 }

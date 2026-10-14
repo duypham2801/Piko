@@ -77,8 +77,6 @@ export default function DecisionPreview({
         <p>{t('previewLead')}</p>
       </header>
 
-      <ResultCard source={source} />
-
       <ul className={styles.optionList}>
         {options.map((option, index) => {
           const checked = !off.has(index);
@@ -110,6 +108,7 @@ export default function DecisionPreview({
       </ul>
 
       <div className={styles.actionBar}>
+        <ResultCard source={source} />
         {minimumReached && <p className={styles.hint}>{t('minOptionsHint')}</p>}
         <Button className={styles.openButton} size="lg" onClick={openCase}>
           {t('openCase')}
