@@ -75,3 +75,15 @@
   color: var(--color-danger);
   font-weight: var(--font-weight-bold);
 }
+
+.liveRegion:empty {
+  position: absolute;
+  width: var(--border-width);
+  height: var(--border-width);
+  margin: calc(var(--border-width) * -1);
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

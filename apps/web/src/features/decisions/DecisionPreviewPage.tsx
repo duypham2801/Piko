@@ -33,6 +33,17 @@ export default function DecisionPreviewPage() {
     wasConfirming.current = confirming;
   }, [confirming]);
 
+  useEffect(() => {
+    if (!deleteError) {
+      return;
+    }
+
+    const frame = requestAnimationFrame(() => {
+      document.getElementById(deleteButtonId)?.focus();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [deleteError]);
+
   if (recordState.status !== 'loaded') {
     return <DecisionLoadState backTo="/" state={recordState} width="wide" />;
   }

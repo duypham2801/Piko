@@ -34,6 +34,9 @@ const lifetimeOptions: readonly {
   { value: 'never', label: t('shareLifetimeNever') },
 ];
 
+const createButtonId = 'share-create-button';
+const shareActionButtonId = 'share-action-button';
+
 export default function ShareDialog({
   decision,
   result,
@@ -51,6 +54,28 @@ export default function ShareDialog({
       requestRef.current += 1;
     };
   }, []);
+
+  useEffect(() => {
+    if (!share) {
+      return;
+    }
+
+    const frame = requestAnimationFrame(() => {
+      document.getElementById(shareActionButtonId)?.focus();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [share]);
+
+  useEffect(() => {
+    if (status !== 'error' && status !== 'limit') {
+      return;
+    }
+
+    const frame = requestAnimationFrame(() => {
+      document.getElementById(createButtonId)?.focus();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [status]);
 
   const handleCreate = async () => {
     const requestId = requestRef.current + 1;
@@ -138,14 +163,17 @@ export default function ShareDialog({
                 ))}
               </div>
             </fieldset>
-            <Button disabled={status === 'creating'} fullWidth onClick={() => void handleCreate()}>
+            <Button
+              disabled={status === 'creating'}
+              fullWidth
+              id={createButtonId}
+              onClick={() => void handleCreate()}
+            >
               {status === 'creating' ? t('creatingShareLink') : t('createShareLink')}
             </Button>
-            {(status === 'error' || status === 'limit') && (
-              <p className={styles.error} role="status">
-                {createErrorMessage}
-              </p>
-            )}
+            <p className={`${styles.error} ${styles.liveRegion}`} role="status">
+              {status === 'error' || status === 'limit' ? createErrorMessage : ''}
+            </p>
           </>
         ) : (
           <>
@@ -156,14 +184,12 @@ export default function ShareDialog({
               value={url}
               onFocus={(event) => event.currentTarget.select()}
             />
-            <Button fullWidth onClick={() => void handleShare()}>
+            <Button fullWidth id={shareActionButtonId} onClick={() => void handleShare()}>
               {typeof navigator.share === 'function' ? t('sendLink') : t('copyLink')}
             </Button>
-            {statusMessage && (
-              <p className={styles.status} role="status">
-                {statusMessage}
-              </p>
-            )}
+            <p className={`${styles.status} ${styles.liveRegion}`} role="status">
+              {statusMessage}
+            </p>
           </>
         )}
       </div>

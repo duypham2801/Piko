@@ -9,6 +9,10 @@
   font-size: var(--text-display);
 }
 
+.content h1:focus:not(:focus-visible) {
+  outline: none;
+}
+
 .brand {
   color: var(--color-text-accent);
   font-family: var(--font-display);
