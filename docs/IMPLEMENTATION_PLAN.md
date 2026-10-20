@@ -2,7 +2,7 @@
 
 ## Status
 - **Current phase:** Phase 9 — first prod release (`v0.1.0`). Final review fixes FR-1 … FR-4 merged into `main` on 2026-10-20.
-- **Integration branch:** none yet (Phase 9 starts from `main`)
+- **Integration branch:** `feat/phase-9-release` (created by 9-1 from `main`)
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`); Phase 4 (4-1, 4-2: router, Home, presets, preview, merged into `main`); Phase 5 (5-1…5-4: decisions API, builder, saved decisions, reuse options, merged into `main`); Phase 6 (6-1…6-5b: history, result actions, share links, merged into `main`); Phase 7 (7-1…7-5: navigation shell, sidebar, case overlay, responsive pass, dev access from other devices, merged into `main`); Phase 8 (8-1…8-4: case polish, interaction states, consistency, case arrows + centring, merged into `main`); final engineering review (FR-1…FR-4: dead-code cleanup, case play + list stores, "Đi thôi" closes the case, a11y + ops hardening, merged into `main`)
 
 ## Phases
@@ -43,7 +43,10 @@
 | 8-2 | Interaction states | ✅ (`ae4d957`, owner fix) | `8-2-interaction-states.md`: hover/pressed on every interactive surface, loading that keeps space, focused error field, case focus after the reveal and at a respin (D-035) |
 | 8-3 | Consistency + layout | ✅ (architect cleanup) | `8-3-consistency-layout.md`: empty/not-found CTAs, History empty alignment, sidebar "Gần đây" on error, active styles, sticky preview CTA on phones, scroll the active sidebar row into view, "Sổ tay" rows without an emoji (D-035) |
 | 8-4 | Case arrows + centring | ✅ (`53ce766`) | `8-4-case-marker-centering.md`: inward arrows that follow the winner's edges (marker moved out of the clip), the case vertically centred on desktop and phones with the revealed footer reserved so the strip never moves |
-| 9 | First prod release | ⬜ | Deploy `v0.1.0` to VPS, verify backup/rollback |
+| 9 | First prod release | 🟡 in progress (D-037) | Deploy `v0.1.0` on the owner's machine behind Cloudflare Tunnel, verify backup/rollback/restore |
+| 9-1 | Tunnel edge + backup copy | ⬜ (handed off, `9-1-tunnel-edge-backups.md`) | HTTP-only Caddy on `127.0.0.1`, no ACME; real client IP from `CF-Connecting-IP`; `make prod-backup-copy DEST=…` |
+| 9-2 | Runbook (architect) | ⬜ | `ENVIRONMENTS.md`: tunnel hostname, `.env.prod`, daily backup via host cron, copy, restore drill |
+| 9-3 | Rehearsal + `v0.1.0` | ⬜ | On the prod machine with the owner: build, deploy, phone check through the domain, rollback, restore, then tag `v0.1.0` |
 | — | Final engineering review | 🟡 fixes in progress (D-036) | `docs/FINAL_ENGINEERING_REVIEW.md`: 7.8/10. MUST before Phase 9: deploy backup, safe restore, a reliable test gate, the session retry race, a local prod rehearsal |
 | FR-1 | Release safety + session single-flight | ✅ (`d0414fd`) | `FR-1-release-safety.md`: deploy backup when the volume exists, a safe restore, the api vitest timeout, the `CHANGE_ME` guard, the session retry race, `withSession` owns `ensureSession` |
 | FR-2 | Case plays a result + list store | ✅ (architect cleanup) | `play(result)` vs `open()`, exact `/s/:id` replay, a shared decisions/history store with invalidation, `useHistorySave` out of `CaseOpening` |
@@ -127,7 +130,7 @@
     - `resetSession()`, kept on purpose for logout/linking (1a-1-fix-1)
     - the Be Vietnam Pro 500 import and the reserve tokens
     - zod classic in `packages/domain`, converted at the start of Phase 2 (D-020)
-  - Known tech debt (unchanged): `prod-deploy` skips the backup when the `db` container is stopped. Fix before Phase 9.
+  - Known tech debt (unchanged): `prod-deploy` skips the backup when the `db` container is stopped. Fix before Phase 9. (Fixed in FR-1.)
   - CSP note for Phase 3: `style-src 'self'` blocks inline `style` attributes in HTML, but not CSSOM/WAAPI writes from JS (React `style`, `element.animate`). The carousel approach is unaffected.
 - **1c-2 (2026-10-08):** verified against the diff (`2a38aaa`, 10 files, +54/−75).
   - `.prettierignore` ignores `*.md`. `check` now runs `format:check`, and `make check` passes with it.
