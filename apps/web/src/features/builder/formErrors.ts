@@ -25,9 +25,7 @@ export function getFormErrors(
     const [first, second, third] = issue.path;
 
     if (first === 'title' && issue.path.length === 1) {
-      if (issue.code === 'too_small') {
-        title = t('titleRequired');
-      } else if (issue.code === 'too_big') {
+      if (issue.code === 'too_big') {
         title = t('titleTooLong');
       }
       continue;

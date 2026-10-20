@@ -28,7 +28,7 @@ export default function Screen({
     .join(' ');
 
   return (
-    <main className={screenClassName}>
+    <main className={screenClassName} id="main" tabIndex={-1}>
       {backTo !== undefined && (
         <div className={styles.top}>
           <BackLink to={backTo}>{t('back')}</BackLink>

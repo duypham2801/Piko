@@ -1,8 +1,8 @@
 # Implementation Plan
 
 ## Status
-- **Current phase:** Final engineering review (next). Phase 8 merged into `main` on 2026-10-12. Phase 7 merged into `main` on 2026-10-10.
-- **Integration branch:** none (the final review starts from `main`)
+- **Current phase:** Final engineering review fixes (D-036): FR-1 → FR-4, then Phase 9. Phase 8 merged into `main` on 2026-10-12.
+- **Integration branch:** `feat/final-review`
 - **Completed:** Phase 0 — Discovery (decisions D-001…D-017); Phase 1a (1a-1, 1a-2); Phase 1b (1b-1, 1b-2); 1c-1 rebrand to PIKO; 1c-2 format gate; Phase 2 (2-1, 2-2); Phase 2.5 (spike, duration tuned to 8 s); Phase 3 (3-1, 3-2: case opening + celebration, merged into `main`); Phase 4 (4-1, 4-2: router, Home, presets, preview, merged into `main`); Phase 5 (5-1…5-4: decisions API, builder, saved decisions, reuse options, merged into `main`); Phase 6 (6-1…6-5b: history, result actions, share links, merged into `main`); Phase 7 (7-1…7-5: navigation shell, sidebar, case overlay, responsive pass, dev access from other devices, merged into `main`); Phase 8 (8-1…8-4: case polish, interaction states, consistency, case arrows + centring, merged into `main`)
 
 ## Phases
@@ -44,7 +44,11 @@
 | 8-3 | Consistency + layout | ✅ (architect cleanup) | `8-3-consistency-layout.md`: empty/not-found CTAs, History empty alignment, sidebar "Gần đây" on error, active styles, sticky preview CTA on phones, scroll the active sidebar row into view, "Sổ tay" rows without an emoji (D-035) |
 | 8-4 | Case arrows + centring | ✅ (`53ce766`) | `8-4-case-marker-centering.md`: inward arrows that follow the winner's edges (marker moved out of the clip), the case vertically centred on desktop and phones with the revealed footer reserved so the strip never moves |
 | 9 | First prod release | ⬜ | Deploy `v0.1.0` to VPS, verify backup/rollback |
-| — | Final engineering review | ⬜ | Format per master prompt §47–48 |
+| — | Final engineering review | 🟡 fixes in progress (D-036) | `docs/FINAL_ENGINEERING_REVIEW.md`: 7.8/10. MUST before Phase 9: deploy backup, safe restore, a reliable test gate, the session retry race, a local prod rehearsal |
+| FR-1 | Release safety + session single-flight | ✅ (`d0414fd`) | `FR-1-release-safety.md`: deploy backup when the volume exists, a safe restore, the api vitest timeout, the `CHANGE_ME` guard, the session retry race, `withSession` owns `ensureSession` |
+| FR-2 | Case plays a result + list store | ✅ (architect cleanup) | `play(result)` vs `open()`, exact `/s/:id` replay, a shared decisions/history store with invalidation, `useHistorySave` out of `CaseOpening` |
+| FR-3 | "Đi thôi" closes + result card, mode selector in nav, "Random" title | ✅ (`405d30f`…`6b787cd`, owner-requested layout fixes `93c9c14`) | D-036 P2–P4 (needs the FR-2 store for an instant sidebar update) |
+| FR-4 | Accessibility + ops hardening | ✅ (`523d8d7`…`a8efedd`, architect cleanup `566a346`) | Skip link, focus loss (share page, "Tạo link", delete), live regions, load-state titles, emoji picker focus; IPv6 /64 rate limit, pruning expired rows |
 | R | Realtime: live viewing + Couple/Squad | ⬜ | After `v0.1.0` (D-031). One design for rooms, presence, viewer/participant identity, anti-spam and server-ordered spins; live viewing of shared links (from D-030) is its first consumer. Couple/Squad still need their own approval (CLAUDE.md rule 9). |
 
 ## Next tasks (Phase 1a)
@@ -949,6 +953,69 @@
   - **8-4 accepted.**
 - **Phase 8 closed (2026-10-12):** the owner did the browser walk-through ("khá ổn") and approved it. `feat/phase-8-polish` was merged into `main` with `--no-ff`. No topology change.
   - Next: the **final engineering review** (owner choice), then Phase 9.
+- **Final engineering review (2026-10-12):** `docs/FINAL_ENGINEERING_REVIEW.md`, 7.8/10. Integration branch `feat/final-review`.
+  - **Owner walk-through bug:** the case footer and result were left-aligned in the dialog. `.caseBlock` lacked `justify-items: center` (introduced in 8-4). The architect's 8-4 review measured vertical positions only and missed it. Fixed directly in `9ec5a39`; the centre offset is now 0 at 768–1920.
+  - **Owner choices (D-036):**
+    - P1: keep the two-step "Mở case".
+    - P2: "Đi thôi" closes the case, with a result card and a toast.
+    - P3: the mode selector moves into the navigation.
+    - P4: the title is optional and defaults to "Random".
+    - The MUST and SHOULD items are fixed before Phase 9, in FR-1 … FR-4.
+- **FR-1 review (2026-10-12):** reviewed `d0414fd` (8 files, +95/−24). `make check` passes (domain 48, **api 52**, 0 lint warnings); lockfile unchanged.
+  - **Release safety (R1–R3):**
+    - `prod-deploy` keys the backup on the `piko-prod_pgdata` volume, starts `db` when needed and aborts on a failed backup.
+      - Rehearsed: first deploy, then a deploy over existing data, which backed up before `migrate`.
+      - The backup version falls back to `TAG` when `.deploy/current` is missing.
+    - `prod-restore` takes a safety backup and uses `--single-transaction --exit-on-error`.
+      - Rehearsed: a truncated dump failed, the row count stayed unchanged, `api` stayed stopped, and the safety file was printed.
+    - api vitest timeouts are 30 s: 3 runs out of 3 were green under parallel load.
+  - **Session (R4):** `withSession` awaits `ensureSession()` and resets only the session promise it ran under. `git grep "await ensureSession"` in `lib/api` shows `session.ts` only. A cold desktop Home sent one `/api/me` and created one guest (101 → 102).
+  - **Env guard (R5):** a production `DATABASE_URL` with `CHANGE_ME` is rejected, and dev accepts it. The local `.env.prod` placeholder had to be replaced for the rehearsal; this is the intended effect.
+  - **Docs by the architect:** `ENVIRONMENTS.md` §7 now documents deploy and restore exactly, including "restore only with the image version that made the dump", and §8 the `CHANGE_ME` guard. The matching technical-debt items are marked resolved.
+  - **Not changed (accepted):** the API helpers keep their `async` wrappers; this is harmless.
+  - **FR-1 accepted.** Fast-forwarded into `feat/final-review`.
+- **FR-2 review (2026-10-14):** reviewed `b35807c`, `51b2e71`, `48b6725` (10 files, +242/−154). `make check` passes (domain 48, api 52, 0 lint warnings); lockfile unchanged; `reloadKey` is gone.
+  - **Browser, re-checked by the architect:**
+    - **Requests:** after a cold desktop `/`, the route "decision → open → close → another decision → `/history` → `/`" sent no further list GETs. It sent only the two decision records, `/api/shares` and the full `/api/history` once.
+    - **Freshness:** "Đi thôi" updated the sidebar "Gần đây" without a reload.
+    - **Focus:** the sequence is unchanged (Mở case → title → Đi thôi → Mở lại).
+    - **`/s/:id` replay:** it plays the stored result (the implementer showed the same winner id stored and revealed).
+  - **Fixes by the architect:**
+    - **Regression: an errored store never refetched.** Before FR-2 every navigation refetched, so a transient failure healed itself. Now:
+      - `listStore` marks `needsFetch` after an error, so the next subscriber refetches.
+      - The always-mounted desktop sidebar calls `retry()` on the next navigation when a list is in error. It uses a last-path ref, not an `eslint-disable`.
+      - Verified: a failed cold load recovered on the first navigation, with no requests on the next.
+    - **Effect deps:** `CaseOpening` destructures `useHistorySave` (`reset`/`save`/`status`). The hook returns a fresh object, so the `useCallback`s depending on it were rebuilt every render.
+    - **`handleClose`:** restored as a plain function with its comment (why nested dialog close events are filtered). It had been compressed into a ternary to reach the line target. `CaseOpening.tsx` is 296 lines.
+    - `play()` returns nothing, instead of an explicit `undefined`.
+  - **Accepted:**
+    - `createDecisionSnapshot` lives in `useHistorySave.ts` and is shared by the share dialog.
+    - The snapshot is rebuilt per render; `ShareDialog` reads it only on submit.
+  - **FR-2 accepted.** Fast-forwarded into `feat/final-review`.
+- **FR-3 review (2026-10-14):** reviewed `405d30f`, `8647686`, `99aaa90`, `6b787cd` (20 files, +536/−160). `make check` passes (domain 48, api 52, 0 lint warnings); lockfile unchanged; `useHistorySave` is gone.
+  - **Browser, re-checked by the architect (desktop 1280, phone 375, preset and draft):** "Đi thôi" closes the case; the card appears with the winner, the time and "Xem lịch sử"; the toast follows the save; the sidebar "Gần đây" updates; focus lands on the card; no horizontal overflow. A full reload drops the card (memory only, by design).
+  - **Owner feedback after a browser check → fixes by the architect (`93c9c14`, owner HITL):**
+    - **Result card position:** moved from under the page header into the bottom action bar (preview and builder), above "Mở case". It is more compact (one heading row plus a meta row). The focus ring shows only on `:focus-visible` and follows the card radius, so a mouse user no longer sees a double frame.
+    - **Toast position:** bottom centre on phones, bottom right from 64rem. `pointer-events: none`, so on phones it never blocks the sticky "Mở case" while it covers it (~3 s).
+    - **Desktop mode selector:** an emoji-only segmented bar (🙋 / 👫🔒 / 👥🔒) in one pill. The accessible name and the tooltip are the full label ("Cặp đôi · Sắp có"). The three cramped circles with wrapped labels are gone, and so are the `modeCoupleShort`/`modeSquadShort` strings.
+    - **Toast timer:** `onDone` is now a stable callback. An inline arrow restarted the 3 s timer on every parent render (for example while typing in the builder).
+  - **FR-3 accepted.** Merged into `feat/final-review`.
+- **FR-4 review (2026-10-14):** reviewed `523d8d7` … `a8efedd` (7 commits, 29 files, +610/−52). `make check` passes (domain 48, api 65, 0 lint warnings); lockfile unchanged; no migration or dependency.
+  - **Browser, checked by the architect (CDP, 1280 and 375):**
+    - Tab on `/` → the skip link appears top left; Enter → focus on `main#main`; the next Tab goes into the content.
+    - Share dialog: "Tạo link" → focus on "Sao chép link".
+    - `/s/:id`: the h1 while spinning, then "Xem lại lượt quay" or "Tự quay thử" after the reveal.
+    - "Đi thôi": the toast is announced ("Đã lưu vào Lịch sử") and the action bar keeps its height.
+    - Load errors (API 500): titles "Không tải được · PIKO", visible h1.
+  - **Architect cleanup (`566a346`):**
+    - **Error headings:** the new error h1s inherited the display size (red, ~43 px on `/s/:id`). They now use `--text-xl`.
+    - **Toast live region:** the wrapper took a grid slot in the action bar while the toast showed. It is now `position: absolute` (it holds only the fixed toast).
+    - **One live-region utility:** `.live-region:empty` in `global.css` shares the `.visually-hidden` rule. It replaces three copied blocks (builder status, share dialog ×2).
+    - **API:** removed a dead session query in the prune and the validation in `expandIPv6` that `isIP` already does.
+  - **Accepted:**
+    - Comma separators (visually hidden) in the logo and Home cards instead of spaces. They give a pause in the name.
+    - The prune also counts cascaded sessions and shares in its totals.
+  - **FR-4 accepted.** Merged into `feat/final-review`.
 
 ## Notes for 1a-2 (prod)
 - `TRUST_PROXY` reads the **first** `X-Forwarded-For` value. This is only safe if Caddy overwrites client-supplied XFF. Caddy ≥2.5 discards XFF from untrusted clients by default; keep `trusted_proxies` unset unless a CDN sits in front, and document this.
@@ -969,10 +1036,10 @@
 - Docker bind mounts + pnpm workspace `node_modules` can be fiddly (handled with container-owned volumes).
 
 ## Technical debt
-- **API tests flake under host load:** each PGlite test file creates its own database in `beforeAll` under the default 10 s `hookTimeout`, which times out when the machine is busy (seen in 6-5b and the 7-1 review). Fix before Phase 9, either by raising `hookTimeout` for the api project or by sharing one PGlite per worker.
-- `prod-deploy` skips the backup when the prod stack is stopped (e.g. after `make prod-down`) but `piko-prod_pgdata` holds data, so migrations would run without a backup. Fix before Phase 9: if the volume exists, start `db` (`up -d --wait db`) and back up before `up`.
-- `prod-restore` does not take a safety backup of the current data before `--clean`. Add one before Phase 9.
-- Restoring an old dump into a newer schema is not guarded. The runbook must say: restore only with the image version that created the dump.
+- ~~**API tests flake under host load:** each PGlite test file creates its own database in `beforeAll` under the default 10 s `hookTimeout`, which times out when the machine is busy (seen in 6-5b and the 7-1 review). Fix before Phase 9, either by raising `hookTimeout` for the api project or by sharing one PGlite per worker.~~ Resolved in FR-1 (2026-10-12).
+- ~~`prod-deploy` skips the backup when the prod stack is stopped (e.g. after `make prod-down`) but `piko-prod_pgdata` holds data, so migrations would run without a backup. Fix before Phase 9: if the volume exists, start `db` (`up -d --wait db`) and back up before `up`.~~ Resolved in FR-1 (2026-10-12).
+- ~~`prod-restore` does not take a safety backup of the current data before `--clean`. Add one before Phase 9.~~ Resolved in FR-1 (2026-10-12).
+- ~~Restoring an old dump into a newer schema is not guarded. The runbook must say: restore only with the image version that created the dump.~~ Resolved in FR-1 (2026-10-12).
 
 ## Before Phase 9 (VPS runbook, to be written in ENVIRONMENTS.md)
 - Docker Engine ≥ 23 (BuildKit by default, unprivileged low ports inside containers), `make`, `git`.

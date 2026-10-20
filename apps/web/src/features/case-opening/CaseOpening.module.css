@@ -32,6 +32,7 @@
   display: grid;
   width: 100%;
   min-width: 0;
+  justify-items: center;
   align-self: safe center;
   gap: var(--space-6);
 }
@@ -139,13 +140,6 @@
 .hint {
   color: var(--color-text-muted);
   font-size: var(--text-sm);
-  text-align: center;
-}
-
-.historyStatusError {
-  color: var(--color-danger);
-  font-size: var(--text-sm);
-  font-weight: var(--font-weight-bold);
   text-align: center;
 }
 

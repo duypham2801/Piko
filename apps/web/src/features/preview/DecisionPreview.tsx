@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 import { DECISION_LIMITS } from '@piko/domain';
-import type { DecisionOptionData } from '@piko/domain';
+import type { DecisionOptionData, HistorySourceInputData } from '@piko/domain';
 
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
@@ -9,8 +9,11 @@ import OptionGlyph from '../../components/ui/OptionGlyph';
 import Switch from '../../components/ui/Switch';
 import Screen from '../../app/Screen';
 import { t } from '../../i18n';
+import ResultCard from './ResultCard';
 import { formatOff, parseOff } from './off';
 import styles from './DecisionPreview.module.css';
+
+const minOptionsHintId = 'preview-min-options-hint';
 
 export type DecisionPreviewProps = {
   title: string;
@@ -18,6 +21,7 @@ export type DecisionPreviewProps = {
   options: readonly DecisionOptionData[];
   backTo: string;
   openTo: string;
+  source: HistorySourceInputData;
   children?: ReactNode;
 };
 
@@ -27,6 +31,7 @@ export default function DecisionPreview({
   options,
   backTo,
   openTo,
+  source,
   children,
 }: DecisionPreviewProps) {
   const navigate = useNavigate();
@@ -92,6 +97,7 @@ export default function DecisionPreview({
                 />
                 <span className={styles.optionLabel}>{option.label}</span>
                 <Switch
+                  aria-describedby={minimumReached && checked ? minOptionsHintId : undefined}
                   checked={checked}
                   disabled={minimumReached && checked}
                   hideLabel
@@ -105,7 +111,12 @@ export default function DecisionPreview({
       </ul>
 
       <div className={styles.actionBar}>
-        {minimumReached && <p className={styles.hint}>{t('minOptionsHint')}</p>}
+        <ResultCard source={source} />
+        {minimumReached && (
+          <p className={styles.hint} id={minOptionsHintId}>
+            {t('minOptionsHint')}
+          </p>
+        )}
         <Button className={styles.openButton} size="lg" onClick={openCase}>
           {t('openCase')}
         </Button>

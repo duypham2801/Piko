@@ -76,7 +76,9 @@ svg {
   color: var(--color-text);
 }
 
-.visually-hidden {
+/* `live-region`: an always-mounted status element that takes no space while empty. */
+.visually-hidden,
+.live-region:empty {
   position: absolute;
   width: var(--border-width-thin);
   height: var(--border-width-thin);

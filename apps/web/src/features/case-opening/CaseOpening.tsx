@@ -9,21 +9,15 @@ import {
 } from 'react';
 import { useNavigate } from 'react-router';
 import { DECISION_LIMITS } from '@piko/domain';
-import type {
-  DecisionDraftData,
-  DecisionOptionData,
-  HistorySourceInputData,
-  SelectionResultData,
-  SharedCaseData,
-} from '@piko/domain';
+import type { DecisionOptionData, HistorySourceInputData, SharedCaseData } from '@piko/domain';
 
 import Button from '../../components/ui/Button';
 import { t } from '../../i18n';
-import { createHistoryEntry } from '../../lib/api/history';
 import { recordShareSpin } from '../../lib/api/shares';
 import CaseCarousel from './CaseCarousel';
 import styles from './CaseOpening.module.css';
 import Confetti from './Confetti';
+import { createDecisionSnapshot, startPick } from './pickStore';
 import { useCaseOpening } from './useCaseOpening';
 import WinnerPanel from './WinnerPanel';
 import ShareDialog from '../share/ShareDialog';
@@ -34,12 +28,6 @@ type CaseOpeningProps = {
   backTo: string;
   source: HistorySourceInputData;
   category?: string;
-};
-
-type HistorySaveStatus = 'idle' | 'saving' | 'saved' | 'error';
-type ShareSnapshot = {
-  decision: DecisionDraftData;
-  result: SelectionResultData;
 };
 
 const lastTwoOptionsHintId = 'case-min-options-hint';
@@ -66,16 +54,12 @@ export default function CaseOpening({
   const titleRef = useRef<HTMLHeadingElement>(null);
   const titleId = useId();
   const [excludedIds, setExcludedIds] = useState<ReadonlySet<string>>(() => new Set());
-  const [historySaveStatus, setHistorySaveStatus] = useState<HistorySaveStatus>('idle');
   const [share, setShare] = useState<SharedCaseData | null>(null);
-  const [shareSnapshot, setShareSnapshot] = useState<ShareSnapshot | null>(null);
-  const saveRequestRef = useRef(0);
+  const [shareOpen, setShareOpen] = useState(false);
   const pool = useMemo(() => excludeOptions(options, excludedIds), [excludedIds, options]);
   const { state, plan, open, viewportRef, stripRef } = useCaseOpening(pool);
-  const resetSaveStatus = useCallback(() => {
-    saveRequestRef.current += 1;
-    setHistorySaveStatus('idle');
-  }, []);
+  const decision =
+    state.status === 'revealed' ? createDecisionSnapshot(category, title, state.options) : null;
   const recordSpin = useCallback(
     (spin: ReturnType<typeof open>) => {
       if (!share || !spin) {
@@ -87,14 +71,12 @@ export default function CaseOpening({
     [share],
   );
   const spin = useCallback(() => {
-    resetSaveStatus();
     recordSpin(open());
-  }, [open, recordSpin, resetSaveStatus]);
+  }, [open, recordSpin]);
   const rejectWinner = useCallback(() => {
     if (state.status !== 'revealed') {
       return;
     }
-
     const nextExcludedIds = new Set(excludedIds);
     nextExcludedIds.add(state.result.winnerId);
     const nextPool = excludeOptions(options, nextExcludedIds);
@@ -103,60 +85,36 @@ export default function CaseOpening({
       return;
     }
 
-    resetSaveStatus();
     setExcludedIds(nextExcludedIds);
     recordSpin(open(nextPool));
-  }, [excludedIds, open, options, recordSpin, resetSaveStatus, state]);
+  }, [excludedIds, open, options, recordSpin, state]);
   const openShareDialog = useCallback(() => {
-    if (state.status !== 'revealed') {
-      return;
-    }
-
-    setShareSnapshot({
-      decision: {
-        ...(category === undefined ? {} : { category }),
-        options: state.options,
-        title,
-      },
-      result: state.result,
-    });
-  }, [category, state, title]);
+    if (decision) setShareOpen(true);
+  }, [decision]);
   const closeShareDialog = useCallback(() => {
-    setShareSnapshot(null);
+    setShareOpen(false);
     requestAnimationFrame(() => document.getElementById(shareToggleId)?.focus());
   }, []);
-  const saveResult = useCallback(async () => {
-    if (
-      state.status !== 'revealed' ||
-      historySaveStatus === 'saving' ||
-      historySaveStatus === 'saved'
-    ) {
+  const pickResult = useCallback(() => {
+    if (!decision || state.status !== 'revealed') {
       return;
     }
 
-    const requestId = saveRequestRef.current + 1;
-    saveRequestRef.current = requestId;
-    setHistorySaveStatus('saving');
-
-    try {
-      await createHistoryEntry({
-        source,
-        decision: {
-          ...(category === undefined ? {} : { category }),
-          options: state.options,
-          title,
-        },
-        result: state.result,
-      });
-      if (saveRequestRef.current === requestId) {
-        setHistorySaveStatus('saved');
-      }
-    } catch {
-      if (saveRequestRef.current === requestId) {
-        setHistorySaveStatus('error');
-      }
+    const pickedWinner = state.options.find((option) => option.id === state.result.winnerId);
+    if (!pickedWinner) {
+      return;
     }
-  }, [category, historySaveStatus, source, state, title]);
+
+    startPick(
+      {
+        source,
+        decision,
+        result: state.result,
+      },
+      pickedWinner,
+    );
+    dialogRef.current?.close();
+  }, [decision, source, state]);
   const optionsById = useMemo(
     () => new Map(options.map((option) => [option.id, option] as const)),
     [options],
@@ -165,13 +123,7 @@ export default function CaseOpening({
   const winner = revealed ? optionsById.get(state.result.winnerId) : undefined;
   const notTodayDisabled =
     !revealed || state.result.candidateIds.length <= DECISION_LIMITS.minEnabledOptions;
-  const historyStatusMessage =
-    historySaveStatus === 'saved'
-      ? t('historySaved')
-      : historySaveStatus === 'error'
-        ? t('historySaveFailed')
-        : '';
-  const hasVisibleStatus = notTodayDisabled || historySaveStatus === 'error';
+  const hasVisibleStatus = notTodayDisabled;
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -194,23 +146,6 @@ export default function CaseOpening({
         ?.focus({ preventScroll: true });
     }
   }, [state.status]);
-
-  useEffect(() => {
-    if (historySaveStatus === 'saving') {
-      titleRef.current?.focus({ preventScroll: true });
-      return;
-    }
-
-    if (historySaveStatus === 'saved') {
-      dialogRef.current
-        ?.querySelector<HTMLElement>('[data-post-save-focus]')
-        ?.focus({ preventScroll: true });
-    }
-  }, [historySaveStatus]);
-
-  const closeDialog = () => {
-    dialogRef.current?.close();
-  };
 
   const handleClose = (event: SyntheticEvent<HTMLDialogElement>) => {
     // React propagates close events from nested dialogs.
@@ -237,7 +172,7 @@ export default function CaseOpening({
             aria-label={t('close')}
             className={styles.closeButton}
             variant="outline"
-            onClick={closeDialog}
+            onClick={() => dialogRef.current?.close()}
           >
             <span aria-hidden="true">×</span>
           </Button>
@@ -262,21 +197,11 @@ export default function CaseOpening({
           <div className={styles.footer}>
             {revealed ? (
               <div className={styles.actions}>
-                <Button
-                  data-reveal-focus
-                  disabled={historySaveStatus === 'saving' || historySaveStatus === 'saved'}
-                  fullWidth
-                  size="lg"
-                  onClick={saveResult}
-                >
-                  {historySaveStatus === 'saving'
-                    ? t('saving')
-                    : historySaveStatus === 'saved'
-                      ? t('saved')
-                      : t('goNow')}
+                <Button data-reveal-focus fullWidth size="lg" onClick={pickResult}>
+                  {t('goNow')}
                 </Button>
                 <div className={styles.secondaryActions}>
-                  <Button data-post-save-focus fullWidth variant="outline" onClick={spin}>
+                  <Button fullWidth variant="outline" onClick={spin}>
                     {t('spinAgain')}
                   </Button>
                   <Button
@@ -307,18 +232,6 @@ export default function CaseOpening({
                       {t('lastTwoOptionsHint')}
                     </p>
                   )}
-                  <p
-                    aria-live="polite"
-                    className={
-                      historySaveStatus === 'saved'
-                        ? 'visually-hidden'
-                        : historySaveStatus === 'error'
-                          ? styles.historyStatusError
-                          : ''
-                    }
-                  >
-                    {historyStatusMessage}
-                  </p>
                 </div>
               </div>
             ) : (
@@ -333,10 +246,10 @@ export default function CaseOpening({
             )}
           </div>
         </div>
-        {shareSnapshot && (
+        {shareOpen && decision && state.status === 'revealed' && (
           <ShareDialog
-            decision={shareSnapshot.decision}
-            result={shareSnapshot.result}
+            decision={decision}
+            result={state.result}
             share={share}
             onClose={closeShareDialog}
             onShared={setShare}

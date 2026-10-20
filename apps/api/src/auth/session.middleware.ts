@@ -13,7 +13,7 @@ import {
   type SessionRecord,
   type SessionUser,
 } from './session.service.js';
-import { FixedWindowRateLimiter } from './rate-limit.js';
+import { FixedWindowRateLimiter, rateLimitKey } from './rate-limit.js';
 
 export type AppEnv = {
   Variables: {
@@ -74,7 +74,7 @@ export function createSessionMiddleware(
       throw new HttpError(401, 'session_required', 'A session is required.');
     }
 
-    if (!options.limiter.consume(clientIp(c, options.trustProxy))) {
+    if (!options.limiter.consume(rateLimitKey(clientIp(c, options.trustProxy)))) {
       throw new HttpError(429, 'rate_limited', 'Too many guest sessions created. Try again later.');
     }
 

@@ -1,40 +1,24 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 import type { HistoryEntryData } from '@piko/domain';
 
 import { listHistory } from '../../lib/api/history';
+import { createListStore } from '../../lib/listStore';
 
 type HistoryListState =
   | { status: 'loading'; entries: readonly HistoryEntryData[] }
   | { status: 'loaded'; entries: readonly HistoryEntryData[] }
   | { status: 'error'; entries: readonly HistoryEntryData[] };
 
-export function useHistoryList(
-  limit?: number,
-  reloadKey?: string,
-): HistoryListState & { retry: () => void } {
-  const [state, setState] = useState<HistoryListState>({ entries: [], status: 'loading' });
-  const [retryCount, setRetryCount] = useState(0);
-  const retry = useCallback(() => {
-    setState({ entries: [], status: 'loading' });
-    setRetryCount((current) => current + 1);
-  }, []);
+const recentHistoryStore = createListStore(() => listHistory({ limit: 5 }));
+const fullHistoryStore = createListStore(() => listHistory());
 
-  useEffect(() => {
-    const controller = new AbortController();
-    void listHistory({ limit, signal: controller.signal })
-      .then((entries) => {
-        if (!controller.signal.aborted) {
-          setState({ entries, status: 'loaded' });
-        }
-      })
-      .catch(() => {
-        if (!controller.signal.aborted) {
-          setState({ entries: [], status: 'error' });
-        }
-      });
+export function useHistoryList(limit?: 5): HistoryListState & { retry: () => void } {
+  const store = limit === 5 ? recentHistoryStore : fullHistoryStore;
+  const snapshot = useSyncExternalStore(store.subscribe, store.getSnapshot);
+  return { entries: snapshot.items, retry: store.retry, status: snapshot.status };
+}
 
-    return () => controller.abort();
-  }, [limit, reloadKey, retryCount]);
-
-  return { ...state, retry };
+export function invalidateHistory(): void {
+  recentHistoryStore.invalidate();
+  fullHistoryStore.invalidate();
 }

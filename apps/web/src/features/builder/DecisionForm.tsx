@@ -9,7 +9,9 @@ import Screen from '../../app/Screen';
 import { t } from '../../i18n';
 import { ApiClientError } from '../../lib/api/client';
 import { createDecision, updateDecision } from '../../lib/api/decisions';
+import { invalidateDecisions } from '../decisions/useDecisionList';
 import CaseOpening from '../case-opening/CaseOpening';
+import ResultCard from '../preview/ResultCard';
 import { draftOf, emptyOption, optionInputId } from './draft';
 import ExistingOptionsPanel, { existingOptionsToggleId } from './ExistingOptionsPanel';
 import { getFormErrors, type FormErrors } from './formErrors';
@@ -42,7 +44,11 @@ export default function DecisionForm({ backTo, decisionId, initial }: DecisionFo
   const caseBackTo = `${location.pathname}${
     caseBackSearchParams.toString() ? `?${caseBackSearchParams.toString()}` : ''
   }`;
-  const parsed = useMemo(() => DecisionDraft.safeParse(draft), [draft]);
+  const draftForValidation = useMemo(
+    () => (draft.title.trim() ? draft : { ...draft, title: t('defaultDecisionTitle') }),
+    [draft],
+  );
+  const parsed = useMemo(() => DecisionDraft.safeParse(draftForValidation), [draftForValidation]);
   const caseOptions = useMemo(() => (parsed.success ? parsed.data.options : []), [parsed]);
   const errors = useMemo(() => {
     if (!submitted || parsed.success) {
@@ -125,6 +131,7 @@ export default function DecisionForm({ backTo, decisionId, initial }: DecisionFo
       const record = decisionId
         ? await updateDecision(decisionId, validDraft)
         : await createDecision(validDraft);
+      invalidateDecisions();
 
       const destination = decisionId
         ? `/decisions/${record.decision.id}/edit${location.search}`
@@ -219,6 +226,7 @@ export default function DecisionForm({ backTo, decisionId, initial }: DecisionFo
 
           <TextField
             error={errors.title}
+            hint={t('emptyTitleHint')}
             id="decision-title"
             label={t('decisionTitleLabel')}
             maxLength={DECISION_LIMITS.titleMaxLength}
@@ -285,12 +293,12 @@ export default function DecisionForm({ backTo, decisionId, initial }: DecisionFo
           )}
 
           <div className={styles.actionBar}>
-            <p
-              aria-live={statusIsError ? 'assertive' : 'polite'}
-              className={`${styles.status} ${statusIsError ? styles.statusError : ''}`}
-              role={statusIsError ? 'alert' : 'status'}
-            >
-              {statusMessage}
+            <ResultCard source={{ kind: 'draft' }} />
+            <p className={`${styles.status} live-region`} role="status">
+              {statusIsError ? '' : statusMessage}
+            </p>
+            <p className={`${styles.status} ${styles.statusError} live-region`} role="alert">
+              {statusIsError ? statusMessage : ''}
             </p>
             <div className={styles.actionButtons}>
               <Button fullWidth variant="secondary" type="button" onClick={handleOpenCase}>

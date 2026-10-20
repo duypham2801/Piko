@@ -5,6 +5,7 @@ import {
   select,
   type AnimationPlan,
   type DecisionOptionData,
+  type SelectionResultData,
 } from '@piko/domain';
 
 import { caseOpeningReducer } from './caseOpeningState';
@@ -214,6 +215,20 @@ export function useCaseOpening(pool: readonly DecisionOptionData[]) {
 
   useEffect(() => () => cancelAnimation(), [cancelAnimation]);
 
+  const play = useCallback(
+    (result: SelectionResultData, spinOptions: readonly DecisionOptionData[]) => {
+      if (state.status === 'spinning') {
+        return;
+      }
+
+      cancelAnimation();
+      reducedMotionRef.current = window.matchMedia(REDUCED_MOTION_QUERY).matches;
+      const plan = buildAnimationPlan(result, spinOptions);
+      dispatch({ type: 'open', plan, result, options: spinOptions });
+    },
+    [cancelAnimation, state.status],
+  );
+
   const open = useCallback(
     (spinOptions: readonly DecisionOptionData[] = pool, seed?: number) => {
       if (state.status === 'spinning') {
@@ -225,15 +240,13 @@ export function useCaseOpening(pool: readonly DecisionOptionData[]) {
         return undefined;
       }
 
-      cancelAnimation();
-      reducedMotionRef.current = window.matchMedia(REDUCED_MOTION_QUERY).matches;
       const result = select(spinOptions, spinSeed);
-      const plan = buildAnimationPlan(result, spinOptions);
-      dispatch({ type: 'open', plan, result, options: spinOptions });
+      play(result, spinOptions);
+
       return { options: [...spinOptions], result };
     },
-    [cancelAnimation, pool, state.status],
+    [play, pool, state.status],
   );
 
-  return { state, plan: displayedPlan, open, viewportRef, stripRef };
+  return { state, plan: displayedPlan, open, play, viewportRef, stripRef };
 }

@@ -7,6 +7,7 @@ import DecisionPreview from '../preview/DecisionPreview';
 import DecisionLoadState from './DecisionLoadState';
 import { deleteDecision } from '../../lib/api/decisions';
 import { ApiClientError } from '../../lib/api/client';
+import { invalidateDecisions } from './useDecisionList';
 import { t } from '../../i18n';
 import { useDecisionRecord } from './useDecisionRecord';
 import styles from './DecisionPreviewPage.module.css';
@@ -32,6 +33,17 @@ export default function DecisionPreviewPage() {
     wasConfirming.current = confirming;
   }, [confirming]);
 
+  useEffect(() => {
+    if (!deleteError) {
+      return;
+    }
+
+    const frame = requestAnimationFrame(() => {
+      document.getElementById(deleteButtonId)?.focus();
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [deleteError]);
+
   if (recordState.status !== 'loaded') {
     return <DecisionLoadState backTo="/" state={recordState} width="wide" />;
   }
@@ -45,6 +57,7 @@ export default function DecisionPreviewPage() {
     setDeleteError(false);
     try {
       await deleteDecision(id);
+      invalidateDecisions();
       navigate('/', { replace: true });
     } catch (error: unknown) {
       if (error instanceof ApiClientError && error.status === 404) {
@@ -106,6 +119,7 @@ export default function DecisionPreviewPage() {
         backTo="/"
         openTo={`/decisions/${id}/open`}
         options={decision.options}
+        source={{ kind: 'decision', decisionId: id }}
         title={decision.title}
       >
         {actions}

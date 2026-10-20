@@ -143,12 +143,22 @@ Sau đó tải lại trang.
 
 ## 7. Backup
 
-- `make prod-backup` tạo file `backups/piko-prod-<thời gian>-<version>.dump`.
-- `make prod-deploy` luôn tự backup trước khi migrate.
+- `make prod-backup` tạo file `backups/piko-prod-<thời gian>-<version>.dump`, quyền 600, giữ 30 file mới nhất.
+- `make prod-deploy` luôn backup trước khi migrate nếu đã có dữ liệu prod:
+  - Nó kiểm tra **volume** `piko-prod_pgdata`, không phụ thuộc vào việc container `db` có đang chạy hay không.
+  - Nếu volume tồn tại, nó bật `db` lên rồi backup. Backup lỗi thì dừng, không thay đổi gì cả.
+  - Nếu chưa có volume (lần deploy đầu tiên), nó bỏ qua bước backup và in ra một dòng thông báo.
+- `make prod-restore FILE=backups/....dump` (xoá dữ liệu hiện tại):
+  1. Hỏi xác nhận.
+  2. Tạo **backup an toàn** của dữ liệu hiện tại. Nếu bước này lỗi thì dừng, API không bị tắt.
+  3. Tắt `api`, rồi restore trong **một transaction** (`--single-transaction --exit-on-error`).
+  4. Restore thành công thì bật lại `api`.
+  5. Restore lỗi thì dữ liệu cũ vẫn còn nguyên và `api` **vẫn tắt**. Lệnh in ra tên file backup an toàn và lệnh để khôi phục nó. Kiểm tra lại, rồi restore file backup an toàn (`make prod-restore FILE=<file backup an toàn>`), hoặc bật lại API bằng `docker compose -f compose.prod.yaml --env-file .env.prod up -d --wait api` (cần `APP_VERSION=<tag đang chạy>`).
+  - **Chỉ restore một dump bằng đúng phiên bản image đã tạo ra dump đó.** Trên tên file có ghi version.
 - **Thư mục `backups/` không được commit.** Nên định kỳ chép backup ra nơi khác (máy khác hoặc cloud storage).
 
 ## 8. Bí mật (secrets)
 
 - `.env.example` được commit, chỉ chứa tên biến và giá trị giả.
 - `.env.dev` và `.env.prod` **không bao giờ commit**. Trên server, đặt quyền `chmod 600 .env.prod`.
-- Mật khẩu DB prod phải khác dev và đủ dài. Tạo bằng `openssl rand -hex 32`. Dùng dạng hex vì nó an toàn khi đặt trong `DATABASE_URL`; base64 có các ký tự `/ + =` làm hỏng URL.
+- Mật khẩu DB prod phải khác dev và đủ dài. API sẽ **không khởi động** nếu `DATABASE_URL` trên prod còn chứa chữ `CHANGE_ME` (giá trị mẫu). Tạo bằng `openssl rand -hex 32`. Dùng dạng hex vì nó an toàn khi đặt trong `DATABASE_URL`; base64 có các ký tự `/ + =` làm hỏng URL.

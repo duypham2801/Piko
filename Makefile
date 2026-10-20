@@ -1,6 +1,7 @@
 DEV_WEB_BIND := $(shell sed -n 's/^DEV_WEB_BIND=//p' .env.dev 2>/dev/null | tail -n 1 | tr -d '\r')
 COMPOSE_DEV = docker compose -f compose.dev.yaml $(if $(DEV_WEB_BIND),-f compose.dev.lan.yaml) --env-file .env.dev
 COMPOSE_PROD = docker compose -f compose.prod.yaml --env-file .env.prod
+PROD_DB_VOLUME = piko-prod_pgdata
 
 TAG ?= $(shell git describe --tags --exact-match 2>/dev/null)
 APP_VERSION ?= $(shell if [ -s .deploy/current ]; then tr -d '\r\n' < .deploy/current; fi)
@@ -65,11 +66,18 @@ prod-deploy: ## Deploy a tagged production release with a pre-migration backup
 	@if [ -z "$(TAG)" ]; then echo 'HEAD is not exactly at a git tag. Pass TAG=<tag> explicitly.' >&2; exit 1; fi
 	@if ! docker image inspect piko-api:$(TAG) >/dev/null 2>&1; then echo 'Missing image piko-api:$(TAG). Run make prod-build TAG=$(TAG).' >&2; exit 1; fi
 	@if ! docker image inspect piko-web:$(TAG) >/dev/null 2>&1; then echo 'Missing image piko-web:$(TAG). Run make prod-build TAG=$(TAG).' >&2; exit 1; fi
-	@if APP_VERSION="$(TAG)" $(COMPOSE_PROD) ps --status running -q db | grep -q .; then \
+	@if docker volume inspect "$(PROD_DB_VOLUME)" >/dev/null 2>&1; then \
+		echo 'Production data volume exists; starting db for the pre-migration backup...'; \
+		if ! APP_VERSION="$(TAG)" $(COMPOSE_PROD) up -d --wait db; then \
+			echo 'Production database could not be started; no deployment changes were made.' >&2; \
+			exit 1; \
+		fi; \
 		if ! $(MAKE) --no-print-directory prod-backup APP_VERSION="$(CURRENT_DEPLOY_TAG)"; then \
 			echo 'Production backup failed; no deployment changes were made.' >&2; \
 			exit 1; \
 		fi; \
+	else \
+		echo 'No production data volume found; skipping pre-migration backup for the first deploy.'; \
 	fi
 	@if ! APP_VERSION="$(TAG)" $(COMPOSE_PROD) up -d --wait --remove-orphans; then \
 		echo 'Production deploy failed. Review logs, then run make prod-rollback if a previous release exists.' >&2; \
@@ -129,12 +137,36 @@ prod-restore: ## Destructively restore a custom-format dump into the production 
 	@if [ -z "$(FILE)" ]; then echo 'Usage: make prod-restore FILE=backups/piko-prod-....dump' >&2; exit 1; fi
 	@if [ ! -f "$(FILE)" ]; then echo 'Restore file not found: $(FILE)' >&2; exit 1; fi
 	@read -r -p 'This will destroy current production data and restore $(FILE). Continue? [y/N] ' answer; case "$$answer" in y|Y) ;; *) echo 'Cancelled.'; exit 1;; esac
-	@set +e; \
-	APP_VERSION="$(APP_VERSION)" $(COMPOSE_PROD) stop api; \
-	restore_status=0; \
-	APP_VERSION="$(APP_VERSION)" $(COMPOSE_PROD) exec -T db sh -c 'pg_restore --clean --if-exists --no-owner -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"' < "$(FILE)" || restore_status=$$?; \
-	APP_VERSION="$(APP_VERSION)" $(COMPOSE_PROD) up -d --wait api; \
-	exit $$restore_status
+	@set -e; \
+	safety_log="$$(mktemp)"; \
+	cleanup() { rm -f "$$safety_log"; }; \
+	trap cleanup EXIT; \
+	if ! $(MAKE) --no-print-directory prod-backup APP_VERSION="$(APP_VERSION)" >"$$safety_log" 2>&1; then \
+		cat "$$safety_log"; \
+		echo 'Safety backup failed; restore aborted and the API was not stopped.' >&2; \
+		exit 1; \
+	fi; \
+	cat "$$safety_log"; \
+	safety_backup="$$(sed -n 's/^Backup: //p' "$$safety_log" | tail -n 1)"; \
+	if [ -z "$$safety_backup" ]; then \
+		echo 'Safety backup completed without reporting a file; restore aborted.' >&2; \
+		exit 1; \
+	fi; \
+	if ! APP_VERSION="$(APP_VERSION)" $(COMPOSE_PROD) stop api; then \
+		echo "Could not stop the API; safety backup is $$safety_backup." >&2; \
+		exit 1; \
+	fi; \
+	if APP_VERSION="$(APP_VERSION)" $(COMPOSE_PROD) exec -T db sh -c 'pg_restore --clean --if-exists --no-owner --single-transaction --exit-on-error -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"' < "$(FILE)"; then \
+		if ! APP_VERSION="$(APP_VERSION)" $(COMPOSE_PROD) up -d --wait api; then \
+			echo "Restore succeeded, but the API did not become healthy. Safety backup: $$safety_backup" >&2; \
+			exit 1; \
+		fi; \
+	else \
+		echo 'Restore failed. The API remains stopped.' >&2; \
+		echo "Safety backup: $$safety_backup" >&2; \
+		echo "To restore the safety backup: make prod-restore FILE=$$safety_backup" >&2; \
+		exit 1; \
+	fi
 
 prod-down: ## Stop the production stack and keep its volumes
 	@if [ ! -f .env.prod ]; then echo 'Missing .env.prod. Copy .env.prod.example and configure it first.' >&2; exit 1; fi

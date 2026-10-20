@@ -1,3 +1,41 @@
+import { isIP } from 'node:net';
+
+// Expands an address that `isIP` already accepted as IPv6 into 8 lower-case 4-digit groups.
+function expandIPv6(value: string): string[] {
+  let address = value;
+  const lastColon = address.lastIndexOf(':');
+  const tail = address.slice(lastColon + 1);
+  if (tail.includes('.')) {
+    const [a = 0, b = 0, c = 0, d = 0] = tail.split('.').map(Number);
+    address = `${address.slice(0, lastColon + 1)}${((a << 8) | b).toString(16)}:${((c << 8) | d).toString(16)}`;
+  }
+
+  const [left = '', right] = address.split('::');
+  const leftGroups = left ? left.split(':') : [];
+  const rightGroups = right ? right.split(':') : [];
+  const zeros = Array.from({ length: 8 - leftGroups.length - rightGroups.length }, () => '0');
+  return [...leftGroups, ...zeros, ...rightGroups].map((group) =>
+    group.padStart(4, '0').toLowerCase(),
+  );
+}
+
+/** IPv4 stays as is; IPv6 is keyed by its /64, since one host usually controls a whole /64. */
+export function rateLimitKey(ip: string): string {
+  if (isIP(ip) === 4) return ip;
+
+  const withoutZone = ip.split('%', 1)[0] ?? ip;
+  if (isIP(withoutZone) !== 6) return ip;
+
+  const groups = expandIPv6(withoutZone);
+  if (groups.slice(0, 5).every((group) => group === '0000') && groups[5] === 'ffff') {
+    const high = Number.parseInt(groups[6] ?? '0', 16);
+    const low = Number.parseInt(groups[7] ?? '0', 16);
+    return [high >> 8, high & 0xff, low >> 8, low & 0xff].join('.');
+  }
+
+  return `${groups.slice(0, 4).join(':')}::/64`;
+}
+
 type Clock = () => number;
 
 interface WindowEntry {

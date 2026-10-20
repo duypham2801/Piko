@@ -17,11 +17,16 @@ export function ensureSession(): Promise<MeResponseData> {
   return memoizedRequest;
 }
 
-export function resetSession(): void {
-  sessionPromise = null;
+function resetSession(expectedSession: Promise<MeResponseData>): void {
+  if (sessionPromise === expectedSession) {
+    sessionPromise = null;
+  }
 }
 
 export async function withSession<T>(request: () => Promise<T>): Promise<T> {
+  const session = ensureSession();
+  await session;
+
   try {
     return await request();
   } catch (error) {
@@ -30,7 +35,7 @@ export async function withSession<T>(request: () => Promise<T>): Promise<T> {
       error.status === 401 &&
       error.code === 'session_required'
     ) {
-      resetSession();
+      resetSession(session);
       await ensureSession();
       return request();
     }

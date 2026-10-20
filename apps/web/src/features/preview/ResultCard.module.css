@@ -1,0 +1,82 @@
+.focusTarget {
+  min-width: 0;
+  border-radius: var(--radius-lg);
+}
+
+.card {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+}
+
+.focusTarget:focus {
+  outline: none;
+}
+
+/* Holds only the fixed toast; out of flow so it never adds a gap to the action bar. */
+.toastRegion {
+  position: absolute;
+}
+
+.focusTarget:focus-visible {
+  outline: var(--border-width) solid var(--color-focus-ring);
+  outline-offset: var(--space-1);
+}
+
+.result {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.emoji {
+  flex: 0 0 auto;
+  font-size: var(--text-2xl);
+  line-height: var(--leading-tight);
+}
+
+.heading {
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--text-lg);
+  line-height: var(--leading-tight);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.meta a {
+  color: inherit;
+  font-weight: var(--font-weight-bold);
+}
+
+.saving {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.errorRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  color: var(--color-danger);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-bold);
+}
+
+@media (min-width: 48rem) {
+  .heading {
+    font-size: var(--text-xl);
+  }
+}

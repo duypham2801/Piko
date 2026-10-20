@@ -26,7 +26,7 @@ export default function HistoryList({ entries, now }: HistoryListProps) {
                 label={entry.winner.label}
               />
               <span className={styles.details}>
-                <span className={styles.winnerLabel}>{entry.winner.label}</span>
+                <span className={styles.winnerLabel}>{entry.winner.label}</span>{' '}
                 <span className={styles.meta}>
                   {entry.title} ·{' '}
                   <time dateTime={entry.createdAt}>{formatHistoryTime(entry.createdAt, now)}</time>

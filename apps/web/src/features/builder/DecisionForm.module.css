@@ -54,10 +54,6 @@
   text-align: center;
 }
 
-.status:empty {
-  min-height: 0;
-}
-
 .statusError {
   color: var(--color-danger);
 }

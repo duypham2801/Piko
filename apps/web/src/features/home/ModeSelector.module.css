@@ -1,6 +1,7 @@
 .selector {
   width: 100%;
   min-width: 0;
+  margin: 0;
   padding: 0;
   border: 0;
 }
@@ -70,4 +71,43 @@
   .option:not(:has(input:checked)):has(input:not(:disabled)):hover {
     transform: translateY(var(--hover-lift-sm));
   }
+}
+
+.compact .options {
+  gap: 0;
+  padding: var(--space-1);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+}
+
+.compact .option {
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: none;
+}
+
+.compact .option:has(input:checked) {
+  box-shadow: none;
+}
+
+.compact .option:has(input:disabled) {
+  background: none;
+}
+
+.compact .option:has(input:disabled) .emoji {
+  opacity: var(--opacity-dimmed);
+}
+
+.compact .emoji {
+  font-size: var(--text-lg);
+}
+
+.lock {
+  position: absolute;
+  right: var(--space-2);
+  bottom: var(--space-1);
+  font-size: var(--text-xs);
+  line-height: var(--leading-tight);
 }

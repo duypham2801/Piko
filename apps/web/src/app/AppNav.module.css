@@ -9,6 +9,7 @@
 }
 
 .logo,
+.modeButton,
 .history,
 .create {
   min-height: var(--tap-target-min);
@@ -47,6 +48,19 @@
   align-items: center;
   justify-content: flex-end;
   gap: var(--space-2);
+}
+
+.modeButton {
+  display: inline-flex;
+  flex: 0 0 var(--tap-target-min);
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  cursor: pointer;
+  font-size: var(--text-lg);
 }
 
 .history,
@@ -121,6 +135,10 @@
     flex-direction: column;
     align-items: stretch;
     gap: var(--space-2);
+  }
+
+  .modeButton {
+    display: none;
   }
 
   .history,
