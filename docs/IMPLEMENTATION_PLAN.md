@@ -1025,9 +1025,10 @@
 
 ## Pending decisions
 - Realtime phase (D-031): room model, presence, viewer/participant identity, interaction kinds, anti-spam (decide at its kickoff).
-- Inactive guest cleanup policy (e.g. delete after N months of inactivity).
-- Hosting target: VPS provider + domain (needed before Phase 9).
-- Off-site backup destination (before Phase 9).
+- ~~Inactive guest cleanup policy~~ → FR-4: empty guests are pruned after 30 days; guests with data are kept.
+- ~~Hosting target~~ → D-037: the owner's local machine behind the existing Cloudflare Tunnel.
+- ~~Off-site backup destination~~ → D-037: minimal (daily dump + a copy command); cloud storage later.
+- `docs/TOPOLOGY.md`: update for the tunnel edge once Phase 9 is settled (owner HITL 2026-10-20).
 
 ## Known issues / risks
 - The mockup is mobile-only, so the desktop layout must be designed from scratch.

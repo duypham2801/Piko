@@ -583,3 +583,19 @@ Format: Decision · Reason · Alternatives · Tradeoffs · Phase/Date
   - **Toast position:** bottom centre on phones, bottom right on desktop.
   - **Desktop mode selector:** an emoji-only segmented bar with a lock on Couple/Squad. Names come from the tooltip and the accessible name.
 - **Phase:** final review · 2026-10-12 · approved by user
+
+## D-037 — Prod hosting: the owner's local machine behind Cloudflare Tunnel
+- **Context:** Phase 9 needs a host for `piko-prod`. The owner already has a domain and a local machine running a Cloudflare Tunnel on the host.
+- **Owner choices (HITL 2026-10-20):**
+  - **Host:** the owner's local machine, not a rented VPS.
+  - **Edge:** the existing host `cloudflared` gets one public hostname pointing at PIKO's Caddy. No `cloudflared` container in the compose project.
+  - **Backup:** minimal for `v0.1.0`. A daily automatic dump on the prod machine, plus one command that copies the latest dump to another disk or machine. No cloud storage yet.
+  - **`docs/TOPOLOGY.md`:** updated after Phase 9 is settled, not now.
+- **Architect defaults:**
+  - **Cloudflare terminates TLS.** Caddy serves plain HTTP inside the stack. No ACME, no `caddy_data` certificates, no `ACME_EMAIL`.
+  - **Caddy keeps its role:** static files, the `/api` reverse proxy and the security headers (CSP, HSTS and so on).
+  - **No public ports.** Caddy is published on `127.0.0.1:<HTTP_PORT>` only. Nothing is port-forwarded on the router. This replaces the "Caddy publishes 80/443" rule for this host.
+  - **Real client IP:** Caddy trusts only private/loopback peers and takes the client IP from `CF-Connecting-IP`. It passes that IP to the api as `X-Forwarded-For`, and the api keeps `TRUST_PROXY=true`. Without this, every visitor shares one guest rate-limit bucket.
+  - **Uptime:** a power or network loss at home takes the app down. This is accepted for `v0.1.0`.
+  - **Revisit:** move to a VPS or add R2 backups if real users depend on the app.
+- **Phase:** 9 · 2026-10-20 · approved by user
