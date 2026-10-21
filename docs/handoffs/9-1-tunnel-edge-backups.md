@@ -61,7 +61,7 @@ Backups (`make prod-backup` in `Makefile`) write mode-600 custom-format dumps in
   - `/api/*` → `api:8787`
   - asset caching, the SPA fallback
   - the `:8081` healthcheck site
-- **Publish Caddy on loopback only:** `127.0.0.1:${HTTP_PORT:-8080}:80`.
+- **Publish Caddy on loopback only:** `127.0.0.1:${HTTP_PORT:-8090}:80`.
   - Remove the 443 TCP/UDP mappings and `HTTPS_PORT`.
   - Nothing in `piko-prod` may listen on a non-loopback host interface. Check with `docker compose ... config` and with `ss -ltn` during Validation.
 - **Volumes:** without ACME, Caddy stores no certificates.
@@ -104,7 +104,7 @@ Backups (`make prod-backup` in `Makefile`) write mode-600 custom-format dumps in
 
 ### `.env.prod.example`
 - Rewrite the header comment for the tunnel model:
-  - **Local rehearsal:** `HTTP_PORT=8080`, `APP_ORIGIN=http://localhost:8080`, `COOKIE_SECURE=false`.
+  - **Local rehearsal:** `HTTP_PORT=8090`, `APP_ORIGIN=http://localhost:8090`, `COOKIE_SECURE=false`.
   - **Behind the tunnel:** `APP_ORIGIN=https://<public hostname>`, `COOKIE_SECURE=true`. The Cloudflare public hostname points at `http://localhost:<HTTP_PORT>`.
   - **The password:** generated with `openssl rand -hex 32`, kept in sync between `POSTGRES_PASSWORD` and `DATABASE_URL`.
 - Keep every other variable and its comment.
@@ -115,8 +115,8 @@ Backups (`make prod-backup` in `Makefile`) write mode-600 custom-format dumps in
 ## Acceptance criteria
 - [ ] `docker/Caddyfile` has no ACME, email or HTTPS site. The header block is unchanged (byte-for-byte apart from indentation, if any). `/api/*` sets `X-Forwarded-For` to `{client_ip}`.
 - [ ] `git grep -nE "SITE_ADDRESS|ACME_EMAIL|HTTPS_PORT|caddy_data|caddy_config" -- ':!docs'` is empty.
-- [ ] During the Validation run, `ss -ltn` shows the stack's published port only on `127.0.0.1`. No `0.0.0.0:80`, `:443` or `:8080`.
-- [ ] Through `http://localhost:8080`:
+- [ ] During the Validation run, `ss -ltn` shows the stack's published port only on `127.0.0.1`. No `0.0.0.0:80`, `:443` or `:8090`. (Port 8080 belongs to another project on this machine; do not touch it.)
+- [ ] Through `http://localhost:8090`:
   - `/` loads the app
   - `/api/healthz` returns `{"status":"ok","db":"ok","version":"<tag>"}`
   - the response headers include the CSP and HSTS
@@ -145,8 +145,8 @@ docker ps --filter label=com.docker.compose.project=piko-prod --format '{{.Names
 
 **Throwaway local run:**
 1. Write a local-test `.env.prod` from `.env.prod.example` with:
-   - `HTTP_PORT=8080`
-   - `APP_ORIGIN=http://localhost:8080`
+   - `HTTP_PORT=8090`
+   - `APP_ORIGIN=http://localhost:8090`
    - `COOKIE_SECURE=false`
    - `GUEST_RATE_LIMIT_PER_HOUR=2`
    - a fresh `openssl rand -hex 32` password, in both places
@@ -156,9 +156,9 @@ docker ps --filter label=com.docker.compose.project=piko-prod --format '{{.Names
    make prod-config
    make prod-build TAG=v0.0.0-9-1-test
    make prod-deploy TAG=v0.0.0-9-1-test
-   ss -ltnp | grep -E ':(80|443|8080)\b'
-   curl -si http://localhost:8080/ | head -20
-   curl -s http://localhost:8080/api/healthz
+   ss -ltnp | grep -E ':(80|443|8090)\b'
+   curl -si http://localhost:8090/ | head -20
+   curl -s http://localhost:8090/api/healthz
    # real-IP sequence from the acceptance criteria, with curl -s -o /dev/null -w '%{http_code}\n'
    make prod-backup
    mkdir -p /tmp/piko-backup-copy-test && make prod-backup-copy DEST=/tmp/piko-backup-copy-test
