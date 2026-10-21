@@ -12,7 +12,7 @@ services:
       timeout: 5s
       retries: 10
     ports:
-      - '127.0.0.1:5433:5432'
+      - '127.0.0.1:24432:5432'
 
   install:
     build:
@@ -45,7 +45,7 @@ services:
         condition: service_completed_successfully
     command: sh -c 'pnpm --filter @piko/api db:migrate && pnpm --filter @piko/api dev'
     ports:
-      - '127.0.0.1:8787:8787'
+      - '127.0.0.1:24787:8787'
 
   web:
     build:
@@ -64,7 +64,7 @@ services:
         condition: service_started
     command: pnpm --filter @piko/web dev
     ports:
-      - '127.0.0.1:5173:5173'
+      - '127.0.0.1:24173:24173'
 
 volumes:
   pgdata:

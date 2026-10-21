@@ -599,3 +599,15 @@ Format: Decision · Reason · Alternatives · Tradeoffs · Phase/Date
   - **Uptime:** a power or network loss at home takes the app down. This is accepted for `v0.1.0`.
   - **Revisit:** move to a VPS or add R2 backups if real users depend on the app.
 - **Phase:** 9 · 2026-10-20 · approved by user
+
+## D-038 — Uncommon host ports
+- **Context:** the owner's machine also runs other projects. Port 8080 was already taken (`aio-rebuild-web-1`), so a common default would collide. The owner asked for rarely used ports (2026-10-21).
+- **Choice:** every port PIKO publishes on the host moves into the 24xxx range. That range is below Linux's ephemeral range (32768–60999).
+  - **Dev:**
+    - web `127.0.0.1:24173` (Vite runs on 24173 in the container too, so HMR needs no client-port override)
+    - api `127.0.0.1:24787` → container 8787
+    - db `127.0.0.1:24432` → container 5432
+  - **Prod:** Caddy `127.0.0.1:24080` → container 80. This is the Cloudflare Tunnel target `http://localhost:24080`.
+- **Unchanged:** ports inside the containers and networks (`api:8787`, `db:5432`, Caddy `:80`/`:8081`).
+- **Follow-up done by the architect:** `.env.dev` origins updated; Tailscale Serve now proxies to `127.0.0.1:24173`.
+- **Phase:** 9 · 2026-10-21 · approved by user

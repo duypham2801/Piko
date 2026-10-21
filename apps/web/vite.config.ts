@@ -17,7 +17,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     host: true,
-    port: 5173,
+    port: 24173,
     strictPort: true,
     allowedHosts: extraHosts,
     watch: {
@@ -25,7 +25,7 @@ export default defineConfig({
     },
     proxy: {
       '/api': {
-        target: process.env.API_PROXY_TARGET ?? 'http://localhost:8787',
+        target: process.env.API_PROXY_TARGET ?? 'http://localhost:24787',
         changeOrigin: false,
       },
     },

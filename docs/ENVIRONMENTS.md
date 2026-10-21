@@ -13,8 +13,8 @@ Tài liệu vận hành dành cho chủ dự án. Mục tiêu: **web thật (pro
 | Code chạy từ | Thư mục source của bạn (sửa là thấy ngay, có HMR) | **Image đóng gói sẵn**, gắn version (vd `v0.3.0`) |
 | Database | Volume `piko-dev_pgdata` (dữ liệu thử) | Volume `piko-prod_pgdata` (dữ liệu thật) |
 | File cấu hình | `.env.dev` | `.env.prod` |
-| Truy cập | `http://localhost:5173` | `https://<domain>` (port 80/443) |
-| Công cụ dev | Có (watch, sourcemap, DB mở port 5433) | Không (chỉ chứa thứ cần để chạy) |
+| Truy cập | `http://localhost:24173` | `https://<domain>` (port 80/443) |
+| Công cụ dev | Có (watch, sourcemap, DB mở port 24432) | Không (chỉ chứa thứ cần để chạy) |
 
 Hai môi trường dùng **tên project khác nhau**, nên Docker coi chúng là hai hệ thống riêng biệt: container, mạng và ổ dữ liệu đều khác nhau.
 
@@ -42,11 +42,11 @@ Internet ──► Caddy (:80/:443, HTTPS tự động)
 ## 3. Kiến trúc dev
 
 ```
-web (Vite dev server, HMR)  ──proxy /api──►  api (tsx watch)  ──►  db (Postgres, port 5433 ra máy bạn)
+web (Vite dev server, HMR)  ──proxy /api──►  api (tsx watch)  ──►  db (Postgres, port 24432 ra máy bạn)
        ▲ bind mount source                       ▲ bind mount source
 ```
 
-Bạn sửa file trên máy, container thấy thay đổi ngay. Có thể mở DB dev bằng công cụ GUI (TablePlus, DBeaver...) qua `localhost:5433`.
+Bạn sửa file trên máy, container thấy thay đổi ngay. Có thể mở DB dev bằng công cụ GUI (TablePlus, DBeaver...) qua `localhost:24432`.
 
 Mặc định web dev chỉ mở trên `localhost`. Có hai cách mở cho thiết bị khác, bật riêng hoặc cùng lúc (D-034).
 
@@ -54,20 +54,20 @@ Mặc định web dev chỉ mở trên `localhost`. Có hai cách mở cho thi�
 
 1. Trên máy chạy Docker, lấy IPv4 mạng LAN bằng `ip -4 -brief address show scope global`. Chọn địa chỉ của card Wi-Fi/Ethernet, ví dụ `192.168.1.100`. Không chọn địa chỉ Docker (`172.x`) hay Tailscale (`100.x`).
 2. Trong `.env.dev`, đặt:
-   - `DEV_WEB_BIND=192.168.1.100`: mở thêm cổng web 5173 trên đúng IP này (`localhost:5173` vẫn dùng được).
-   - Thêm `http://192.168.1.100:5173` vào `DEV_EXTRA_ORIGINS`.
-3. Chạy `make dev`, rồi trên thiết bị kia mở `http://192.168.1.100:5173`. Hai thiết bị phải cùng mạng, và mạng không được bật "client isolation" (một số Wi-Fi khách có bật).
+   - `DEV_WEB_BIND=192.168.1.100`: mở thêm cổng web 24173 trên đúng IP này (`localhost:24173` vẫn dùng được).
+   - Thêm `http://192.168.1.100:24173` vào `DEV_EXTRA_ORIGINS`.
+3. Chạy `make dev`, rồi trên thiết bị kia mở `http://192.168.1.100:24173`. Hai thiết bị phải cùng mạng, và mạng không được bật "client isolation" (một số Wi-Fi khách có bật).
 
 **Cách 2: qua Tailscale (HTTPS, mở được ở bất kỳ đâu trong tailnet)**
 
 1. Làm một lần trong trang quản trị Tailscale: bật **MagicDNS** và **HTTPS Certificates** (mục DNS).
-2. Trên máy chạy Docker, chạy `tailscale serve --bg 5173`.
+2. Trên máy chạy Docker, chạy `tailscale serve --bg 24173`.
    - Nếu báo thiếu quyền, chạy một lần `sudo tailscale set --operator=$USER`.
    - Lệnh in ra địa chỉ dạng `https://dp-1.tailfeab26.ts.net`. Cấu hình này vẫn giữ sau khi khởi động lại máy.
 3. Thêm địa chỉ đó vào `DEV_EXTRA_ORIGINS`, rồi chạy `make dev`.
 4. Trên điện thoại đã cài app Tailscale và đăng nhập cùng tailnet, mở địa chỉ đó.
 
-Không cần `DEV_WEB_BIND`, vì Tailscale Serve chuyển tiếp vào `localhost:5173`.
+Không cần `DEV_WEB_BIND`, vì Tailscale Serve chuyển tiếp vào `localhost:24173`.
 - Xem trạng thái: `tailscale serve status`.
 - Tắt: `tailscale serve --https=443 off` (hoặc `tailscale serve reset`).
 
@@ -75,7 +75,7 @@ Không cần `DEV_WEB_BIND`, vì Tailscale Serve chuyển tiếp vào `localhost
 
 ```dotenv
 DEV_WEB_BIND=192.168.6.28
-DEV_EXTRA_ORIGINS=http://192.168.6.28:5173,https://dp-1.tailfeab26.ts.net
+DEV_EXTRA_ORIGINS=http://192.168.6.28:24173,https://dp-1.tailfeab26.ts.net
 ```
 
 `DEV_EXTRA_ORIGINS` là danh sách địa chỉ, cách nhau bằng dấu phẩy. Mỗi địa chỉ chỉ gồm `scheme://host[:port]`, không có `/` ở cuối. Danh sách này có hai tác dụng:
@@ -91,7 +91,7 @@ Lưu ý:
 - **Tường lửa (ufw) không chặn được cổng Docker,** vì Docker tự ghi rule iptables. Vì vậy chỉ bind đúng IP LAN, không dùng `0.0.0.0`.
 - **IP LAN đổi** (DHCP): container web sẽ không khởi động được. Sửa `DEV_WEB_BIND` và địa chỉ trong `DEV_EXTRA_ORIGINS` rồi chạy `make dev` lại. Có thể đặt IP cố định cho máy trên router. Tên Tailscale thì không đổi.
 - **Link chia sẻ** lấy theo địa chỉ đang mở, nên hãy tạo link từ địa chỉ mà người nhận dùng được.
-- **API 8787 và PostgreSQL 5433 luôn chỉ mở trên `localhost`.** Thiết bị khác gọi API qua proxy `/api` của web.
+- **API 24787 và PostgreSQL 24432 luôn chỉ mở trên `localhost`.** Thiết bị khác gọi API qua proxy `/api` của web.
 - **Giới hạn tạo khách mới:** mọi thiết bị đi qua cùng một proxy, nên dùng chung giới hạn `GUEST_RATE_LIMIT_PER_HOUR`.
 - **Chỉ dùng trong mạng tin cậy:** đây là dev server, không mở ra internet (không dùng Tailscale Funnel). Bản cho người dùng thật chạy prod qua domain và HTTPS (Phase 9).
 - **Tắt LAN:** comment `DEV_WEB_BIND` trong `.env.dev`, chạy `make dev-down` rồi `make dev`. Khi không còn `DEV_WEB_BIND`, Makefile không nạp `compose.dev.lan.yaml`, nên `up` không tự gỡ binding cũ.

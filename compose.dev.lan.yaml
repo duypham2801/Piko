@@ -2,4 +2,4 @@
 services:
   web:
     ports:
-      - '${DEV_WEB_BIND:?DEV_WEB_BIND must be set}:5173:5173'
+      - '${DEV_WEB_BIND:?DEV_WEB_BIND must be set}:24173:24173'
