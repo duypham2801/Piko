@@ -20,22 +20,22 @@ Ký hiệu:
 
 ```
  Trình duyệt (máy này)     Điện thoại cùng LAN (tuỳ chọn)   Thiết bị trong tailnet (tuỳ chọn)
-   │ http://localhost:5173   │ http://<IP-LAN>:5173           │ https://dp-1.tailfeab26.ts.net
+   │ http://localhost:24173  │ http://<IP-LAN>:24173          │ https://dp-1.tailfeab26.ts.net
    │                         │                                ▼
    │                         │                      tailscale serve (trên máy, TLS)
-   │                         │                                │ → 127.0.0.1:5173
+   │                         │                                │ → 127.0.0.1:24173
    └─────────────┬───────────┴────────────────────────────────┘
                  ▼
 ┌──────────────────────── Docker project: piko-dev ────────────────────────┐
 │                                                                           │
-│  web  (Vite dev server, HMR)        127.0.0.1:5173  (luôn có)             │
-│                                   + <IP-LAN>:5173   (nếu đặt DEV_WEB_BIND)│
+│  web  (Vite dev server, HMR)        127.0.0.1:24173 (luôn có)             │
+│                                   + <IP-LAN>:24173  (nếu đặt DEV_WEB_BIND)│
 │    │  proxy /api/*                                                        │
 │    ▼                                                                      │
-│  api  (Hono, tsx watch)             127.0.0.1:8787                        │
+│  api  (Hono, tsx watch)             127.0.0.1:24787 → container 8787      │
 │    │  tự chạy migrate khi khởi động                                       │
 │    ▼                                                                      │
-│  db   (PostgreSQL 17)               127.0.0.1:5433  ← mở được bằng GUI    │
+│  db   (PostgreSQL 17)               127.0.0.1:24432 ← mở được bằng GUI    │
 │                                                                           │
 │  install (chạy 1 lần: pnpm install) → xong thì web/api mới khởi động      │
 │                                                                           │
@@ -44,12 +44,12 @@ Ký hiệu:
 └───────────────────────────────────────────────────────────────────────────┘
 ```
 
-- Mặc định mọi port chỉ mở trên `127.0.0.1`, nên máy khác trong LAN không truy cập được.
+- Mặc định mọi port chỉ mở trên `127.0.0.1`, nên máy khác trong LAN không truy cập được. Port trên máy nằm ở dải 24xxx ít dùng để không đụng project khác (D-038).
 - **Tuỳ chọn mở cho thiết bị khác (D-034, 🔧 7-5):**
-  - **LAN:** `DEV_WEB_BIND=<IP-LAN>` làm Makefile nạp thêm `compose.dev.lan.yaml`. Khi đó chỉ port web `5173` mở thêm trên đúng IP LAN đó.
-  - **Tailscale:** `tailscale serve --bg 5173` chạy trên máy (ngoài Docker) và chuyển HTTPS `https://dp-1.tailfeab26.ts.net` vào `127.0.0.1:5173`. Docker không mở thêm cổng nào.
+  - **LAN:** `DEV_WEB_BIND=<IP-LAN>` làm Makefile nạp thêm `compose.dev.lan.yaml`. Khi đó chỉ port web `24173` mở thêm trên đúng IP LAN đó.
+  - **Tailscale:** `tailscale serve --bg 24173` chạy trên máy (ngoài Docker) và chuyển HTTPS `https://dp-1.tailfeab26.ts.net` vào `127.0.0.1:24173`. Docker không mở thêm cổng nào.
   - **Danh sách địa chỉ:** cả hai cách đều cần thêm địa chỉ của mình vào `DEV_EXTRA_ORIGINS`. Từ danh sách này, API nhận thao tác ghi và Vite chấp nhận tên miền.
-  - **Không đổi:** API `8787` và PostgreSQL `5433` luôn chỉ mở trên `127.0.0.1`. Prod cũng không đổi, domain prod vẫn dùng `APP_ORIGIN` qua Caddy (Phase 9).
+  - **Không đổi:** API `24787` và PostgreSQL `24432` luôn chỉ mở trên `127.0.0.1`. Prod cũng không đổi, domain prod vẫn dùng `APP_ORIGIN` qua Caddy (Phase 9).
   - Cách làm: `ENVIRONMENTS.md` mục 3.
 
 ### 1.2 Prod — ✅ trên `main`, đã chạy thử trên máy local (build từ tag, deploy, backup, rollback), **chưa có VPS**
@@ -195,3 +195,4 @@ apps/web  ──HTTP /api──►  apps/api  ──►  PostgreSQL
 | 2026-10-09 | Phase 6 merge vào `main`: bảng `decision_sessions`, `shared_cases`, route `/api/history`, `/api/shares`, `/api/public/shares/:id`, trang `/history`, `/s/:id` chuyển ⬜ → ✅. Kênh SSE xem trực tiếp hoãn sang phase Realtime sau `v0.1.0` (D-031). Container, port, network, volume không đổi. |
 | 2026-10-10 | 7-5 (D-034): web dev có thể mở cho điện thoại cùng LAN, **chỉ khi bật** trong `.env.dev` (`DEV_WEB_BIND` → file `compose.dev.lan.yaml` mở thêm 5173 trên đúng IP LAN, `DEV_LAN_ORIGIN` cho API nhận ghi). Mặc định chỉ `127.0.0.1`. API 8787, DB 5433 và prod không đổi. Bản đầu (`0.0.0.0:5173` luôn bật) bị loại vì Docker vượt qua ufw. |
 | 2026-10-10 | 7-5-fix-1 (D-034 sửa đổi): thêm truy cập dev qua **Tailscale Serve** (`https://dp-1.tailfeab26.ts.net` → `127.0.0.1:5173`, chạy trên máy, Docker không mở thêm cổng). `DEV_LAN_ORIGIN` thay bằng danh sách `DEV_EXTRA_ORIGINS`, dùng chung cho kiểm tra origin của API và `allowedHosts` của Vite. Domain sau này là domain prod (Phase 9), không phải dev. |
+| 2026-10-21 | D-038: port dev trên máy chuyển sang dải 24xxx ít dùng (port 8080 đã bị project khác chiếm): web `5173` → `24173` (Vite trong container cũng chạy 24173), API `8787` → `24787` (container vẫn 8787), DB `5433` → `24432`. Tailscale Serve chuyển vào `127.0.0.1:24173`. Network, volume và port bên trong container không đổi. Prod (Cloudflare Tunnel → `127.0.0.1:24080`, D-037) sẽ cập nhật sau Phase 9. |
